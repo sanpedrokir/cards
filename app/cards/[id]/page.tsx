@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { readDb } from "@/lib/store";
 import { cardProfit } from "@/lib/calculations";
@@ -42,12 +41,11 @@ export default async function CardDetailPage({
         <div className="flex gap-4">
           <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800">
             {card.imageUrl ? (
-              <Image
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
                 src={card.imageUrl}
                 alt={card.name}
-                fill
-                sizes="96px"
-                className="object-cover"
+                className="h-full w-full object-cover"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-4xl">

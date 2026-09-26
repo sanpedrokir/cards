@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { Card } from "@/lib/types";
 import { cardProfit } from "@/lib/calculations";
 import { formatDate, formatMoney } from "@/lib/format";
@@ -21,12 +20,11 @@ export default function CardTile({
     >
       <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
         {card.imageUrl ? (
-          <Image
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
             src={card.imageUrl}
             alt={card.name}
-            fill
-            sizes="64px"
-            className="object-cover"
+            className="h-full w-full object-cover"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-2xl">

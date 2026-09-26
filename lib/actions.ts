@@ -1,20 +1,27 @@
 "use server";
 
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { mutateDb } from "./store";
+import {
+  getCardById,
+  getCards,
+  getInvestment,
+  insertCard,
+  markCardSold,
+  upsertInvestment,
+} from "./store";
 import { getTotals } from "./calculations";
 import { todayIso } from "./format";
-import type { Card } from "./types";
+import type { Card, Sale } from "./types";
 
 export interface FormState {
   error?: string;
 }
 
 export const initialFormState: FormState = {};
+
+const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
 
 function numberField(formData: FormData, name: string): number | undefined {
   const raw = formData.get(name);
@@ -30,19 +37,20 @@ function textField(formData: FormData, name: string): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
-async function saveImage(file: File | null): Promise<string | undefined> {
-  if (!file || file.size === 0) return undefined;
-  if (!file.type.startsWith("image/")) return undefined;
+async function encodeImage(
+  file: File | null
+): Promise<{ dataUrl?: string; error?: string }> {
+  if (!file || file.size === 0) return {};
+  if (!file.type.startsWith("image/")) {
+    return { error: "Please upload a valid image file." };
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    return { error: "Image is too large. Please use a file under 3MB." };
+  }
 
-  const uploadsDir = path.join(process.cwd(), "public", "uploads");
-  await fs.mkdir(uploadsDir, { recursive: true });
-
-  const ext = path.extname(file.name) || "";
-  const filename = `${randomUUID()}${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
-  await fs.writeFile(path.join(uploadsDir, filename), buffer);
-
-  return `/uploads/${filename}`;
+  const dataUrl = `data:${file.type};base64,${buffer.toString("base64")}`;
+  return { dataUrl };
 }
 
 export async function saveInvestment(
@@ -58,9 +66,7 @@ export async function saveInvestment(
     return { error: "Enter a valid investment amount greater than zero." };
   }
 
-  await mutateDb((db) => {
-    db.investment = { amount, currency, date, notes };
-  });
+  await upsertInvestment({ amount, currency, date, notes });
 
   revalidatePath("/");
   revalidatePath("/investment");
@@ -90,57 +96,47 @@ export async function purchaseCard(
     return { error: "Enter a valid purchase price greater than zero." };
   }
 
-  const imageUrl = await saveImage(
+  const { dataUrl: imageUrl, error: imageError } = await encodeImage(
     imageFile instanceof File ? imageFile : null
   );
-
-  let newId = "";
-  let insufficientFunds = false;
-  let noInvestment = false;
-
-  await mutateDb((db) => {
-    if (!db.investment) {
-      noInvestment = true;
-      return;
-    }
-    const { availableBalance } = getTotals(db);
-    if (purchasePrice > availableBalance) {
-      insufficientFunds = true;
-      return;
-    }
-
-    newId = randomUUID();
-    const card: Card = {
-      id: newId,
-      name,
-      purchasePrice,
-      purchaseDate,
-      category,
-      series,
-      cardNumber,
-      grade,
-      gradingCompany,
-      quantity,
-      notes,
-      imageUrl,
-      status: "available",
-      createdAt: new Date().toISOString(),
-    };
-    db.cards.push(card);
-  });
-
-  if (noInvestment) {
-    return {
-      error: "Set up your initial investment before purchasing cards.",
-    };
+  if (imageError) {
+    return { error: imageError };
   }
-  if (insufficientFunds) {
+
+  const investment = await getInvestment();
+  if (!investment) {
+    return { error: "Set up your initial investment before purchasing cards." };
+  }
+
+  const cards = await getCards();
+  const { availableBalance } = getTotals({ investment, cards });
+
+  if (purchasePrice > availableBalance) {
     return { error: "Insufficient available investment balance." };
   }
 
+  const id = randomUUID();
+  const card: Card = {
+    id,
+    name,
+    purchasePrice,
+    purchaseDate,
+    category,
+    series,
+    cardNumber,
+    grade,
+    gradingCompany,
+    quantity,
+    notes,
+    imageUrl,
+    status: "available",
+    createdAt: new Date().toISOString(),
+  };
+  await insertCard(card);
+
   revalidatePath("/");
   revalidatePath("/cards");
-  redirect(`/cards/${newId}`);
+  redirect(`/cards/${id}`);
 }
 
 export async function sellCard(
@@ -162,29 +158,16 @@ export async function sellCard(
     return { error: "Enter a valid sales amount." };
   }
 
-  let notFound = false;
-  let alreadySold = false;
-
-  await mutateDb((db) => {
-    const card = db.cards.find((c) => c.id === cardId);
-    if (!card) {
-      notFound = true;
-      return;
-    }
-    if (card.status === "sold") {
-      alreadySold = true;
-      return;
-    }
-    card.status = "sold";
-    card.sale = { salePrice, saleDate, buyer, channel, fees, notes };
-  });
-
-  if (notFound) {
+  const card = await getCardById(cardId);
+  if (!card) {
     return { error: "Card not found." };
   }
-  if (alreadySold) {
+  if (card.status === "sold") {
     return { error: "This card has already been sold." };
   }
+
+  const sale: Sale = { salePrice, saleDate, buyer, channel, fees, notes };
+  await markCardSold(cardId, sale);
 
   revalidatePath("/");
   revalidatePath("/cards");
