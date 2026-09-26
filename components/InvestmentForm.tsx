@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { saveInvestment, initialFormState } from "@/lib/actions";
+import { saveInvestment } from "@/lib/actions";
+import { initialFormState } from "@/lib/form-state";
 import { CURRENCIES } from "@/lib/format";
 import SubmitButton from "./SubmitButton";
 import type { Investment } from "@/lib/types";

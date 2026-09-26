@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { purchaseCard, initialFormState } from "@/lib/actions";
+import { purchaseCard } from "@/lib/actions";
+import { initialFormState } from "@/lib/form-state";
 import { formatMoney, todayIso } from "@/lib/format";
 import SubmitButton from "./SubmitButton";
 

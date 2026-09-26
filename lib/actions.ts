@@ -14,12 +14,7 @@ import {
 import { getTotals } from "./calculations";
 import { todayIso } from "./format";
 import type { Card, Sale } from "./types";
-
-export interface FormState {
-  error?: string;
-}
-
-export const initialFormState: FormState = {};
+import type { FormState } from "./form-state";
 
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
 
