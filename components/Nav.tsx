@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useAuth, useClerk } from "@clerk/nextjs";
+import { useAuth, useClerk, useUser } from "@clerk/nextjs";
 
 const NAV_ITEMS = [
   {
@@ -86,6 +86,8 @@ export default function Nav() {
   const router = useRouter();
   const { isSignedIn, isLoaded } = useAuth();
   const { signOut } = useClerk();
+  const { user } = useUser();
+  const email = user?.primaryEmailAddress?.emailAddress;
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -126,6 +128,11 @@ export default function Nav() {
             Sign out
           </button>
         </div>
+        {email && (
+          <div className="border-t border-zinc-100 px-4 py-1 text-center text-[11px] text-zinc-400 dark:border-zinc-900 dark:text-zinc-500">
+            {email}
+          </div>
+        )}
       </header>
 
       <header className="sticky top-0 z-40 hidden border-b border-zinc-200 bg-white/80 backdrop-blur sm:block dark:border-zinc-800 dark:bg-zinc-950/80">
@@ -135,6 +142,9 @@ export default function Nav() {
             <img src="/vaulted-logo.png" alt="" className="h-8 w-8" />
             Vaulted
           </Link>
+          {email && (
+            <span className="text-xs text-zinc-400 dark:text-zinc-500">{email}</span>
+          )}
           <nav className="flex items-center gap-1">
             {NAV_ITEMS.map((item) => {
               const active = isActive(item.href);
