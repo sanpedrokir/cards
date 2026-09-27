@@ -57,7 +57,7 @@ export default function PurchaseForm({
         certNumberRef.current.value = result.certNumber;
 
       if (detailsRef.current) detailsRef.current.open = true;
-      setScanNotice("Filled in from the photo — please double-check before saving.");
+      setScanNotice("Verify details before saving!");
     });
   }
 

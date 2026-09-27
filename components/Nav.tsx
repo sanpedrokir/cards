@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth, useClerk } from "@clerk/nextjs";
 
 const NAV_ITEMS = [
   {
@@ -82,18 +83,48 @@ const NAV_ITEMS = [
 
 export default function Nav() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { isSignedIn, isLoaded } = useAuth();
+  const { signOut } = useClerk();
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
+  function handleSignOut() {
+    signOut(() => router.push("/sign-in"));
+  }
+
+  if (!isLoaded) return null;
+
+  if (!isSignedIn) {
+    return (
+      <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80">
+        <div className="mx-auto flex max-w-4xl items-center justify-center px-6 py-3">
+          <Link href="/" className="flex items-center gap-2 text-base font-semibold text-zinc-900 dark:text-zinc-50">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/vaulted-logo.png" alt="" className="h-8 w-8" />
+            Vaulted
+          </Link>
+        </div>
+      </header>
+    );
+  }
+
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80 sm:hidden">
-        <div className="flex items-center justify-center px-6 py-2">
+        <div className="flex items-center justify-between px-4 py-2">
+          <div className="w-12" />
           <Link href="/">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/vaulted-logo.png" alt="Vaulted" className="h-8 w-8" />
           </Link>
+          <button
+            onClick={handleSignOut}
+            className="w-12 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400"
+          >
+            Sign out
+          </button>
         </div>
       </header>
 
@@ -121,6 +152,12 @@ export default function Nav() {
                 </Link>
               );
             })}
+            <button
+              onClick={handleSignOut}
+              className="ml-2 rounded-full px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            >
+              Sign out
+            </button>
           </nav>
         </div>
       </header>
