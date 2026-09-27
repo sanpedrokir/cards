@@ -115,10 +115,6 @@ export async function setInvestmentAmount(userId: string, amount: number): Promi
   `;
 }
 
-export async function deleteInvestment(userId: string): Promise<void> {
-  await sql`DELETE FROM investment WHERE user_id = ${userId}`;
-}
-
 export async function insertCard(userId: string, card: Card): Promise<void> {
   await sql`
     INSERT INTO cards (

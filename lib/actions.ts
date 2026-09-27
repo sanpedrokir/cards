@@ -8,7 +8,6 @@ import { requirePageUserId } from "./auth-helpers";
 import {
   addInvestmentFunds,
   deleteCard,
-  deleteInvestment,
   getCardById,
   getCards,
   getInvestment,
@@ -228,14 +227,6 @@ export async function updateInvestmentAmount(
   }
 
   await setInvestmentAmount(userId, amount);
-
-  revalidateInvestmentPaths();
-  redirect("/");
-}
-
-export async function deleteInvestmentAction(): Promise<void> {
-  const userId = await requirePageUserId();
-  await deleteInvestment(userId);
 
   revalidateInvestmentPaths();
   redirect("/");
