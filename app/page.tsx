@@ -76,7 +76,7 @@ export default async function DashboardPage({
           href="/cards/new"
           className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
         >
-          + Add Card
+          + Purchase
         </Link>
       </div>
 

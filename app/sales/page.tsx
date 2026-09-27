@@ -12,7 +12,7 @@ export default async function SalesPage() {
   return (
     <div className="mx-auto max-w-lg space-y-4">
       <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-        Sell a Card
+        Sales
       </h1>
 
       {availableCards.length === 0 ? (
@@ -22,7 +22,7 @@ export default async function SalesPage() {
             href="/cards/new"
             className="mt-3 inline-block rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
           >
-            + Add Card
+            Select Card
           </Link>
         </div>
       ) : (
