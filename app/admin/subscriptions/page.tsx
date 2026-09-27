@@ -61,6 +61,7 @@ export default async function AdminSubscriptionsPage() {
                 <th className="px-3 py-2 text-left font-medium">Status</th>
                 <th className="px-3 py-2 text-left font-medium">Subscribed On</th>
                 <th className="px-3 py-2 text-left font-medium">Renews / Ended</th>
+                <th className="px-3 py-2 text-left font-medium">Transaction #</th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-zinc-900">
@@ -77,6 +78,9 @@ export default async function AdminSubscriptionsPage() {
                   </td>
                   <td className="px-3 py-2 text-zinc-600 dark:text-zinc-300">
                     {s.currentPeriodEnd ? formatDate(s.currentPeriodEnd.slice(0, 10)) : "—"}
+                  </td>
+                  <td className="px-3 py-2 font-mono text-xs text-zinc-500 dark:text-zinc-400">
+                    {s.stripeSubscriptionId ?? "—"}
                   </td>
                 </tr>
               ))}
