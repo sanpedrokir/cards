@@ -33,3 +33,5 @@ CREATE TABLE IF NOT EXISTS cards (
 
 CREATE INDEX IF NOT EXISTS cards_status_idx ON cards (status);
 CREATE INDEX IF NOT EXISTS cards_created_at_idx ON cards (created_at DESC);
+
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS cert_number TEXT;

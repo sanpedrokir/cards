@@ -19,6 +19,7 @@ export interface Card {
   cardNumber?: string;
   grade?: string;
   gradingCompany?: string;
+  certNumber?: string;
   quantity?: number;
   notes?: string;
   imageUrl?: string;

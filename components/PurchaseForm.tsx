@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
-import { purchaseCard } from "@/lib/actions";
+import { useActionState, useRef, useState, useTransition } from "react";
+import { purchaseCard, analyzeCardPhoto } from "@/lib/actions";
 import { initialFormState } from "@/lib/form-state";
 import { formatMoney, formatDate, todayIso } from "@/lib/format";
 import SubmitButton from "./SubmitButton";
@@ -14,6 +14,54 @@ export default function PurchaseForm({
   currency: string;
 }) {
   const [state, formAction] = useActionState(purchaseCard, initialFormState);
+  const [isScanning, startScan] = useTransition();
+  const [scanError, setScanError] = useState<string | null>(null);
+  const [scanNotice, setScanNotice] = useState<string | null>(null);
+
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const seriesRef = useRef<HTMLInputElement>(null);
+  const cardNumberRef = useRef<HTMLInputElement>(null);
+  const gradeRef = useRef<HTMLInputElement>(null);
+  const gradingCompanyRef = useRef<HTMLInputElement>(null);
+  const certNumberRef = useRef<HTMLInputElement>(null);
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+
+  function handleScan() {
+    const file = imageInputRef.current?.files?.[0];
+    if (!file) {
+      setScanError("Choose a photo first, then scan it.");
+      setScanNotice(null);
+      return;
+    }
+
+    setScanError(null);
+    setScanNotice(null);
+
+    startScan(async () => {
+      const formData = new FormData();
+      formData.set("image", file);
+      const result = await analyzeCardPhoto(formData);
+
+      if (result.error) {
+        setScanError(result.error);
+        return;
+      }
+
+      if (result.name && nameRef.current) nameRef.current.value = result.name;
+      if (result.series && seriesRef.current) seriesRef.current.value = result.series;
+      if (result.cardNumber && cardNumberRef.current)
+        cardNumberRef.current.value = result.cardNumber;
+      if (result.grade && gradeRef.current) gradeRef.current.value = result.grade;
+      if (result.gradingCompany && gradingCompanyRef.current)
+        gradingCompanyRef.current.value = result.gradingCompany;
+      if (result.certNumber && certNumberRef.current)
+        certNumberRef.current.value = result.certNumber;
+
+      if (detailsRef.current) detailsRef.current.open = true;
+      setScanNotice("Filled in from the photo — please double-check before saving.");
+    });
+  }
 
   return (
     <form action={formAction} className="space-y-5">
@@ -26,10 +74,46 @@ export default function PurchaseForm({
 
       <fieldset className="space-y-4">
         <div>
+          <label htmlFor="image" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            Photo
+          </label>
+          <input
+            ref={imageInputRef}
+            id="image"
+            name="image"
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="mt-1 w-full text-sm text-zinc-600 file:mr-3 file:rounded-full file:border-0 file:bg-zinc-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-zinc-700 hover:file:bg-zinc-200 dark:text-zinc-300 dark:file:bg-zinc-800 dark:file:text-zinc-200"
+          />
+          <button
+            type="button"
+            onClick={handleScan}
+            disabled={isScanning}
+            className="mt-2 inline-flex items-center gap-2 rounded-full border border-blue-300 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-950/40"
+          >
+            {isScanning ? "Scanning…" : "Scan Card"}
+          </button>
+          <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+            Take a photo with your camera, or upload one from a scanner app --
+            we&apos;ll try to fill in the fields below.
+          </p>
+          {scanError && (
+            <p className="mt-2 text-sm text-red-600 dark:text-red-400">{scanError}</p>
+          )}
+          {scanNotice && !scanError && (
+            <p className="mt-2 text-sm text-emerald-600 dark:text-emerald-400">
+              {scanNotice}
+            </p>
+          )}
+        </div>
+
+        <div>
           <label htmlFor="name" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
             Card Name *
           </label>
           <input
+            ref={nameRef}
             id="name"
             name="name"
             type="text"
@@ -64,22 +148,9 @@ export default function PurchaseForm({
             </div>
           </div>
         </div>
-
-        <div>
-          <label htmlFor="image" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Photo
-          </label>
-          <input
-            id="image"
-            name="image"
-            type="file"
-            accept="image/*"
-            className="mt-1 w-full text-sm text-zinc-600 file:mr-3 file:rounded-full file:border-0 file:bg-zinc-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-zinc-700 hover:file:bg-zinc-200 dark:text-zinc-300 dark:file:bg-zinc-800 dark:file:text-zinc-200"
-          />
-        </div>
       </fieldset>
 
-      <details className="group rounded-xl border border-zinc-200 dark:border-zinc-800">
+      <details ref={detailsRef} className="group rounded-xl border border-zinc-200 dark:border-zinc-800">
         <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
           More details (optional)
         </summary>
@@ -102,6 +173,7 @@ export default function PurchaseForm({
                 Set / Series
               </label>
               <input
+                ref={seriesRef}
                 id="series"
                 name="series"
                 type="text"
@@ -111,33 +183,18 @@ export default function PurchaseForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="cardNumber" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Card Number
-              </label>
-              <input
-                id="cardNumber"
-                name="cardNumber"
-                type="text"
-                placeholder="4/102"
-                className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
-              />
-            </div>
-            <div>
-              <label htmlFor="quantity" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Quantity
-              </label>
-              <input
-                id="quantity"
-                name="quantity"
-                type="number"
-                min="1"
-                step="1"
-                placeholder="1"
-                className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
-              />
-            </div>
+          <div>
+            <label htmlFor="cardNumber" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Card Number
+            </label>
+            <input
+              ref={cardNumberRef}
+              id="cardNumber"
+              name="cardNumber"
+              type="text"
+              placeholder="4/102"
+              className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -146,10 +203,11 @@ export default function PurchaseForm({
                 Grade
               </label>
               <input
+                ref={gradeRef}
                 id="grade"
                 name="grade"
                 type="text"
-                placeholder="PSA 10"
+                placeholder="0 if ungraded"
                 className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
               />
             </div>
@@ -158,6 +216,7 @@ export default function PurchaseForm({
                 Grading Company
               </label>
               <input
+                ref={gradingCompanyRef}
                 id="gradingCompany"
                 name="gradingCompany"
                 type="text"
@@ -165,6 +224,20 @@ export default function PurchaseForm({
                 className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
               />
             </div>
+          </div>
+
+          <div>
+            <label htmlFor="certNumber" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              PSA Cert #
+            </label>
+            <input
+              ref={certNumberRef}
+              id="certNumber"
+              name="certNumber"
+              type="text"
+              placeholder="115823198"
+              className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+            />
           </div>
 
           <div>

@@ -41,6 +41,7 @@ function mapCard(row: any): Card {
     cardNumber: row.card_number ?? undefined,
     grade: row.grade ?? undefined,
     gradingCompany: row.grading_company ?? undefined,
+    certNumber: row.cert_number ?? undefined,
     quantity: row.quantity ?? undefined,
     notes: row.notes ?? undefined,
     imageUrl: row.image_url ?? undefined,
@@ -118,11 +119,12 @@ export async function insertCard(card: Card): Promise<void> {
   await sql`
     INSERT INTO cards (
       id, name, purchase_price, purchase_date, category, series, card_number,
-      grade, grading_company, quantity, notes, image_url, status, created_at
+      grade, grading_company, cert_number, quantity, notes, image_url, status, created_at
     ) VALUES (
       ${card.id}, ${card.name}, ${card.purchasePrice}, ${card.purchaseDate},
       ${card.category ?? null}, ${card.series ?? null}, ${card.cardNumber ?? null},
-      ${card.grade ?? null}, ${card.gradingCompany ?? null}, ${card.quantity ?? null},
+      ${card.grade ?? null}, ${card.gradingCompany ?? null}, ${card.certNumber ?? null},
+      ${card.quantity ?? null},
       ${card.notes ?? null}, ${card.imageUrl ?? null}, ${card.status}, ${card.createdAt}
     )
   `;
