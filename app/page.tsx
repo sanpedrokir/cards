@@ -38,6 +38,30 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex flex-wrap gap-x-6 gap-y-1 border-b border-zinc-200 pb-4 text-sm dark:border-zinc-800">
+        <div>
+          <span className="text-zinc-500 dark:text-zinc-400">Total Invested: </span>
+          <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+            {formatMoney(totals.investedAmount, currency)}
+          </span>
+          <span className="ml-1 text-xs text-zinc-400 dark:text-zinc-500">
+            (since {formatDate(investment.date)})
+          </span>
+        </div>
+        <div>
+          <span className="text-zinc-500 dark:text-zinc-400">Available Balance: </span>
+          <span className="font-semibold text-blue-600 dark:text-blue-400">
+            {formatMoney(totals.availableBalance, currency)}
+          </span>
+        </div>
+        <div>
+          <span className="text-zinc-500 dark:text-zinc-400">Cards Inventory: </span>
+          <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+            {formatMoney(totals.inventoryCost, currency)}
+          </span>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
           Dashboard
@@ -50,21 +74,7 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <SummaryCard
-          label="Total Invested"
-          value={formatMoney(totals.investedAmount, currency)}
-          hint={`Since ${formatDate(investment.date)}`}
-        />
-        <SummaryCard
-          label="Available Balance"
-          value={formatMoney(totals.availableBalance, currency)}
-          tone="accent"
-        />
-        <SummaryCard
-          label="Cards Inventory"
-          value={formatMoney(totals.inventoryCost, currency)}
-        />
+      <div className="grid grid-cols-3 gap-3">
         <SummaryCard
           label="Total Sales"
           value={formatMoney(totals.totalSales, currency)}
