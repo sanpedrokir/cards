@@ -147,3 +147,72 @@ export async function markCardSold(userId: string, id: string, sale: Sale): Prom
     WHERE id = ${id} AND user_id = ${userId}
   `;
 }
+
+const ACTIVE_SUBSCRIPTION_STATUSES = new Set(["active", "trialing", "past_due"]);
+
+export interface SubscriptionRecord {
+  userId: string;
+  stripeCustomerId: string;
+  stripeSubscriptionId: string | null;
+  status: string;
+  currentPeriodEnd: string | null;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapSubscription(row: any): SubscriptionRecord {
+  return {
+    userId: row.user_id,
+    stripeCustomerId: row.stripe_customer_id,
+    stripeSubscriptionId: row.stripe_subscription_id,
+    status: row.status,
+    currentPeriodEnd: row.current_period_end ? toIsoTimestamp(row.current_period_end) : null,
+  };
+}
+
+export async function getSubscription(userId: string): Promise<SubscriptionRecord | null> {
+  const rows = await sql`SELECT * FROM subscriptions WHERE user_id = ${userId}`;
+  return rows.length ? mapSubscription(rows[0]) : null;
+}
+
+export async function hasActiveSubscription(userId: string): Promise<boolean> {
+  const rows = await sql`SELECT status FROM subscriptions WHERE user_id = ${userId}`;
+  return rows.length > 0 && ACTIVE_SUBSCRIPTION_STATUSES.has(rows[0].status);
+}
+
+export async function upsertSubscriptionCustomer(
+  userId: string,
+  stripeCustomerId: string
+): Promise<void> {
+  await sql`
+    INSERT INTO subscriptions (user_id, stripe_customer_id, status)
+    VALUES (${userId}, ${stripeCustomerId}, 'incomplete')
+    ON CONFLICT (user_id) DO UPDATE SET stripe_customer_id = EXCLUDED.stripe_customer_id
+  `;
+}
+
+export async function getUserIdByStripeCustomerId(
+  stripeCustomerId: string
+): Promise<string | null> {
+  const rows = await sql`
+    SELECT user_id FROM subscriptions WHERE stripe_customer_id = ${stripeCustomerId}
+  `;
+  return rows.length ? rows[0].user_id : null;
+}
+
+export async function updateSubscriptionFromStripe(
+  stripeCustomerId: string,
+  data: {
+    stripeSubscriptionId: string | null;
+    status: string;
+    currentPeriodEnd: string | null;
+  }
+): Promise<void> {
+  await sql`
+    UPDATE subscriptions SET
+      stripe_subscription_id = ${data.stripeSubscriptionId},
+      status = ${data.status},
+      current_period_end = ${data.currentPeriodEnd},
+      updated_at = now()
+    WHERE stripe_customer_id = ${stripeCustomerId}
+  `;
+}

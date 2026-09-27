@@ -1,5 +1,5 @@
-import { PricingTable } from "@clerk/nextjs";
 import { requireSignedInUserId } from "@/lib/auth-helpers";
+import { startCheckout } from "@/lib/actions";
 
 export default async function PricingPage() {
   await requireSignedInUserId();
@@ -22,13 +22,24 @@ export default async function PricingPage() {
       </div>
 
       <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <PricingTable />
+        <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
+          <li>• Track card purchases, sales and profit</li>
+          <li>• AI-assisted card scanning</li>
+          <li>• Unlimited cards and sales history</li>
+        </ul>
+
+        <form action={startCheckout} className="mt-5">
+          <button
+            type="submit"
+            className="w-full rounded-full bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            Subscribe — $10/month
+          </button>
+        </form>
       </div>
 
-      <p className="mt-4 text-center text-sm">
-        <a href="/" className="font-medium text-blue-600 dark:text-blue-400">
-          Already subscribed? Go to Dashboard →
-        </a>
+      <p className="mt-4 text-center text-xs text-zinc-400 dark:text-zinc-500">
+        Payments are processed securely by Stripe.
       </p>
     </div>
   );

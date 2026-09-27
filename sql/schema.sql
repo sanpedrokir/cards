@@ -45,3 +45,13 @@ ALTER TABLE investment ADD COLUMN IF NOT EXISTS user_id TEXT PRIMARY KEY;
 ALTER TABLE cards ADD COLUMN IF NOT EXISTS user_id TEXT NOT NULL;
 
 CREATE INDEX IF NOT EXISTS cards_user_id_idx ON cards (user_id);
+
+-- Direct Stripe subscription billing (not Clerk Billing)
+CREATE TABLE IF NOT EXISTS subscriptions (
+  user_id TEXT PRIMARY KEY,
+  stripe_customer_id TEXT NOT NULL,
+  stripe_subscription_id TEXT,
+  status TEXT NOT NULL DEFAULT 'incomplete',
+  current_period_end TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);

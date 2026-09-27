@@ -4,17 +4,21 @@ import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import Anthropic from "@anthropic-ai/sdk";
-import { requirePageUserId } from "./auth-helpers";
+import { currentUser } from "@clerk/nextjs/server";
+import { requirePageUserId, requireSignedInUserId } from "./auth-helpers";
+import { getStripe, getAppUrl } from "./stripe";
 import {
   addInvestmentFunds,
   deleteCard,
   getCardById,
   getCards,
   getInvestment,
+  getSubscription,
   insertCard,
   markCardSold,
   setInvestmentAmount,
   upsertInvestment,
+  upsertSubscriptionCustomer,
 } from "./store";
 import { getTotals } from "./calculations";
 import { todayIso } from "./format";
@@ -309,6 +313,65 @@ export async function deleteCardAction(cardId: string): Promise<void> {
 
   revalidateCardPaths();
   redirect("/cards");
+}
+
+export async function startCheckout(): Promise<void> {
+  const userId = await requireSignedInUserId();
+  const user = await currentUser();
+  const email = user?.primaryEmailAddress?.emailAddress ?? user?.emailAddresses[0]?.emailAddress;
+
+  const priceId = process.env.STRIPE_PRICE_ID;
+  if (!priceId) {
+    throw new Error("Billing isn't configured yet.");
+  }
+
+  const stripe = getStripe();
+  const appUrl = getAppUrl();
+
+  let customerId = (await getSubscription(userId))?.stripeCustomerId;
+  if (!customerId) {
+    const customer = await stripe.customers.create({
+      email,
+      metadata: { userId },
+    });
+    customerId = customer.id;
+    await upsertSubscriptionCustomer(userId, customerId);
+  }
+
+  const session = await stripe.checkout.sessions.create({
+    mode: "subscription",
+    customer: customerId,
+    line_items: [{ price: priceId, quantity: 1 }],
+    success_url: `${appUrl}/?checkout=success`,
+    cancel_url: `${appUrl}/pricing`,
+    client_reference_id: userId,
+    metadata: { userId },
+  });
+
+  if (!session.url) {
+    throw new Error("Could not start checkout.");
+  }
+
+  redirect(session.url);
+}
+
+export async function openBillingPortal(): Promise<void> {
+  const userId = await requireSignedInUserId();
+  const subscription = await getSubscription(userId);
+
+  if (!subscription) {
+    redirect("/pricing");
+  }
+
+  const stripe = getStripe();
+  const appUrl = getAppUrl();
+
+  const portalSession = await stripe.billingPortal.sessions.create({
+    customer: subscription.stripeCustomerId,
+    return_url: `${appUrl}/`,
+  });
+
+  redirect(portalSession.url);
 }
 
 export async function sellCard(

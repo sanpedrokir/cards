@@ -1,6 +1,7 @@
 import "server-only";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
+import { hasActiveSubscription } from "./store";
 
 export async function requireSignedInUserId(): Promise<string> {
   const { userId } = await auth();
@@ -9,8 +10,8 @@ export async function requireSignedInUserId(): Promise<string> {
 }
 
 export async function requirePageUserId(): Promise<string> {
-  const { userId, has } = await auth();
+  const { userId } = await auth();
   if (!userId) redirect("/sign-in");
-  if (!has({ plan: "vaulted" })) redirect("/pricing");
+  if (!(await hasActiveSubscription(userId))) redirect("/pricing");
   return userId;
 }
