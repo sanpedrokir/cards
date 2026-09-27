@@ -15,9 +15,17 @@ export default async function DashboardPage() {
   if (!investment) {
     return (
       <div className="mx-auto max-w-md">
-        <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-          Welcome to Vaulted
-        </h1>
+        <div className="text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/vaulted-logo.png"
+            alt="Vaulted"
+            className="mx-auto h-28 w-28"
+          />
+          <h1 className="mt-4 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+            Welcome to Vaulted
+          </h1>
+        </div>
         <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <InvestmentForm investment={null} />
         </div>
@@ -33,6 +41,9 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/vaulted-logo.png" alt="Vaulted" className="h-10 w-10" />
+
       <div className="flex flex-wrap gap-x-6 gap-y-1 border-b border-zinc-200 pb-4 text-sm dark:border-zinc-800">
         <div>
           <span className="text-zinc-500 dark:text-zinc-400">Total Invested: </span>
