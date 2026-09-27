@@ -103,12 +103,6 @@ export async function upsertInvestment(userId: string, data: Investment): Promis
   `;
 }
 
-export async function addInvestmentFunds(userId: string, amount: number): Promise<void> {
-  await sql`
-    UPDATE investment SET amount = amount + ${amount} WHERE user_id = ${userId}
-  `;
-}
-
 export async function setInvestmentAmount(userId: string, amount: number): Promise<void> {
   await sql`
     UPDATE investment SET amount = ${amount} WHERE user_id = ${userId}
@@ -206,9 +200,17 @@ export async function getUserIdByStripeCustomerId(
   return rows.length ? rows[0].user_id : null;
 }
 
+let gateCache: { value: boolean; expiresAt: number } | null = null;
+const GATE_CACHE_TTL_MS = 30_000;
+
 export async function isSubscriptionGateEnabled(): Promise<boolean> {
+  if (gateCache && gateCache.expiresAt > Date.now()) {
+    return gateCache.value;
+  }
   const rows = await sql`SELECT subscription_required FROM app_settings WHERE id = 1`;
-  return rows.length ? Boolean(rows[0].subscription_required) : false;
+  const value = rows.length ? Boolean(rows[0].subscription_required) : false;
+  gateCache = { value, expiresAt: Date.now() + GATE_CACHE_TTL_MS };
+  return value;
 }
 
 export async function setSubscriptionGateEnabled(enabled: boolean): Promise<void> {
@@ -217,6 +219,7 @@ export async function setSubscriptionGateEnabled(enabled: boolean): Promise<void
     VALUES (1, ${enabled})
     ON CONFLICT (id) DO UPDATE SET subscription_required = EXCLUDED.subscription_required
   `;
+  gateCache = { value: enabled, expiresAt: Date.now() + GATE_CACHE_TTL_MS };
 }
 
 export async function upsertSubscriptionFromStripe(

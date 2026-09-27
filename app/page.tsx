@@ -5,7 +5,6 @@ import { getTotals } from "@/lib/calculations";
 import { formatMoney } from "@/lib/format";
 import SummaryCard from "@/components/SummaryCard";
 import InvestmentForm from "@/components/InvestmentForm";
-import InvestmentFundsPanel from "@/components/InvestmentFundsPanel";
 import InvestedAmountEditor from "@/components/InvestedAmountEditor";
 import PaginatedSalesTable from "@/components/PaginatedSalesTable";
 import CheckoutSuccessBanner from "@/components/CheckoutSuccessBanner";
@@ -97,8 +96,6 @@ export default async function DashboardPage({
           tone="purple"
         />
       </div>
-
-      <InvestmentFundsPanel />
 
       <div>
         <div className="mb-3 flex items-center justify-between">

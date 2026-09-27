@@ -191,7 +191,7 @@ export default async function CardDetailPage({
             href={`/cards/${card.id}/sell`}
             className="mt-4 flex w-full items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
           >
-            Sell Card
+            Mark as Sold
           </Link>
         )}
 

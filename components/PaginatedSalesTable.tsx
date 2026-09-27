@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { cardProfit } from "@/lib/calculations";
 import { formatMoney } from "@/lib/format";
 import type { Card } from "@/lib/types";
@@ -36,8 +37,13 @@ export default function PaginatedSalesTable({
             const profit = cardProfit(card);
             return (
               <tr key={card.id} className="border-t border-zinc-100 dark:border-zinc-800">
-                <td className="max-w-[120px] truncate px-3 py-2 text-zinc-900 dark:text-zinc-50">
-                  {card.name}
+                <td className="max-w-[120px] truncate px-3 py-2">
+                  <Link
+                    href={`/cards/${card.id}`}
+                    className="text-zinc-900 hover:underline dark:text-zinc-50"
+                  >
+                    {card.name}
+                  </Link>
                 </td>
                 <td className="px-3 py-2 text-right text-zinc-600 dark:text-zinc-300">
                   {formatMoney(card.purchasePrice, currency)}

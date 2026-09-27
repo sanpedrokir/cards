@@ -9,7 +9,6 @@ import { requireAdminUserId, requirePageUserId, requireSignedInUserId } from "./
 import { getStripe, getAppUrl } from "./stripe";
 import { searchEbayActiveListings, type EbayListing } from "./ebay";
 import {
-  addInvestmentFunds,
   deleteCard,
   getCardById,
   getCards,
@@ -190,28 +189,6 @@ export async function saveInvestment(
   }
 
   await upsertInvestment(userId, { amount, currency, date, notes });
-
-  revalidateInvestmentPaths();
-  redirect("/");
-}
-
-export async function addFunds(
-  _prevState: FormState,
-  formData: FormData
-): Promise<FormState> {
-  const userId = await requirePageUserId();
-  const amount = numberField(formData, "amount");
-
-  if (amount === undefined || amount <= 0) {
-    return { error: "Enter a valid amount greater than zero." };
-  }
-
-  const investment = await getInvestment(userId);
-  if (!investment) {
-    return { error: "Set up your initial investment first." };
-  }
-
-  await addInvestmentFunds(userId, amount);
 
   revalidateInvestmentPaths();
   redirect("/");
