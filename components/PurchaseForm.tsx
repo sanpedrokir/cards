@@ -27,6 +27,19 @@ export default function PurchaseForm({
   const certNumberRef = useRef<HTMLInputElement>(null);
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  // Tracks which fields currently hold a value from a *previous* scan (as
+  // opposed to something the user typed themselves), so a re-scan can clear
+  // stale auto-filled values without ever touching user-typed input.
+  const autoFilledRef = useRef<Set<string>>(new Set());
+
+  const fieldRefs = {
+    name: nameRef,
+    series: seriesRef,
+    cardNumber: cardNumberRef,
+    grade: gradeRef,
+    gradingCompany: gradingCompanyRef,
+    certNumber: certNumberRef,
+  } as const;
 
   function handleFileChange() {
     const file = imageInputRef.current?.files?.[0];
@@ -36,38 +49,32 @@ export default function PurchaseForm({
     setScanError(null);
     setScanNotice(null);
 
-    // Clear previous scan results so a re-scan never mixes old and new
-    // values -- if this scan doesn't detect a field, it should come back
-    // blank rather than silently keeping the last photo's answer.
-    if (nameRef.current) nameRef.current.value = "";
-    if (seriesRef.current) seriesRef.current.value = "";
-    if (cardNumberRef.current) cardNumberRef.current.value = "";
-    if (gradeRef.current) gradeRef.current.value = "";
-    if (gradingCompanyRef.current) gradingCompanyRef.current.value = "";
-    if (certNumberRef.current) certNumberRef.current.value = "";
+    // Clear only fields that came from a previous scan -- never clobber
+    // something the user typed in by hand.
+    for (const key of autoFilledRef.current) {
+      const ref = fieldRefs[key as keyof typeof fieldRefs];
+      if (ref?.current) ref.current.value = "";
+    }
+    autoFilledRef.current.clear();
 
     startScan(async () => {
       const formData = new FormData();
       formData.set("image", file);
       const result = await analyzeCardPhoto(formData);
 
-      // Allow re-selecting the exact same file to re-trigger a scan
-      if (imageInputRef.current) imageInputRef.current.value = "";
-
       if (result.error) {
         setScanError(result.error);
         return;
       }
 
-      if (result.name && nameRef.current) nameRef.current.value = result.name;
-      if (result.series && seriesRef.current) seriesRef.current.value = result.series;
-      if (result.cardNumber && cardNumberRef.current)
-        cardNumberRef.current.value = result.cardNumber;
-      if (result.grade && gradeRef.current) gradeRef.current.value = result.grade;
-      if (result.gradingCompany && gradingCompanyRef.current)
-        gradingCompanyRef.current.value = result.gradingCompany;
-      if (result.certNumber && certNumberRef.current)
-        certNumberRef.current.value = result.certNumber;
+      for (const key of Object.keys(fieldRefs) as (keyof typeof fieldRefs)[]) {
+        const value = result[key];
+        const ref = fieldRefs[key];
+        if (value && ref.current) {
+          ref.current.value = value;
+          autoFilledRef.current.add(key);
+        }
+      }
 
       if (detailsRef.current) detailsRef.current.open = true;
       setScanNotice("Verify details before saving!");

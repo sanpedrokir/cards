@@ -139,7 +139,7 @@ export default function SellPickerForm({
 
           <div>
             <label htmlFor="fees" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Fees
+              Fees <span className="text-zinc-400">(optional)</span>
             </label>
             <input
               id="fees"
