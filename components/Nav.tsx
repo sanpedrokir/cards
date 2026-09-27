@@ -20,28 +20,6 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: "/cards",
-    label: "My Cards",
-    icon: (active: boolean) => (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
-        <rect
-          x="3.5"
-          y="5.5"
-          width="17"
-          height="13"
-          rx="2"
-          stroke="currentColor"
-          strokeWidth={active ? 2.2 : 1.8}
-        />
-        <path
-          d="M3.5 9.5h17"
-          stroke="currentColor"
-          strokeWidth={active ? 2.2 : 1.8}
-        />
-      </svg>
-    ),
-  },
-  {
     href: "/cards/new",
     label: "Purchase",
     icon: (active: boolean) => (
@@ -63,8 +41,8 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: "/investment",
-    label: "Investment",
+    href: "/sales",
+    label: "Sales",
     icon: (active: boolean) => (
       <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
         <path
@@ -75,6 +53,28 @@ const NAV_ITEMS = [
           strokeLinejoin="round"
         />
         <circle cx="12" cy="13" r="2" stroke="currentColor" strokeWidth={active ? 2.2 : 1.8} />
+      </svg>
+    ),
+  },
+  {
+    href: "/cards",
+    label: "My Cards",
+    icon: (active: boolean) => (
+      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
+        <rect
+          x="3.5"
+          y="5.5"
+          width="17"
+          height="13"
+          rx="2"
+          stroke="currentColor"
+          strokeWidth={active ? 2.2 : 1.8}
+        />
+        <path
+          d="M3.5 9.5h17"
+          stroke="currentColor"
+          strokeWidth={active ? 2.2 : 1.8}
+        />
       </svg>
     ),
   },

@@ -4,6 +4,7 @@ import { readDb } from "@/lib/store";
 import { cardProfit } from "@/lib/calculations";
 import { formatDate, formatMoney } from "@/lib/format";
 import StatusBadge from "@/components/StatusBadge";
+import DeleteCardButton from "@/components/DeleteCardButton";
 
 export default async function CardDetailPage({
   params,
@@ -185,6 +186,8 @@ export default async function CardDetailPage({
             Sell Card
           </Link>
         )}
+
+        <DeleteCardButton cardId={card.id} cardName={card.name} />
       </div>
     </div>
   );

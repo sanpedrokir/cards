@@ -4,6 +4,8 @@ import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
+  addInvestmentFunds,
+  deleteCard,
   getCardById,
   getCards,
   getInvestment,
@@ -62,6 +64,28 @@ export async function saveInvestment(
   }
 
   await upsertInvestment({ amount, currency, date, notes });
+
+  revalidatePath("/");
+  revalidatePath("/investment");
+  redirect("/");
+}
+
+export async function addFunds(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const amount = numberField(formData, "amount");
+
+  if (amount === undefined || amount <= 0) {
+    return { error: "Enter a valid amount greater than zero." };
+  }
+
+  const investment = await getInvestment();
+  if (!investment) {
+    return { error: "Set up your initial investment first." };
+  }
+
+  await addInvestmentFunds(amount);
 
   revalidatePath("/");
   revalidatePath("/investment");
@@ -132,6 +156,17 @@ export async function purchaseCard(
   revalidatePath("/");
   revalidatePath("/cards");
   redirect(`/cards/${id}`);
+}
+
+export async function deleteCardAction(cardId: string): Promise<void> {
+  const card = await getCardById(cardId);
+  if (!card) return;
+
+  await deleteCard(cardId);
+
+  revalidatePath("/");
+  revalidatePath("/cards");
+  redirect("/cards");
 }
 
 export async function sellCard(

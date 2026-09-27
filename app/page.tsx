@@ -5,6 +5,9 @@ import { formatMoney, formatDate } from "@/lib/format";
 import SummaryCard from "@/components/SummaryCard";
 import CardTile from "@/components/CardTile";
 import InvestmentForm from "@/components/InvestmentForm";
+import AddFundsForm from "@/components/AddFundsForm";
+
+export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const db = await readDb();
@@ -49,9 +52,9 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <SummaryCard
-          label="Initial Investment"
+          label="Total Invested"
           value={formatMoney(totals.investedAmount, currency)}
-          hint={formatDate(investment.date)}
+          hint={`Since ${formatDate(investment.date)}`}
         />
         <SummaryCard
           label="Available Balance"
@@ -74,9 +77,11 @@ export default async function DashboardPage() {
         <SummaryCard
           label="Total Funds"
           value={formatMoney(totals.totalFunds, currency)}
-          tone="accent"
+          tone="purple"
         />
       </div>
+
+      <AddFundsForm />
 
       <div>
         <div className="mb-3 flex items-center justify-between">

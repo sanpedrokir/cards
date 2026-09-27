@@ -98,6 +98,12 @@ export async function upsertInvestment(data: Investment): Promise<void> {
   `;
 }
 
+export async function addInvestmentFunds(amount: number): Promise<void> {
+  await sql`
+    UPDATE investment SET amount = amount + ${amount} WHERE id = 1
+  `;
+}
+
 export async function insertCard(card: Card): Promise<void> {
   await sql`
     INSERT INTO cards (
@@ -110,6 +116,10 @@ export async function insertCard(card: Card): Promise<void> {
       ${card.notes ?? null}, ${card.imageUrl ?? null}, ${card.status}, ${card.createdAt}
     )
   `;
+}
+
+export async function deleteCard(id: string): Promise<void> {
+  await sql`DELETE FROM cards WHERE id = ${id}`;
 }
 
 export async function markCardSold(id: string, sale: Sale): Promise<void> {
