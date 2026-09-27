@@ -154,7 +154,7 @@ export default function PurchaseForm({
         </div>
       </fieldset>
 
-      <details ref={detailsRef} className="group rounded-xl border border-zinc-200 dark:border-zinc-800">
+      <details ref={detailsRef} open className="group rounded-xl border border-zinc-200 dark:border-zinc-800">
         <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
           More details (optional)
         </summary>

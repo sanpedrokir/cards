@@ -29,11 +29,15 @@ export default function SignUpPage() {
     }
 
     const formData = new FormData(e.currentTarget);
-    const emailAddress = String(formData.get("email") ?? "");
+    const emailAddress = String(formData.get("email") ?? "").trim();
     const password = String(formData.get("password") ?? "");
     const phoneNumber = `${countryDial}${digits}`;
 
-    const { error } = await signUp.create({ emailAddress, phoneNumber, password });
+    const { error } = await signUp.create({
+      ...(emailAddress ? { emailAddress } : {}),
+      phoneNumber,
+      password,
+    });
     if (!error) {
       await signUp.verifications.sendPhoneCode();
     }
@@ -137,9 +141,9 @@ export default function SignUpPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Email
+              Email <span className="text-zinc-400">(optional)</span>
             </label>
-            <input id="email" name="email" type="email" required className={inputClass} />
+            <input id="email" name="email" type="email" className={inputClass} />
             {errors?.fields?.emailAddress && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {errors.fields.emailAddress.message}
