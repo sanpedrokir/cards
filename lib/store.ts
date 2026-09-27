@@ -156,6 +156,7 @@ export interface SubscriptionRecord {
   stripeSubscriptionId: string | null;
   status: string;
   currentPeriodEnd: string | null;
+  createdAt: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -166,12 +167,18 @@ function mapSubscription(row: any): SubscriptionRecord {
     stripeSubscriptionId: row.stripe_subscription_id,
     status: row.status,
     currentPeriodEnd: row.current_period_end ? toIsoTimestamp(row.current_period_end) : null,
+    createdAt: toIsoTimestamp(row.created_at),
   };
 }
 
 export async function getSubscription(userId: string): Promise<SubscriptionRecord | null> {
   const rows = await sql`SELECT * FROM subscriptions WHERE user_id = ${userId}`;
   return rows.length ? mapSubscription(rows[0]) : null;
+}
+
+export async function getAllSubscriptions(): Promise<SubscriptionRecord[]> {
+  const rows = await sql`SELECT * FROM subscriptions ORDER BY created_at DESC`;
+  return rows.map(mapSubscription);
 }
 
 export async function hasActiveSubscription(userId: string): Promise<boolean> {

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireAdminUserId } from "@/lib/auth-helpers";
 import { isSubscriptionGateEnabled } from "@/lib/store";
 import { toggleSubscriptionGate } from "@/lib/actions";
@@ -38,6 +39,13 @@ export default async function AdminPage() {
           </form>
         </div>
       </div>
+
+      <Link
+        href="/admin/subscriptions"
+        className="block rounded-2xl border border-zinc-200 bg-white p-5 text-sm font-medium text-blue-600 shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-blue-400 dark:hover:bg-zinc-800/50"
+      >
+        View subscriptions →
+      </Link>
     </div>
   );
 }
