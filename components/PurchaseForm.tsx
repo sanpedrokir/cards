@@ -1,7 +1,12 @@
 "use client";
 
 import { useActionState, useRef, useState, useTransition } from "react";
-import { purchaseCard, analyzeCardPhoto } from "@/lib/actions";
+import {
+  purchaseCard,
+  analyzeCardPhoto,
+  checkEbayPriceForQuery,
+  type EbayPriceEstimate,
+} from "@/lib/actions";
 import { initialFormState } from "@/lib/form-state";
 import { formatMoney, formatDate, todayIso } from "@/lib/format";
 import SubmitButton from "./SubmitButton";
@@ -31,6 +36,21 @@ export default function PurchaseForm({
   // opposed to something the user typed themselves), so a re-scan can clear
   // stale auto-filled values without ever touching user-typed input.
   const autoFilledRef = useRef<Set<string>>(new Set());
+
+  const [ebayResult, setEbayResult] = useState<EbayPriceEstimate | null>(null);
+  const [isCheckingEbay, startEbayCheck] = useTransition();
+
+  function handleCheckEbay() {
+    const name = nameRef.current?.value ?? "";
+    startEbayCheck(async () => {
+      const result = await checkEbayPriceForQuery(
+        name,
+        gradingCompanyRef.current?.value,
+        gradeRef.current?.value
+      );
+      setEbayResult(result);
+    });
+  }
 
   const fieldRefs = {
     name: nameRef,
@@ -171,6 +191,70 @@ export default function PurchaseForm({
               {formatDate(todayIso())}
             </div>
           </div>
+        </div>
+
+        <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+                eBay Market Check
+              </p>
+              <p className="text-xs text-zinc-400 dark:text-zinc-500">
+                See if you&apos;re paying a fair price.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleCheckEbay}
+              disabled={isCheckingEbay}
+              className="shrink-0 rounded-full bg-zinc-900 px-4 py-1.5 text-xs font-semibold text-white hover:bg-zinc-800 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900"
+            >
+              {isCheckingEbay ? "Checking…" : "Check eBay Price"}
+            </button>
+          </div>
+
+          {ebayResult?.error && (
+            <p className="mt-3 text-sm text-red-600 dark:text-red-400">{ebayResult.error}</p>
+          )}
+
+          {ebayResult && !ebayResult.error && (
+            <div className="mt-3 space-y-3">
+              {ebayResult.recommendedPrice !== undefined && (
+                <div className="rounded-xl bg-emerald-50 p-3 dark:bg-emerald-950/40">
+                  <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                    Typical market price
+                  </p>
+                  <p className="text-lg font-semibold text-emerald-800 dark:text-emerald-300">
+                    {formatMoney(ebayResult.recommendedPrice, ebayResult.currency ?? "USD")}
+                  </p>
+                  <p className="mt-1 text-xs text-emerald-700/80 dark:text-emerald-400/80">
+                    Based on {ebayResult.listings.length} similar active eBay listing
+                    {ebayResult.listings.length === 1 ? "" : "s"}. Guideline only.
+                  </p>
+                </div>
+              )}
+
+              <ul className="space-y-1.5 text-sm">
+                {ebayResult.listings.map((listing, i) => (
+                  <li key={i}>
+                    <a
+                      href={listing.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                    >
+                      <span className="truncate text-zinc-600 dark:text-zinc-300">
+                        {listing.title}
+                      </span>
+                      <span className="shrink-0 font-medium text-zinc-900 dark:text-zinc-50">
+                        {formatMoney(listing.price, listing.currency)}
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </fieldset>
 

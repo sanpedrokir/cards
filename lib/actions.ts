@@ -377,21 +377,17 @@ function median(values: number[]): number {
     : sorted[mid];
 }
 
-export async function checkEbayPrice(cardId: string): Promise<EbayPriceEstimate> {
-  const userId = await requirePageUserId();
-  const card = await getCardById(userId, cardId);
-  if (!card) {
-    return { listings: [], error: "Card not found." };
-  }
-
-  const query = [
-    card.name,
-    card.gradingCompany,
-    card.grade && card.grade !== "0" ? card.grade : undefined,
-  ]
+function buildEbayQuery(
+  name: string,
+  gradingCompany?: string | null,
+  grade?: string | null
+): string {
+  return [name, gradingCompany, grade && grade !== "0" ? grade : undefined]
     .filter(Boolean)
     .join(" ");
+}
 
+async function estimateEbayPrice(query: string): Promise<EbayPriceEstimate> {
   try {
     const listings = await searchEbayActiveListings(query);
     if (listings.length === 0) {
@@ -414,9 +410,35 @@ export async function checkEbayPrice(cardId: string): Promise<EbayPriceEstimate>
       currency: listings[0].currency,
     };
   } catch (err) {
-    console.error("checkEbayPrice failed:", err);
+    console.error("eBay price estimate failed:", err);
     return { listings: [], error: "Couldn't reach eBay. Please try again later." };
   }
+}
+
+export async function checkEbayPrice(cardId: string): Promise<EbayPriceEstimate> {
+  const userId = await requirePageUserId();
+  const card = await getCardById(userId, cardId);
+  if (!card) {
+    return { listings: [], error: "Card not found." };
+  }
+
+  const query = buildEbayQuery(card.name, card.gradingCompany, card.grade);
+  return estimateEbayPrice(query);
+}
+
+export async function checkEbayPriceForQuery(
+  name: string,
+  gradingCompany?: string,
+  grade?: string
+): Promise<EbayPriceEstimate> {
+  await requireSignedInUserId();
+
+  if (!name.trim()) {
+    return { listings: [], error: "Enter a card name first." };
+  }
+
+  const query = buildEbayQuery(name, gradingCompany, grade);
+  return estimateEbayPrice(query);
 }
 
 export async function sellCard(

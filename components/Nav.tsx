@@ -22,7 +22,7 @@ const NAV_ITEMS = [
   },
   {
     href: "/cards/new",
-    label: "Add Card",
+    label: "Purchase",
     icon: (active: boolean) => (
       <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
         <circle
@@ -43,7 +43,7 @@ const NAV_ITEMS = [
   },
   {
     href: "/sales",
-    label: "Sell Card",
+    label: "Sales",
     icon: (active: boolean) => (
       <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
         <path
