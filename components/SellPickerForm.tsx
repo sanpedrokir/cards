@@ -85,6 +85,19 @@ export default function SellPickerForm({
         </div>
       </div>
 
+      <div>
+        <label htmlFor="notes" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          Comment <span className="text-zinc-400">(optional)</span>
+        </label>
+        <textarea
+          id="notes"
+          name="notes"
+          rows={3}
+          placeholder="Add a comment about this sale..."
+          className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+        />
+      </div>
+
       <details className="group rounded-xl border border-zinc-200 dark:border-zinc-800">
         <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
           More details (optional)
@@ -135,18 +148,6 @@ export default function SellPickerForm({
               step="0.01"
               min="0"
               placeholder="0.00"
-              className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="notes" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Notes
-            </label>
-            <textarea
-              id="notes"
-              name="notes"
-              rows={3}
               className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
             />
           </div>

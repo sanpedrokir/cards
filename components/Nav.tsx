@@ -88,9 +88,20 @@ export default function Nav() {
 
   return (
     <>
+      <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80 sm:hidden">
+        <div className="flex items-center justify-center px-6 py-2">
+          <Link href="/">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/vaulted-logo.png" alt="Vaulted" className="h-8 w-8" />
+          </Link>
+        </div>
+      </header>
+
       <header className="sticky top-0 z-40 hidden border-b border-zinc-200 bg-white/80 backdrop-blur sm:block dark:border-zinc-800 dark:bg-zinc-950/80">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-3">
-          <Link href="/" className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+          <Link href="/" className="flex items-center gap-2 text-base font-semibold text-zinc-900 dark:text-zinc-50">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/vaulted-logo.png" alt="" className="h-8 w-8" />
             Vaulted
           </Link>
           <nav className="flex items-center gap-1">

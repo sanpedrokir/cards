@@ -41,9 +41,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/vaulted-logo.png" alt="Vaulted" className="h-10 w-10" />
-
       <div className="flex flex-wrap gap-x-6 gap-y-1 border-b border-zinc-200 pb-4 text-sm dark:border-zinc-800">
         <div>
           <span className="text-zinc-500 dark:text-zinc-400">Total Invested: </span>
