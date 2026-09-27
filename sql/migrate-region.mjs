@@ -20,26 +20,49 @@ const schema = readFileSync(schemaPath, "utf-8");
 const oldSql = neon(oldUrl);
 const newSql = neon(newUrl);
 
-const BATCH_SIZE = 5;
+const BATCH_SIZE = 1;
+const MAX_ATTEMPTS = 5;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function withRetry(fn) {
+  let lastErr;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      console.log(`  retry ${attempt}/${MAX_ATTEMPTS} after error: ${err.message}`);
+      await sleep(1000 * attempt);
+    }
+  }
+  throw lastErr;
+}
 
 async function copyTable(table, columns, orderBy) {
-  const countRows = await oldSql.query(`SELECT count(*) FROM ${table}`);
+  const countRows = await withRetry(() => oldSql.query(`SELECT count(*) FROM ${table}`));
   const total = Number(countRows[0].count);
   console.log(`${table}: ${total} row(s) total`);
 
   let copied = 0;
   for (let offset = 0; offset < total; offset += BATCH_SIZE) {
-    const rows = await oldSql.query(
-      `SELECT ${columns.join(", ")} FROM ${table} ORDER BY ${orderBy} LIMIT ${BATCH_SIZE} OFFSET ${offset}`
+    const rows = await withRetry(() =>
+      oldSql.query(
+        `SELECT ${columns.join(", ")} FROM ${table} ORDER BY ${orderBy} LIMIT ${BATCH_SIZE} OFFSET ${offset}`
+      )
     );
 
     for (const row of rows) {
       const values = columns.map((c) => row[c]);
       const placeholders = columns.map((_, i) => `$${i + 1}`).join(", ");
-      await newSql.query(
-        `INSERT INTO ${table} (${columns.join(", ")}) VALUES (${placeholders})
-         ON CONFLICT DO NOTHING`,
-        values
+      await withRetry(() =>
+        newSql.query(
+          `INSERT INTO ${table} (${columns.join(", ")}) VALUES (${placeholders})
+           ON CONFLICT DO NOTHING`,
+          values
+        )
       );
       copied++;
     }
