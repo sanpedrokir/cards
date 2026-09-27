@@ -4,8 +4,6 @@ import { readDb } from "@/lib/store";
 import { getTotals } from "@/lib/calculations";
 import PurchaseForm from "@/components/PurchaseForm";
 
-export const dynamic = "force-dynamic";
-
 export default async function NewCardPage() {
   const db = await readDb();
 

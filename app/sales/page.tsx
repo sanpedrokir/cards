@@ -2,8 +2,6 @@ import Link from "next/link";
 import { readDb } from "@/lib/store";
 import SellPickerForm from "@/components/SellPickerForm";
 
-export const dynamic = "force-dynamic";
-
 export default async function SalesPage() {
   const db = await readDb();
   const currency = db.investment?.currency ?? "SGD";

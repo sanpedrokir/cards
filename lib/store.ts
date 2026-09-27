@@ -104,6 +104,16 @@ export async function addInvestmentFunds(amount: number): Promise<void> {
   `;
 }
 
+export async function setInvestmentAmount(amount: number): Promise<void> {
+  await sql`
+    UPDATE investment SET amount = ${amount} WHERE id = 1
+  `;
+}
+
+export async function deleteInvestment(): Promise<void> {
+  await sql`DELETE FROM investment WHERE id = 1`;
+}
+
 export async function insertCard(card: Card): Promise<void> {
   await sql`
     INSERT INTO cards (

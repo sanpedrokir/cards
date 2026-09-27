@@ -91,7 +91,7 @@ export default function Nav() {
       <header className="sticky top-0 z-40 hidden border-b border-zinc-200 bg-white/80 backdrop-blur sm:block dark:border-zinc-800 dark:bg-zinc-950/80">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-3">
           <Link href="/" className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-            Card Tracker
+            Vaulted
           </Link>
           <nav className="flex items-center gap-1">
             {NAV_ITEMS.map((item) => {

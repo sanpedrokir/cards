@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Card Tracker",
+  title: "Vaulted",
   description: "Track investment, purchases, sales and profit for your card business.",
 };
 

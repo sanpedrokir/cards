@@ -28,7 +28,6 @@ export default function InvestmentForm({
           min="0.01"
           required
           defaultValue={investment?.amount}
-          placeholder="10000.00"
           className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
         />
       </div>

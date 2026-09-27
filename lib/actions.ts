@@ -6,11 +6,13 @@ import { revalidatePath } from "next/cache";
 import {
   addInvestmentFunds,
   deleteCard,
+  deleteInvestment,
   getCardById,
   getCards,
   getInvestment,
   insertCard,
   markCardSold,
+  setInvestmentAmount,
   upsertInvestment,
 } from "./store";
 import { getTotals } from "./calculations";
@@ -19,6 +21,21 @@ import type { Card, Sale } from "./types";
 import type { FormState } from "./form-state";
 
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
+
+function revalidateInvestmentPaths() {
+  revalidatePath("/");
+  revalidatePath("/investment");
+  revalidatePath("/cards/new");
+  revalidatePath("/sales");
+}
+
+function revalidateCardPaths(cardId?: string) {
+  revalidatePath("/");
+  revalidatePath("/cards");
+  revalidatePath("/cards/new");
+  revalidatePath("/sales");
+  if (cardId) revalidatePath(`/cards/${cardId}`);
+}
 
 function numberField(formData: FormData, name: string): number | undefined {
   const raw = formData.get(name);
@@ -65,8 +82,7 @@ export async function saveInvestment(
 
   await upsertInvestment({ amount, currency, date, notes });
 
-  revalidatePath("/");
-  revalidatePath("/investment");
+  revalidateInvestmentPaths();
   redirect("/");
 }
 
@@ -87,8 +103,35 @@ export async function addFunds(
 
   await addInvestmentFunds(amount);
 
-  revalidatePath("/");
-  revalidatePath("/investment");
+  revalidateInvestmentPaths();
+  redirect("/");
+}
+
+export async function updateInvestmentAmount(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const amount = numberField(formData, "amount");
+
+  if (amount === undefined || amount <= 0) {
+    return { error: "Enter a valid amount greater than zero." };
+  }
+
+  const investment = await getInvestment();
+  if (!investment) {
+    return { error: "Set up your initial investment first." };
+  }
+
+  await setInvestmentAmount(amount);
+
+  revalidateInvestmentPaths();
+  redirect("/");
+}
+
+export async function deleteInvestmentAction(): Promise<void> {
+  await deleteInvestment();
+
+  revalidateInvestmentPaths();
   redirect("/");
 }
 
@@ -153,8 +196,7 @@ export async function purchaseCard(
   };
   await insertCard(card);
 
-  revalidatePath("/");
-  revalidatePath("/cards");
+  revalidateCardPaths();
   redirect(`/cards/${id}`);
 }
 
@@ -164,8 +206,7 @@ export async function deleteCardAction(cardId: string): Promise<void> {
 
   await deleteCard(cardId);
 
-  revalidatePath("/");
-  revalidatePath("/cards");
+  revalidateCardPaths();
   redirect("/cards");
 }
 
@@ -199,8 +240,6 @@ export async function sellCard(
   const sale: Sale = { salePrice, saleDate, buyer, channel, fees, notes };
   await markCardSold(cardId, sale);
 
-  revalidatePath("/");
-  revalidatePath("/cards");
-  revalidatePath(`/cards/${cardId}`);
+  revalidateCardPaths(cardId);
   redirect(`/cards/${cardId}`);
 }

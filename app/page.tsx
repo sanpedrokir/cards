@@ -6,8 +6,8 @@ import SummaryCard from "@/components/SummaryCard";
 import CardTile from "@/components/CardTile";
 import InvestmentForm from "@/components/InvestmentForm";
 import AddFundsForm from "@/components/AddFundsForm";
-
-export const dynamic = "force-dynamic";
+import UpdateInvestmentForm from "@/components/UpdateInvestmentForm";
+import DeleteInvestmentButton from "@/components/DeleteInvestmentButton";
 
 export default async function DashboardPage() {
   const db = await readDb();
@@ -17,12 +17,8 @@ export default async function DashboardPage() {
     return (
       <div className="mx-auto max-w-md">
         <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-          Welcome to Card Tracker
+          Welcome to Vaulted
         </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Start by recording the amount you&apos;ve invested into your card
-          business.
-        </p>
         <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <InvestmentForm investment={null} />
         </div>
@@ -91,7 +87,13 @@ export default async function DashboardPage() {
         />
       </div>
 
-      <AddFundsForm />
+      <div className="space-y-3">
+        <AddFundsForm />
+        <UpdateInvestmentForm currentAmount={totals.investedAmount} />
+        <div className="flex justify-end">
+          <DeleteInvestmentButton />
+        </div>
+      </div>
 
       <div>
         <div className="mb-3 flex items-center justify-between">
