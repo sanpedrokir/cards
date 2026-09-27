@@ -6,6 +6,7 @@ import { cardProfit } from "@/lib/calculations";
 import { formatDate, formatMoney } from "@/lib/format";
 import StatusBadge from "@/components/StatusBadge";
 import DeleteCardButton from "@/components/DeleteCardButton";
+import EbayPriceCheck from "@/components/EbayPriceCheck";
 import SaleCelebration from "@/components/SaleCelebration";
 
 export default async function CardDetailPage({
@@ -196,6 +197,8 @@ export default async function CardDetailPage({
 
         <DeleteCardButton cardId={card.id} cardName={card.name} />
       </div>
+
+      <EbayPriceCheck cardId={card.id} />
     </div>
   );
 }

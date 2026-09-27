@@ -7,6 +7,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { currentUser } from "@clerk/nextjs/server";
 import { requireAdminUserId, requirePageUserId, requireSignedInUserId } from "./auth-helpers";
 import { getStripe, getAppUrl } from "./stripe";
+import { searchEbayActiveListings, type EbayListing } from "./ebay";
 import {
   addInvestmentFunds,
   deleteCard,
@@ -381,6 +382,54 @@ export async function toggleSubscriptionGate(): Promise<void> {
   const enabled = await isSubscriptionGateEnabled();
   await setSubscriptionGateEnabled(!enabled);
   revalidatePath("/admin");
+}
+
+export interface EbayPriceEstimate {
+  recommendedPrice?: number;
+  currency?: string;
+  listings: EbayListing[];
+  error?: string;
+}
+
+function median(values: number[]): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0
+    ? (sorted[mid - 1] + sorted[mid]) / 2
+    : sorted[mid];
+}
+
+export async function checkEbayPrice(cardId: string): Promise<EbayPriceEstimate> {
+  const userId = await requirePageUserId();
+  const card = await getCardById(userId, cardId);
+  if (!card) {
+    return { listings: [], error: "Card not found." };
+  }
+
+  const query = [card.name, card.gradingCompany, card.grade && `${card.grade}`]
+    .filter(Boolean)
+    .join(" ");
+
+  try {
+    const listings = await searchEbayActiveListings(query);
+    if (listings.length === 0) {
+      return { listings: [], error: "No comparable listings found on eBay." };
+    }
+
+    const prices = listings.map((l) => l.price).filter((p) => p > 0);
+    const med = median(prices);
+    // Asking prices run higher than what items typically sell for;
+    // suggest listing a bit below the median ask to be competitive.
+    const recommendedPrice = Math.round(med * 0.9 * 100) / 100;
+
+    return {
+      listings,
+      recommendedPrice,
+      currency: listings[0].currency,
+    };
+  } catch {
+    return { listings: [], error: "Couldn't reach eBay. Please try again later." };
+  }
 }
 
 export async function sellCard(
