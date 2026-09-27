@@ -35,7 +35,7 @@ export default async function CardDetailPage({
         href="/cards"
         className="text-sm font-medium text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
       >
-        ← Back to My Cards
+        ← Back to Vaulted Cards
       </Link>
 
       <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">

@@ -21,7 +21,7 @@ const NAV_ITEMS = [
   },
   {
     href: "/cards/new",
-    label: "Purchase",
+    label: "Add Card",
     icon: (active: boolean) => (
       <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
         <circle
@@ -58,7 +58,7 @@ const NAV_ITEMS = [
   },
   {
     href: "/cards",
-    label: "My Cards",
+    label: "Vaulted Cards",
     icon: (active: boolean) => (
       <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
         <rect

@@ -187,7 +187,7 @@ export default function PurchaseForm({
         </p>
       )}
 
-      <SubmitButton className="w-full">Save Purchase</SubmitButton>
+      <SubmitButton className="w-full">Add Card</SubmitButton>
     </form>
   );
 }

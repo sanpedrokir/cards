@@ -22,13 +22,13 @@ export default async function CardsPage({
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-          My Cards
+          Vaulted Cards
         </h1>
         <Link
           href="/cards/new"
           className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
         >
-          + Purchase Card
+          + Add Card
         </Link>
       </div>
 

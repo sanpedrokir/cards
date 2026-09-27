@@ -20,7 +20,7 @@ export default async function SalesPage() {
             href="/cards/new"
             className="mt-3 inline-block rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
           >
-            + Purchase Card
+            + Add Card
           </Link>
         </div>
       ) : (
