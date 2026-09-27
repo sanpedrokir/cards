@@ -24,7 +24,7 @@ export default async function PricingPage() {
       <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
           <li>• Track card purchases, sales and profit</li>
-          <li>• AI-assisted card scanning</li>
+          <li>• Card scanning capability</li>
           <li>• Unlimited cards and sales history</li>
         </ul>
 

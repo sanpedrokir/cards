@@ -406,5 +406,5 @@ export async function sellCard(
   await markCardSold(userId, cardId, sale);
 
   revalidateCardPaths(cardId);
-  redirect(`/cards/${cardId}`);
+  redirect(`/cards/${cardId}?sold=1`);
 }

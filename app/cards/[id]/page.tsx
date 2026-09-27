@@ -6,13 +6,17 @@ import { cardProfit } from "@/lib/calculations";
 import { formatDate, formatMoney } from "@/lib/format";
 import StatusBadge from "@/components/StatusBadge";
 import DeleteCardButton from "@/components/DeleteCardButton";
+import SaleCelebration from "@/components/SaleCelebration";
 
 export default async function CardDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ sold?: string }>;
 }) {
   const { id } = await params;
+  const { sold } = await searchParams;
   const userId = await requirePageUserId();
   const db = await readDb(userId);
   const card = db.cards.find((c) => c.id === id);
@@ -33,6 +37,7 @@ export default async function CardDetailPage({
 
   return (
     <div className="mx-auto max-w-lg space-y-5">
+      {sold === "1" && <SaleCelebration />}
       <Link
         href="/cards"
         className="text-sm font-medium text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
