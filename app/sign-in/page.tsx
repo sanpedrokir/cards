@@ -8,6 +8,14 @@ import { COUNTRY_DIAL_CODES } from "@/lib/countries";
 const inputClass =
   "mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900";
 
+function friendlyError(message?: string | null): string | undefined {
+  if (!message) return undefined;
+  if (message.toLowerCase().includes("couldn't find your account")) {
+    return "Couldn't find your account. Please create an account first.";
+  }
+  return message;
+}
+
 export default function SignInPage() {
   const { signIn, errors, fetchStatus } = useSignIn();
   const { isSignedIn } = useAuth();
@@ -157,14 +165,14 @@ export default function SignInPage() {
             </div>
             {(phoneError || errors?.fields?.identifier) && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                {phoneError ?? errors?.fields?.identifier?.message}
+                {phoneError ?? friendlyError(errors?.fields?.identifier?.message)}
               </p>
             )}
           </div>
 
           {errors?.global && errors.global.length > 0 && (
             <p className="text-sm text-red-600 dark:text-red-400">
-              {errors.global[0].message}
+              {friendlyError(errors.global[0].message)}
             </p>
           )}
 
