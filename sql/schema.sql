@@ -55,3 +55,12 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   current_period_end TIMESTAMPTZ,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Single-row app-wide settings, toggled from /admin
+CREATE TABLE IF NOT EXISTS app_settings (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  subscription_required BOOLEAN NOT NULL DEFAULT false
+);
+INSERT INTO app_settings (id, subscription_required)
+VALUES (1, false)
+ON CONFLICT (id) DO NOTHING;

@@ -199,6 +199,19 @@ export async function getUserIdByStripeCustomerId(
   return rows.length ? rows[0].user_id : null;
 }
 
+export async function isSubscriptionGateEnabled(): Promise<boolean> {
+  const rows = await sql`SELECT subscription_required FROM app_settings WHERE id = 1`;
+  return rows.length ? Boolean(rows[0].subscription_required) : false;
+}
+
+export async function setSubscriptionGateEnabled(enabled: boolean): Promise<void> {
+  await sql`
+    INSERT INTO app_settings (id, subscription_required)
+    VALUES (1, ${enabled})
+    ON CONFLICT (id) DO UPDATE SET subscription_required = EXCLUDED.subscription_required
+  `;
+}
+
 export async function updateSubscriptionFromStripe(
   stripeCustomerId: string,
   data: {

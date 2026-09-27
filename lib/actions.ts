@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import Anthropic from "@anthropic-ai/sdk";
 import { currentUser } from "@clerk/nextjs/server";
-import { requirePageUserId, requireSignedInUserId } from "./auth-helpers";
+import { requireAdminUserId, requirePageUserId, requireSignedInUserId } from "./auth-helpers";
 import { getStripe, getAppUrl } from "./stripe";
 import {
   addInvestmentFunds,
@@ -15,8 +15,10 @@ import {
   getInvestment,
   getSubscription,
   insertCard,
+  isSubscriptionGateEnabled,
   markCardSold,
   setInvestmentAmount,
+  setSubscriptionGateEnabled,
   upsertInvestment,
   upsertSubscriptionCustomer,
 } from "./store";
@@ -372,6 +374,13 @@ export async function openBillingPortal(): Promise<void> {
   });
 
   redirect(portalSession.url);
+}
+
+export async function toggleSubscriptionGate(): Promise<void> {
+  await requireAdminUserId();
+  const enabled = await isSubscriptionGateEnabled();
+  await setSubscriptionGateEnabled(!enabled);
+  revalidatePath("/admin");
 }
 
 export async function sellCard(
