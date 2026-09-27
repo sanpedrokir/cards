@@ -26,7 +26,7 @@ export default async function CardDetailPage({
     ["Card Number", card.cardNumber],
     ["Grade", card.grade],
     ["Grading Company", card.gradingCompany],
-    ["Cert / Serial #", card.certNumber],
+    ["Cert / Serial # (PSA)", card.certNumber],
   ];
 
   return (
