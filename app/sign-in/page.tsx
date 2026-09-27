@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSignIn, useAuth } from "@clerk/nextjs";
 
@@ -19,9 +19,11 @@ export default function SignInPage() {
   const { signIn, errors, fetchStatus } = useSignIn();
   const { isSignedIn } = useAuth();
   const router = useRouter();
+  const [stuckStatus, setStuckStatus] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setStuckStatus(null);
 
     const formData = new FormData(e.currentTarget);
     const emailAddress = String(formData.get("email") ?? "").trim();
@@ -29,7 +31,9 @@ export default function SignInPage() {
 
     const { error } = await signIn.password({ identifier: emailAddress, password });
 
-    if (!error && signIn.status === "complete") {
+    if (error) return;
+
+    if (signIn.status === "complete") {
       await signIn.finalize({
         navigate: ({ decorateUrl }) => {
           const url = decorateUrl("/");
@@ -40,6 +44,10 @@ export default function SignInPage() {
           }
         },
       });
+    } else {
+      // Clerk needs an extra step this page doesn't have UI for (e.g. it
+      // flagged the password as compromised and wants it reset).
+      setStuckStatus(signIn.status ?? "unknown");
     }
   }
 
@@ -90,6 +98,15 @@ export default function SignInPage() {
               </p>
             )}
           </div>
+
+          {stuckStatus && (
+            <p className="text-sm text-red-600 dark:text-red-400">
+              Clerk needs an extra verification step ({stuckStatus}) that this
+              sign-in form doesn&apos;t support yet — this often means the
+              password was flagged as compromised. Please use a different
+              password, or ask the app owner to reset it.
+            </p>
+          )}
 
           {errors?.global && errors.global.length > 0 && (
             <p className="text-sm text-red-600 dark:text-red-400">
