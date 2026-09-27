@@ -39,9 +39,17 @@ ALTER TABLE cards ADD COLUMN IF NOT EXISTS cert_number TEXT;
 
 -- Multi-user support: scope investment/cards per Clerk user
 ALTER TABLE investment DROP CONSTRAINT IF EXISTS investment_id_check;
-ALTER TABLE investment DROP CONSTRAINT IF EXISTS investment_pkey;
 ALTER TABLE investment DROP COLUMN IF EXISTS id;
-ALTER TABLE investment ADD COLUMN IF NOT EXISTS user_id TEXT PRIMARY KEY;
+ALTER TABLE investment ADD COLUMN IF NOT EXISTS user_id TEXT;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conrelid = 'investment'::regclass AND contype = 'p'
+  ) THEN
+    ALTER TABLE investment ALTER COLUMN user_id SET NOT NULL;
+    ALTER TABLE investment ADD PRIMARY KEY (user_id);
+  END IF;
+END $$;
 ALTER TABLE cards ADD COLUMN IF NOT EXISTS user_id TEXT NOT NULL;
 
 CREATE INDEX IF NOT EXISTS cards_user_id_idx ON cards (user_id);

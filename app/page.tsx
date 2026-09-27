@@ -8,15 +8,23 @@ import InvestmentForm from "@/components/InvestmentForm";
 import InvestmentFundsPanel from "@/components/InvestmentFundsPanel";
 import InvestedAmountEditor from "@/components/InvestedAmountEditor";
 import PaginatedSalesTable from "@/components/PaginatedSalesTable";
+import CheckoutSuccessBanner from "@/components/CheckoutSuccessBanner";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ checkout?: string }>;
+}) {
   const userId = await requirePageUserId();
   const db = await readDb(userId);
   const { investment, cards } = db;
+  const { checkout } = await searchParams;
+  const justSubscribed = checkout === "success";
 
   if (!investment) {
     return (
       <div className="mx-auto max-w-md">
+        {justSubscribed && <CheckoutSuccessBanner />}
         <div className="text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -43,6 +51,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {justSubscribed && <CheckoutSuccessBanner />}
       <div className="flex flex-wrap gap-x-6 gap-y-1 border-b border-zinc-200 pb-4 text-sm dark:border-zinc-800">
         <InvestedAmountEditor
           amount={totals.investedAmount}
