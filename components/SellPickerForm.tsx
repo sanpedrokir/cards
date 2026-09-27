@@ -34,7 +34,7 @@ export default function SellPickerForm({
           className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
         >
           <option value="" disabled>
-            Select a card to sell...
+            Select Card
           </option>
           {cards.map((card) => (
             <option key={card.id} value={card.id}>
