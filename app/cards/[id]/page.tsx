@@ -187,12 +187,14 @@ export default async function CardDetailPage({
         </div>
 
         {card.status === "available" && (
-          <Link
-            href={`/cards/${card.id}/sell`}
-            className="mt-4 flex w-full items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
-          >
-            Mark as Sold
-          </Link>
+          <div className="mt-4 flex justify-center">
+            <Link
+              href={`/cards/${card.id}/sell`}
+              className="inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              Mark as Sold
+            </Link>
+          </div>
         )}
 
         <DeleteCardButton cardId={card.id} cardName={card.name} />
