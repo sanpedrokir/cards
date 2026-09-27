@@ -21,7 +21,7 @@ export default async function PricingPage() {
         </h1>
         {gateEnabled && (
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            $10/month, cancel anytime.
+            $1.99/month, cancel anytime.
           </p>
         )}
       </div>
@@ -38,7 +38,7 @@ export default async function PricingPage() {
               type="submit"
               className="w-full rounded-full bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
             >
-              Subscribe — $10/month
+              Subscribe — $1.99/month
             </button>
           </form>
         ) : (
