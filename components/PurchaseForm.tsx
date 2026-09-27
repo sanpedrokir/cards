@@ -36,10 +36,23 @@ export default function PurchaseForm({
     setScanError(null);
     setScanNotice(null);
 
+    // Clear previous scan results so a re-scan never mixes old and new
+    // values -- if this scan doesn't detect a field, it should come back
+    // blank rather than silently keeping the last photo's answer.
+    if (nameRef.current) nameRef.current.value = "";
+    if (seriesRef.current) seriesRef.current.value = "";
+    if (cardNumberRef.current) cardNumberRef.current.value = "";
+    if (gradeRef.current) gradeRef.current.value = "";
+    if (gradingCompanyRef.current) gradingCompanyRef.current.value = "";
+    if (certNumberRef.current) certNumberRef.current.value = "";
+
     startScan(async () => {
       const formData = new FormData();
       formData.set("image", file);
       const result = await analyzeCardPhoto(formData);
+
+      // Allow re-selecting the exact same file to re-trigger a scan
+      if (imageInputRef.current) imageInputRef.current.value = "";
 
       if (result.error) {
         setScanError(result.error);
@@ -80,7 +93,7 @@ export default function PurchaseForm({
               htmlFor="image"
               className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
             >
-              Upload
+              Upload/Scan
             </label>
             <input
               ref={imageInputRef}
