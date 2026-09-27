@@ -43,7 +43,7 @@ const NAV_ITEMS = [
   },
   {
     href: "/sales",
-    label: "Sales",
+    label: "Sell Card",
     icon: (active: boolean) => (
       <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
         <path

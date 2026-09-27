@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useActionState } from "react";
+import { useState, useRef, useActionState, useTransition } from "react";
 import { updateInvestmentAmount } from "@/lib/actions";
 import { initialFormState } from "@/lib/form-state";
 import { formatMoney, formatDate } from "@/lib/format";
-import ConfirmSubmitButton from "./ConfirmSubmitButton";
 
 function PencilIcon() {
   return (
@@ -31,10 +30,25 @@ export default function InvestedAmountEditor({
 }) {
   const [editing, setEditing] = useState(false);
   const [state, formAction] = useActionState(updateInvestmentAmount, initialFormState);
+  const [isSaving, startSaving] = useTransition();
+  const formRef = useRef<HTMLFormElement>(null);
+  const savedRef = useRef(false);
+
+  function handleBlur(e: React.FocusEvent<HTMLInputElement>) {
+    const value = Number(e.target.value);
+    if (!value || value <= 0 || value === amount) {
+      setEditing(false);
+      return;
+    }
+    savedRef.current = true;
+    startSaving(() => {
+      formRef.current?.requestSubmit();
+    });
+  }
 
   if (editing) {
     return (
-      <form action={formAction} className="flex flex-wrap items-center gap-2">
+      <form ref={formRef} action={formAction} className="flex flex-wrap items-center gap-2">
         <span className="text-zinc-500 dark:text-zinc-400">Overall Fund Invested:</span>
         <input
           name="amount"
@@ -44,23 +58,18 @@ export default function InvestedAmountEditor({
           required
           defaultValue={amount}
           autoFocus
-          className="w-28 rounded-lg border border-zinc-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+          disabled={isSaving}
+          onBlur={handleBlur}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.currentTarget.blur();
+            if (e.key === "Escape") setEditing(false);
+          }}
+          className="w-28 rounded-lg border border-zinc-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900"
         />
-        <ConfirmSubmitButton
-          triggerLabel="Save"
-          triggerClassName="rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-blue-700"
-          title="Update total invested?"
-          message="This overwrites your recorded total invested amount. This cannot be undone."
-          confirmLabel="Update"
-        />
-        <button
-          type="button"
-          onClick={() => setEditing(false)}
-          className="text-xs font-medium text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-        >
-          Cancel
-        </button>
-        {state?.error && (
+        {isSaving && (
+          <span className="text-xs text-zinc-400 dark:text-zinc-500">Saving…</span>
+        )}
+        {state?.error && !savedRef.current && (
           <p className="w-full text-xs text-red-600 dark:text-red-400">{state.error}</p>
         )}
       </form>

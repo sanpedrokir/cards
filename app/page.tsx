@@ -7,7 +7,6 @@ import SummaryCard from "@/components/SummaryCard";
 import InvestmentForm from "@/components/InvestmentForm";
 import InvestmentFundsPanel from "@/components/InvestmentFundsPanel";
 import InvestedAmountEditor from "@/components/InvestedAmountEditor";
-import PaginatedCardList from "@/components/PaginatedCardList";
 import PaginatedSalesTable from "@/components/PaginatedSalesTable";
 
 export default async function DashboardPage() {
@@ -38,9 +37,6 @@ export default async function DashboardPage() {
 
   const totals = getTotals(db);
   const currency = investment.currency;
-  const sortedCards = [...cards].sort((a, b) =>
-    a.createdAt < b.createdAt ? 1 : -1
-  );
   const soldCards = cards
     .filter((c) => c.status === "sold" && c.sale)
     .sort((a, b) => (a.sale!.saleDate < b.sale!.saleDate ? 1 : -1));
@@ -118,28 +114,6 @@ export default async function DashboardPage() {
             currency={currency}
             totalProfit={totals.totalProfit}
           />
-        )}
-      </div>
-
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-            Recent Cards
-          </h2>
-          <Link
-            href="/cards"
-            className="text-sm font-medium text-blue-600 dark:text-blue-400"
-          >
-            View all
-          </Link>
-        </div>
-
-        {sortedCards.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-            No cards purchased yet.
-          </p>
-        ) : (
-          <PaginatedCardList cards={sortedCards} currency={currency} />
         )}
       </div>
     </div>

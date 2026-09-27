@@ -47,7 +47,8 @@ export default function CardTile({
 
         {card.sale && profit !== null && (
           <p className="mt-1 text-xs">
-            Sold {formatMoney(card.sale.salePrice, currency)} ·{" "}
+            Sold {formatDate(card.sale.saleDate)} ·{" "}
+            {formatMoney(card.sale.salePrice, currency)} ·{" "}
             <span
               className={
                 profit >= 0
