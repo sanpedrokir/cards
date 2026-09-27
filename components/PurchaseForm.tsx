@@ -26,14 +26,12 @@ export default function PurchaseForm({
   const gradingCompanyRef = useRef<HTMLInputElement>(null);
   const certNumberRef = useRef<HTMLInputElement>(null);
   const detailsRef = useRef<HTMLDetailsElement>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
 
-  function handleScan() {
+  function handleFileChange() {
     const file = imageInputRef.current?.files?.[0];
-    if (!file) {
-      setScanError("Choose a photo first, then scan it.");
-      setScanNotice(null);
-      return;
-    }
+    setFileName(file?.name ?? null);
+    if (!file) return;
 
     setScanError(null);
     setScanNotice(null);
@@ -74,30 +72,36 @@ export default function PurchaseForm({
 
       <fieldset className="space-y-4">
         <div>
-          <label htmlFor="image" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <span className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
             Photo
-          </label>
-          <input
-            ref={imageInputRef}
-            id="image"
-            name="image"
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="mt-1 w-full text-sm text-zinc-600 file:mr-3 file:rounded-full file:border-0 file:bg-zinc-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-zinc-700 hover:file:bg-zinc-200 dark:text-zinc-300 dark:file:bg-zinc-800 dark:file:text-zinc-200"
-          />
-          <button
-            type="button"
-            onClick={handleScan}
-            disabled={isScanning}
-            className="mt-2 inline-flex items-center gap-2 rounded-full border border-blue-300 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-950/40"
-          >
-            {isScanning ? "Scanning…" : "Scan Card"}
-          </button>
+          </span>
+          <div className="mt-1 flex items-center gap-3">
+            <label
+              htmlFor="image"
+              className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+            >
+              Upload
+            </label>
+            <input
+              ref={imageInputRef}
+              id="image"
+              name="image"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="sr-only"
+            />
+            <span className="truncate text-sm text-zinc-500 dark:text-zinc-400">
+              {fileName ?? "No file chosen"}
+            </span>
+          </div>
           <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
             Take a photo with your camera, or upload one from a scanner app --
-            we&apos;ll try to fill in the fields below.
+            we&apos;ll automatically fill in the fields below.
           </p>
+          {isScanning && (
+            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Scanning…</p>
+          )}
           {scanError && (
             <p className="mt-2 text-sm text-red-600 dark:text-red-400">{scanError}</p>
           )}
