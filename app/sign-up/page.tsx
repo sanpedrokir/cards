@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSignUp, useAuth } from "@clerk/nextjs";
 
@@ -38,7 +39,13 @@ export default function SignUpPage() {
     }
   }
 
-  if (signUp.status === "complete" || isSignedIn) {
+  const alreadySignedIn = signUp.status === "complete" || isSignedIn;
+
+  useEffect(() => {
+    if (alreadySignedIn) router.replace("/");
+  }, [alreadySignedIn, router]);
+
+  if (alreadySignedIn) {
     return null;
   }
 
