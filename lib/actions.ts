@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import Anthropic from "@anthropic-ai/sdk";
+import sharp from "sharp";
 import { currentUser } from "@clerk/nextjs/server";
 import { requireAdminUserId, requirePageUserId, requireSignedInUserId } from "./auth-helpers";
 import { getStripe, getAppUrl } from "./stripe";
@@ -70,8 +71,18 @@ async function encodeImage(
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  const dataUrl = `data:${file.type};base64,${buffer.toString("base64")}`;
-  return { dataUrl };
+
+  try {
+    const compressed = await sharp(buffer)
+      .rotate()
+      .resize({ width: 900, height: 900, fit: "inside", withoutEnlargement: true })
+      .jpeg({ quality: 82 })
+      .toBuffer();
+
+    return { dataUrl: `data:image/jpeg;base64,${compressed.toString("base64")}` };
+  } catch {
+    return { error: "Couldn't process that image. Please try a different photo." };
+  }
 }
 
 const SUPPORTED_SCAN_TYPES = new Set([
