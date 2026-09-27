@@ -38,7 +38,7 @@ export default function SellForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="salePrice" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Sales Amount *
+            Sale Amount *
           </label>
           <input
             id="salePrice"
