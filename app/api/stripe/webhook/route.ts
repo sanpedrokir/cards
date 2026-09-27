@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe";
-import { updateSubscriptionFromStripe } from "@/lib/store";
+import { getUserIdByStripeCustomerId, upsertSubscriptionFromStripe } from "@/lib/store";
 
 export async function POST(req: Request) {
   const stripe = getStripe();
@@ -24,9 +24,10 @@ export async function POST(req: Request) {
   try {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
+      const userId = session.metadata?.userId ?? session.client_reference_id ?? undefined;
       if (typeof session.customer === "string" && typeof session.subscription === "string") {
         const subscription = await stripe.subscriptions.retrieve(session.subscription);
-        await syncSubscription(session.customer, subscription);
+        await syncSubscription(session.customer, subscription, event.created, userId);
       }
     } else if (
       event.type === "customer.subscription.updated" ||
@@ -35,7 +36,12 @@ export async function POST(req: Request) {
     ) {
       const subscription = event.data.object as Stripe.Subscription;
       if (typeof subscription.customer === "string") {
-        await syncSubscription(subscription.customer, subscription);
+        await syncSubscription(
+          subscription.customer,
+          subscription,
+          event.created,
+          subscription.metadata?.userId
+        );
       }
     }
   } catch (err) {
@@ -46,15 +52,27 @@ export async function POST(req: Request) {
   return NextResponse.json({ received: true });
 }
 
-async function syncSubscription(customerId: string, subscription: Stripe.Subscription) {
+async function syncSubscription(
+  customerId: string,
+  subscription: Stripe.Subscription,
+  eventCreatedAt: number,
+  knownUserId?: string
+) {
+  const userId = knownUserId ?? (await getUserIdByStripeCustomerId(customerId));
+  if (!userId) {
+    console.error("Stripe webhook: no user found for customer", customerId);
+    return;
+  }
+
   const item = subscription.items.data[0];
   const currentPeriodEnd = item
     ? new Date(item.current_period_end * 1000).toISOString()
     : null;
 
-  await updateSubscriptionFromStripe(customerId, {
+  await upsertSubscriptionFromStripe(userId, customerId, {
     stripeSubscriptionId: subscription.id,
     status: subscription.status,
     currentPeriodEnd,
+    eventCreatedAt: new Date(eventCreatedAt * 1000).toISOString(),
   });
 }

@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
 );
 
 ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now();
+ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS last_event_at TIMESTAMPTZ;
 
 -- Single-row app-wide settings, toggled from /admin
 CREATE TABLE IF NOT EXISTS app_settings (

@@ -349,6 +349,7 @@ export async function startCheckout(): Promise<void> {
     cancel_url: `${appUrl}/pricing`,
     client_reference_id: userId,
     metadata: { userId },
+    subscription_data: { metadata: { userId } },
   });
 
   if (!session.url) {
@@ -406,7 +407,11 @@ export async function checkEbayPrice(cardId: string): Promise<EbayPriceEstimate>
     return { listings: [], error: "Card not found." };
   }
 
-  const query = [card.name, card.gradingCompany, card.grade && `${card.grade}`]
+  const query = [
+    card.name,
+    card.gradingCompany,
+    card.grade && card.grade !== "0" ? card.grade : undefined,
+  ]
     .filter(Boolean)
     .join(" ");
 
@@ -417,6 +422,10 @@ export async function checkEbayPrice(cardId: string): Promise<EbayPriceEstimate>
     }
 
     const prices = listings.map((l) => l.price).filter((p) => p > 0);
+    if (prices.length === 0) {
+      return { listings, currency: listings[0].currency };
+    }
+
     const med = median(prices);
     // Asking prices run higher than what items typically sell for;
     // suggest listing a bit below the median ask to be competitive.

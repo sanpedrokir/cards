@@ -219,20 +219,31 @@ export async function setSubscriptionGateEnabled(enabled: boolean): Promise<void
   `;
 }
 
-export async function updateSubscriptionFromStripe(
+export async function upsertSubscriptionFromStripe(
+  userId: string,
   stripeCustomerId: string,
   data: {
     stripeSubscriptionId: string | null;
     status: string;
     currentPeriodEnd: string | null;
+    eventCreatedAt: string;
   }
 ): Promise<void> {
   await sql`
-    UPDATE subscriptions SET
-      stripe_subscription_id = ${data.stripeSubscriptionId},
-      status = ${data.status},
-      current_period_end = ${data.currentPeriodEnd},
+    INSERT INTO subscriptions (
+      user_id, stripe_customer_id, stripe_subscription_id, status, current_period_end, last_event_at
+    ) VALUES (
+      ${userId}, ${stripeCustomerId}, ${data.stripeSubscriptionId}, ${data.status},
+      ${data.currentPeriodEnd}, ${data.eventCreatedAt}
+    )
+    ON CONFLICT (user_id) DO UPDATE SET
+      stripe_customer_id = EXCLUDED.stripe_customer_id,
+      stripe_subscription_id = EXCLUDED.stripe_subscription_id,
+      status = EXCLUDED.status,
+      current_period_end = EXCLUDED.current_period_end,
+      last_event_at = EXCLUDED.last_event_at,
       updated_at = now()
-    WHERE stripe_customer_id = ${stripeCustomerId}
+    WHERE subscriptions.last_event_at IS NULL
+       OR EXCLUDED.last_event_at >= subscriptions.last_event_at
   `;
 }
