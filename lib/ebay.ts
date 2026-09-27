@@ -35,6 +35,7 @@ async function getEbayAccessToken(): Promise<string> {
   });
 
   if (!res.ok) {
+    console.error("eBay OAuth token request failed:", res.status, await res.text());
     throw new Error("Could not authenticate with eBay.");
   }
 
@@ -63,6 +64,7 @@ export async function searchEbayActiveListings(
   });
 
   if (!res.ok) {
+    console.error("eBay search request failed:", res.status, await res.text());
     throw new Error("eBay search failed.");
   }
 

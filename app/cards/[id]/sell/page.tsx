@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { requirePageUserId } from "@/lib/auth-helpers";
 import { readDb } from "@/lib/store";
 import SellForm from "@/components/SellForm";
+import EbayPriceCheck from "@/components/EbayPriceCheck";
 
 export default async function SellCardPage({
   params,
@@ -30,6 +31,8 @@ export default async function SellCardPage({
       <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
         Sell {card.name}
       </h1>
+
+      <EbayPriceCheck cardId={card.id} />
 
       <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <SellForm

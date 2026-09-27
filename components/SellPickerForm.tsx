@@ -6,6 +6,7 @@ import { initialFormState } from "@/lib/form-state";
 import { formatMoney, formatDate, todayIso, SALE_CHANNELS } from "@/lib/format";
 import type { Card } from "@/lib/types";
 import SubmitButton from "./SubmitButton";
+import EbayPriceCheck from "./EbayPriceCheck";
 
 export default function SellPickerForm({
   cards,
@@ -58,6 +59,10 @@ export default function SellPickerForm({
           </a>
         )}
       </div>
+
+      {selectedCardId && (
+        <EbayPriceCheck key={selectedCardId} cardId={selectedCardId} />
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <div>

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth, useClerk } from "@clerk/nextjs";
-import { openBillingPortal } from "@/lib/actions";
 
 const NAV_ITEMS = [
   {
@@ -120,22 +119,12 @@ export default function Nav() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/vaulted-logo.png" alt="Vaulted" className="h-8 w-8" />
           </Link>
-          <div className="flex w-12 flex-col items-end gap-0.5">
-            <form action={openBillingPortal}>
-              <button
-                type="submit"
-                className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400"
-              >
-                Billing
-              </button>
-            </form>
-            <button
-              onClick={handleSignOut}
-              className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400"
-            >
-              Sign out
-            </button>
-          </div>
+          <button
+            onClick={handleSignOut}
+            className="w-12 text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400"
+          >
+            Sign out
+          </button>
         </div>
       </header>
 
@@ -163,17 +152,9 @@ export default function Nav() {
                 </Link>
               );
             })}
-            <form action={openBillingPortal}>
-              <button
-                type="submit"
-                className="ml-2 rounded-full px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
-              >
-                Billing
-              </button>
-            </form>
             <button
               onClick={handleSignOut}
-              className="rounded-full px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              className="ml-2 rounded-full px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
             >
               Sign out
             </button>

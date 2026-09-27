@@ -436,7 +436,8 @@ export async function checkEbayPrice(cardId: string): Promise<EbayPriceEstimate>
       recommendedPrice,
       currency: listings[0].currency,
     };
-  } catch {
+  } catch (err) {
+    console.error("checkEbayPrice failed:", err);
     return { listings: [], error: "Couldn't reach eBay. Please try again later." };
   }
 }
