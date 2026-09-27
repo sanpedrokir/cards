@@ -5,8 +5,7 @@ import { formatMoney, formatDate } from "@/lib/format";
 import SummaryCard from "@/components/SummaryCard";
 import CardTile from "@/components/CardTile";
 import InvestmentForm from "@/components/InvestmentForm";
-import AddFundsForm from "@/components/AddFundsForm";
-import UpdateInvestmentForm from "@/components/UpdateInvestmentForm";
+import InvestmentFundsPanel from "@/components/InvestmentFundsPanel";
 import DeleteInvestmentButton from "@/components/DeleteInvestmentButton";
 
 export default async function DashboardPage() {
@@ -58,10 +57,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-          Dashboard
-        </h1>
+      <div className="flex items-center justify-end">
         <Link
           href="/cards/new"
           className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
@@ -88,8 +84,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="space-y-3">
-        <AddFundsForm />
-        <UpdateInvestmentForm currentAmount={totals.investedAmount} />
+        <InvestmentFundsPanel currentAmount={totals.investedAmount} />
         <div className="flex justify-end">
           <DeleteInvestmentButton />
         </div>
