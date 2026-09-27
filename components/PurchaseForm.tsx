@@ -232,7 +232,7 @@ export default function PurchaseForm({
 
           <div>
             <label htmlFor="certNumber" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              PSA Cert #
+              Cert / Serial #
             </label>
             <input
               ref={certNumberRef}
