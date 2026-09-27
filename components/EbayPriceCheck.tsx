@@ -30,6 +30,9 @@ export default function EbayPriceCheck({ cardId }: { cardId: string }) {
           {isPending ? "Checking…" : "Check eBay Price"}
         </button>
       </div>
+      <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+        Guideline only, not a guaranteed sale price.
+      </p>
 
       {result?.error && (
         <p className="mt-3 text-sm text-red-600 dark:text-red-400">{result.error}</p>
@@ -47,8 +50,9 @@ export default function EbayPriceCheck({ cardId }: { cardId: string }) {
               </p>
               <p className="mt-1 text-xs text-emerald-700/80 dark:text-emerald-400/80">
                 Based on {result.listings.length} similar active eBay listing
-                {result.listings.length === 1 ? "" : "s"} — these are asking
-                prices, not confirmed sales.
+                {result.listings.length === 1 ? "" : "s"} (asking prices, not
+                confirmed sales). Use this as a guideline only — your actual
+                sale price isn&apos;t guaranteed.
               </p>
             </div>
           )}
