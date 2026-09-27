@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requirePageUserId } from "@/lib/auth-helpers";
 import { readDb } from "@/lib/store";
 import CardTile from "@/components/CardTile";
 import CardFilterBar from "@/components/CardFilterBar";
@@ -9,7 +10,8 @@ export default async function CardsPage({
   searchParams: Promise<{ status?: string; q?: string }>;
 }) {
   const { status = "all", q = "" } = await searchParams;
-  const db = await readDb();
+  const userId = await requirePageUserId();
+  const db = await readDb(userId);
   const currency = db.investment?.currency ?? "SGD";
 
   const query = q.trim().toLowerCase();

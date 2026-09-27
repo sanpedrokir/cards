@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requirePageUserId } from "@/lib/auth-helpers";
 import { readDb } from "@/lib/store";
 import { getTotals } from "@/lib/calculations";
 import { formatMoney, formatDate } from "@/lib/format";
@@ -9,7 +10,8 @@ import InvestmentFundsPanel from "@/components/InvestmentFundsPanel";
 import DeleteInvestmentButton from "@/components/DeleteInvestmentButton";
 
 export default async function DashboardPage() {
-  const db = await readDb();
+  const userId = await requirePageUserId();
+  const db = await readDb(userId);
   const { investment, cards } = db;
 
   if (!investment) {

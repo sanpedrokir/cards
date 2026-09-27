@@ -64,34 +64,38 @@ function mapCard(row: any): Card {
   return card;
 }
 
-export async function getInvestment(): Promise<Investment | null> {
-  const rows = await sql`SELECT * FROM investment WHERE id = 1`;
+export async function getInvestment(userId: string): Promise<Investment | null> {
+  const rows = await sql`SELECT * FROM investment WHERE user_id = ${userId}`;
   return rows.length ? mapInvestment(rows[0]) : null;
 }
 
-export async function getCards(): Promise<Card[]> {
-  const rows = await sql`SELECT * FROM cards ORDER BY created_at DESC`;
+export async function getCards(userId: string): Promise<Card[]> {
+  const rows = await sql`
+    SELECT * FROM cards WHERE user_id = ${userId} ORDER BY created_at DESC
+  `;
   return rows.map(mapCard);
 }
 
-export async function getCardById(id: string): Promise<Card | null> {
-  const rows = await sql`SELECT * FROM cards WHERE id = ${id}`;
+export async function getCardById(userId: string, id: string): Promise<Card | null> {
+  const rows = await sql`
+    SELECT * FROM cards WHERE id = ${id} AND user_id = ${userId}
+  `;
   return rows.length ? mapCard(rows[0]) : null;
 }
 
-export async function readDb(): Promise<Database> {
+export async function readDb(userId: string): Promise<Database> {
   const [investment, cards] = await Promise.all([
-    getInvestment(),
-    getCards(),
+    getInvestment(userId),
+    getCards(userId),
   ]);
   return { investment, cards };
 }
 
-export async function upsertInvestment(data: Investment): Promise<void> {
+export async function upsertInvestment(userId: string, data: Investment): Promise<void> {
   await sql`
-    INSERT INTO investment (id, amount, currency, investment_date, notes)
-    VALUES (1, ${data.amount}, ${data.currency}, ${data.date}, ${data.notes ?? null})
-    ON CONFLICT (id) DO UPDATE SET
+    INSERT INTO investment (user_id, amount, currency, investment_date, notes)
+    VALUES (${userId}, ${data.amount}, ${data.currency}, ${data.date}, ${data.notes ?? null})
+    ON CONFLICT (user_id) DO UPDATE SET
       amount = EXCLUDED.amount,
       currency = EXCLUDED.currency,
       investment_date = EXCLUDED.investment_date,
@@ -99,29 +103,29 @@ export async function upsertInvestment(data: Investment): Promise<void> {
   `;
 }
 
-export async function addInvestmentFunds(amount: number): Promise<void> {
+export async function addInvestmentFunds(userId: string, amount: number): Promise<void> {
   await sql`
-    UPDATE investment SET amount = amount + ${amount} WHERE id = 1
+    UPDATE investment SET amount = amount + ${amount} WHERE user_id = ${userId}
   `;
 }
 
-export async function setInvestmentAmount(amount: number): Promise<void> {
+export async function setInvestmentAmount(userId: string, amount: number): Promise<void> {
   await sql`
-    UPDATE investment SET amount = ${amount} WHERE id = 1
+    UPDATE investment SET amount = ${amount} WHERE user_id = ${userId}
   `;
 }
 
-export async function deleteInvestment(): Promise<void> {
-  await sql`DELETE FROM investment WHERE id = 1`;
+export async function deleteInvestment(userId: string): Promise<void> {
+  await sql`DELETE FROM investment WHERE user_id = ${userId}`;
 }
 
-export async function insertCard(card: Card): Promise<void> {
+export async function insertCard(userId: string, card: Card): Promise<void> {
   await sql`
     INSERT INTO cards (
-      id, name, purchase_price, purchase_date, category, series, card_number,
+      id, user_id, name, purchase_price, purchase_date, category, series, card_number,
       grade, grading_company, cert_number, quantity, notes, image_url, status, created_at
     ) VALUES (
-      ${card.id}, ${card.name}, ${card.purchasePrice}, ${card.purchaseDate},
+      ${card.id}, ${userId}, ${card.name}, ${card.purchasePrice}, ${card.purchaseDate},
       ${card.category ?? null}, ${card.series ?? null}, ${card.cardNumber ?? null},
       ${card.grade ?? null}, ${card.gradingCompany ?? null}, ${card.certNumber ?? null},
       ${card.quantity ?? null},
@@ -130,11 +134,11 @@ export async function insertCard(card: Card): Promise<void> {
   `;
 }
 
-export async function deleteCard(id: string): Promise<void> {
-  await sql`DELETE FROM cards WHERE id = ${id}`;
+export async function deleteCard(userId: string, id: string): Promise<void> {
+  await sql`DELETE FROM cards WHERE id = ${id} AND user_id = ${userId}`;
 }
 
-export async function markCardSold(id: string, sale: Sale): Promise<void> {
+export async function markCardSold(userId: string, id: string, sale: Sale): Promise<void> {
   await sql`
     UPDATE cards SET
       status = 'sold',
@@ -144,6 +148,6 @@ export async function markCardSold(id: string, sale: Sale): Promise<void> {
       channel = ${sale.channel ?? null},
       fees = ${sale.fees ?? null},
       sale_notes = ${sale.notes ?? null}
-    WHERE id = ${id}
+    WHERE id = ${id} AND user_id = ${userId}
   `;
 }

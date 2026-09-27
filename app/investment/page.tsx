@@ -1,8 +1,10 @@
+import { requirePageUserId } from "@/lib/auth-helpers";
 import { readDb } from "@/lib/store";
 import InvestmentForm from "@/components/InvestmentForm";
 
 export default async function InvestmentPage() {
-  const { investment } = await readDb();
+  const userId = await requirePageUserId();
+  const { investment } = await readDb(userId);
 
   return (
     <div className="mx-auto max-w-md space-y-4">

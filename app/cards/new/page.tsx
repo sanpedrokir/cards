@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { requirePageUserId } from "@/lib/auth-helpers";
 import { readDb } from "@/lib/store";
 import { getTotals } from "@/lib/calculations";
 import PurchaseForm from "@/components/PurchaseForm";
 
 export default async function NewCardPage() {
-  const db = await readDb();
+  const userId = await requirePageUserId();
+  const db = await readDb(userId);
 
   if (!db.investment) {
     redirect("/investment");

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { requirePageUserId } from "@/lib/auth-helpers";
 import { readDb } from "@/lib/store";
 import SellForm from "@/components/SellForm";
 
@@ -9,7 +10,8 @@ export default async function SellCardPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const db = await readDb();
+  const userId = await requirePageUserId();
+  const db = await readDb(userId);
   const card = db.cards.find((c) => c.id === id);
 
   if (!card) notFound();

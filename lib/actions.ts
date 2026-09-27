@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import Anthropic from "@anthropic-ai/sdk";
+import { requirePageUserId } from "./auth-helpers";
 import {
   addInvestmentFunds,
   deleteCard,
@@ -172,6 +173,7 @@ export async function saveInvestment(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
+  const userId = await requirePageUserId();
   const amount = numberField(formData, "amount");
   const currency = textField(formData, "currency") ?? "SGD";
   const date = textField(formData, "date") ?? todayIso();
@@ -181,7 +183,7 @@ export async function saveInvestment(
     return { error: "Enter a valid investment amount greater than zero." };
   }
 
-  await upsertInvestment({ amount, currency, date, notes });
+  await upsertInvestment(userId, { amount, currency, date, notes });
 
   revalidateInvestmentPaths();
   redirect("/");
@@ -191,18 +193,19 @@ export async function addFunds(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
+  const userId = await requirePageUserId();
   const amount = numberField(formData, "amount");
 
   if (amount === undefined || amount <= 0) {
     return { error: "Enter a valid amount greater than zero." };
   }
 
-  const investment = await getInvestment();
+  const investment = await getInvestment(userId);
   if (!investment) {
     return { error: "Set up your initial investment first." };
   }
 
-  await addInvestmentFunds(amount);
+  await addInvestmentFunds(userId, amount);
 
   revalidateInvestmentPaths();
   redirect("/");
@@ -212,25 +215,27 @@ export async function updateInvestmentAmount(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
+  const userId = await requirePageUserId();
   const amount = numberField(formData, "amount");
 
   if (amount === undefined || amount <= 0) {
     return { error: "Enter a valid amount greater than zero." };
   }
 
-  const investment = await getInvestment();
+  const investment = await getInvestment(userId);
   if (!investment) {
     return { error: "Set up your initial investment first." };
   }
 
-  await setInvestmentAmount(amount);
+  await setInvestmentAmount(userId, amount);
 
   revalidateInvestmentPaths();
   redirect("/");
 }
 
 export async function deleteInvestmentAction(): Promise<void> {
-  await deleteInvestment();
+  const userId = await requirePageUserId();
+  await deleteInvestment(userId);
 
   revalidateInvestmentPaths();
   redirect("/");
@@ -240,6 +245,7 @@ export async function purchaseCard(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
+  const userId = await requirePageUserId();
   const name = textField(formData, "name");
   const purchasePrice = numberField(formData, "purchasePrice");
   const purchaseDate = textField(formData, "purchaseDate") ?? todayIso();
@@ -267,12 +273,12 @@ export async function purchaseCard(
     return { error: imageError };
   }
 
-  const investment = await getInvestment();
+  const investment = await getInvestment(userId);
   if (!investment) {
     return { error: "Set up your initial investment before purchasing cards." };
   }
 
-  const cards = await getCards();
+  const cards = await getCards(userId);
   const { availableBalance } = getTotals({ investment, cards });
 
   if (purchasePrice > availableBalance) {
@@ -297,17 +303,18 @@ export async function purchaseCard(
     status: "available",
     createdAt: new Date().toISOString(),
   };
-  await insertCard(card);
+  await insertCard(userId, card);
 
   revalidateCardPaths();
   redirect(`/cards/${id}`);
 }
 
 export async function deleteCardAction(cardId: string): Promise<void> {
-  const card = await getCardById(cardId);
+  const userId = await requirePageUserId();
+  const card = await getCardById(userId, cardId);
   if (!card) return;
 
-  await deleteCard(cardId);
+  await deleteCard(userId, cardId);
 
   revalidateCardPaths();
   redirect("/cards");
@@ -317,6 +324,7 @@ export async function sellCard(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
+  const userId = await requirePageUserId();
   const cardId = textField(formData, "cardId");
   const salePrice = numberField(formData, "salePrice");
   const saleDate = textField(formData, "saleDate") ?? todayIso();
@@ -332,7 +340,7 @@ export async function sellCard(
     return { error: "Enter a valid sales amount." };
   }
 
-  const card = await getCardById(cardId);
+  const card = await getCardById(userId, cardId);
   if (!card) {
     return { error: "Card not found." };
   }
@@ -341,7 +349,7 @@ export async function sellCard(
   }
 
   const sale: Sale = { salePrice, saleDate, buyer, channel, fees, notes };
-  await markCardSold(cardId, sale);
+  await markCardSold(userId, cardId, sale);
 
   revalidateCardPaths(cardId);
   redirect(`/cards/${cardId}`);

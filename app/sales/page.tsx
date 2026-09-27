@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { requirePageUserId } from "@/lib/auth-helpers";
 import { readDb } from "@/lib/store";
 import SellPickerForm from "@/components/SellPickerForm";
 
 export default async function SalesPage() {
-  const db = await readDb();
+  const userId = await requirePageUserId();
+  const db = await readDb(userId);
   const currency = db.investment?.currency ?? "SGD";
   const availableCards = db.cards.filter((c) => c.status === "available");
 
