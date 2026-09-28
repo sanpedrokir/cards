@@ -258,11 +258,6 @@ export async function purchaseCard(
     return { error: imageError };
   }
 
-  const investment = await getInvestment(userId);
-  if (!investment) {
-    return { error: "Set up your initial investment before purchasing cards." };
-  }
-
   const id = randomUUID();
   const card: Card = {
     id,
@@ -281,8 +276,11 @@ export async function purchaseCard(
     status: "available",
     createdAt: new Date().toISOString(),
   };
-  const affordable = await insertCardIfAffordable(userId, card);
-  if (!affordable) {
+  const result = await insertCardIfAffordable(userId, card);
+  if (result === "no-investment") {
+    return { error: "Set up your initial investment before purchasing cards." };
+  }
+  if (result === "insufficient-balance") {
     return { error: "Insufficient available investment balance." };
   }
 

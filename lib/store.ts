@@ -1,4 +1,5 @@
 import "server-only";
+import { Client } from "@neondatabase/serverless";
 import { sql } from "./db";
 import type { Card, Database, Investment, Sale } from "./types";
 
@@ -109,34 +110,64 @@ export async function setInvestmentAmount(userId: string, amount: number): Promi
   `;
 }
 
-// Checks the available-balance and inserts in a single statement (rather than
-// a separate read-then-write) to shrink the window for a double-submit race
-// to overspend the investment balance.
+export type PurchaseResult = "ok" | "no-investment" | "insufficient-balance";
+
+// Locks the user's investment row for the duration of the transaction so a
+// double-submit (double-click, two tabs) can't have both requests read the
+// same pre-purchase balance and both succeed.
 export async function insertCardIfAffordable(
   userId: string,
   card: Card
-): Promise<boolean> {
-  const rows = await sql`
-    INSERT INTO cards (
-      id, user_id, name, purchase_price, purchase_date, category, series, card_number,
-      grade, grading_company, cert_number, quantity, notes, image_url, status, created_at
-    )
-    SELECT
-      ${card.id}, ${userId}, ${card.name}, ${card.purchasePrice}, ${card.purchaseDate},
-      ${card.category ?? null}, ${card.series ?? null}, ${card.cardNumber ?? null},
-      ${card.grade ?? null}, ${card.gradingCompany ?? null}, ${card.certNumber ?? null},
-      ${card.quantity ?? null},
-      ${card.notes ?? null}, ${card.imageUrl ?? null}, ${card.status}, ${card.createdAt}
-    WHERE ${card.purchasePrice} <= (
-      SELECT i.amount - COALESCE(
-        (SELECT SUM(c.purchase_price) FROM cards c WHERE c.user_id = ${userId}), 0
-      )
-      FROM investment i
-      WHERE i.user_id = ${userId}
-    )
-    RETURNING id
-  `;
-  return rows.length > 0;
+): Promise<PurchaseResult> {
+  const client = new Client(process.env.DATABASE_URL);
+  await client.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const invResult = await client.query(
+      "SELECT amount FROM investment WHERE user_id = $1 FOR UPDATE",
+      [userId]
+    );
+    if (invResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return "no-investment";
+    }
+
+    const sumResult = await client.query(
+      "SELECT COALESCE(SUM(purchase_price), 0) AS total FROM cards WHERE user_id = $1",
+      [userId]
+    );
+    const investedAmount = toNumber(invResult.rows[0].amount);
+    const purchaseCost = toNumber(sumResult.rows[0].total);
+    const availableBalance = investedAmount - purchaseCost;
+
+    if (card.purchasePrice > availableBalance) {
+      await client.query("ROLLBACK");
+      return "insufficient-balance";
+    }
+
+    await client.query(
+      `INSERT INTO cards (
+        id, user_id, name, purchase_price, purchase_date, category, series, card_number,
+        grade, grading_company, cert_number, quantity, notes, image_url, status, created_at
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
+      [
+        card.id, userId, card.name, card.purchasePrice, card.purchaseDate,
+        card.category ?? null, card.series ?? null, card.cardNumber ?? null,
+        card.grade ?? null, card.gradingCompany ?? null, card.certNumber ?? null,
+        card.quantity ?? null, card.notes ?? null, card.imageUrl ?? null,
+        card.status, card.createdAt,
+      ]
+    );
+    await client.query("COMMIT");
+    return "ok";
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw err;
+  } finally {
+    await client.end();
+  }
 }
 
 export async function deleteCard(userId: string, id: string): Promise<void> {

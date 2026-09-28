@@ -169,6 +169,7 @@ export default function SignInPage() {
                 <button
                   type="button"
                   onClick={() => {
+                    signIn.reset();
                     setStuckStatus(null);
                     setNotice(null);
                     setStep("forgot-email");
@@ -288,7 +289,12 @@ export default function SignInPage() {
             </button>
             <button
               type="button"
-              onClick={() => setStep("password")}
+              onClick={() => {
+                signIn.reset();
+                setStuckStatus(null);
+                setNotice(null);
+                setStep("password");
+              }}
               className="w-full text-center text-sm font-medium text-zinc-500 dark:text-zinc-400"
             >
               Back to sign in
