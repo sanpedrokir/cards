@@ -19,6 +19,8 @@ import {
   markCardSold,
   setInvestmentAmount,
   setSubscriptionGateEnabled,
+  updateCardPurchasePrice,
+  updateCardSalePrice,
   upsertInvestment,
   upsertSubscriptionCustomer,
 } from "./store";
@@ -286,6 +288,57 @@ export async function purchaseCard(
 
   revalidateCardPaths();
   redirect(`/cards/${id}`);
+}
+
+export async function updateCardPurchasePriceAction(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const userId = await requirePageUserId();
+  const cardId = textField(formData, "cardId");
+  const amount = numberField(formData, "amount");
+
+  if (!cardId) {
+    return { error: "Missing card reference." };
+  }
+  if (amount === undefined || amount <= 0) {
+    return { error: "Enter a valid purchase price greater than zero." };
+  }
+
+  const result = await updateCardPurchasePrice(userId, cardId, amount);
+  if (result === "not-found") {
+    return { error: "Card not found." };
+  }
+  if (result === "insufficient-balance") {
+    return { error: "That price exceeds your available investment balance." };
+  }
+
+  revalidateCardPaths(cardId);
+  return {};
+}
+
+export async function updateCardSalePriceAction(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const userId = await requirePageUserId();
+  const cardId = textField(formData, "cardId");
+  const amount = numberField(formData, "amount");
+
+  if (!cardId) {
+    return { error: "Missing card reference." };
+  }
+  if (amount === undefined || amount < 0) {
+    return { error: "Enter a valid sale amount." };
+  }
+
+  const ok = await updateCardSalePrice(userId, cardId, amount);
+  if (!ok) {
+    return { error: "Card not found or not yet sold." };
+  }
+
+  revalidateCardPaths(cardId);
+  return {};
 }
 
 export async function deleteCardAction(cardId: string): Promise<void> {

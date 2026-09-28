@@ -8,6 +8,8 @@ import StatusBadge from "@/components/StatusBadge";
 import DeleteCardButton from "@/components/DeleteCardButton";
 import EbayPriceCheck from "@/components/EbayPriceCheck";
 import SaleCelebration from "@/components/SaleCelebration";
+import EditableAmount from "@/components/EditableAmount";
+import { updateCardPurchasePriceAction, updateCardSalePriceAction } from "@/lib/actions";
 
 export default async function CardDetailPage({
   params,
@@ -102,7 +104,14 @@ export default async function CardDetailPage({
               Purchase Price
             </span>
             <span className="font-medium text-zinc-900 dark:text-zinc-50">
-              {formatMoney(card.purchasePrice, currency)}
+              <EditableAmount
+                action={updateCardPurchasePriceAction}
+                hiddenFields={{ cardId: card.id }}
+                amount={card.purchasePrice}
+                currency={currency}
+                ariaLabel="Edit purchase price"
+                min="0.01"
+              />
             </span>
           </div>
           <div className="flex justify-between">
@@ -121,7 +130,14 @@ export default async function CardDetailPage({
                   Selling Price
                 </span>
                 <span className="font-medium text-zinc-900 dark:text-zinc-50">
-                  {formatMoney(card.sale.salePrice, currency)}
+                  <EditableAmount
+                    action={updateCardSalePriceAction}
+                    hiddenFields={{ cardId: card.id }}
+                    amount={card.sale.salePrice}
+                    currency={currency}
+                    ariaLabel="Edit sale amount"
+                    min="0"
+                  />
                 </span>
               </div>
               <div className="flex justify-between">

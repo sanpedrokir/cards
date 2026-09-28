@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { cardProfit } from "@/lib/calculations";
 import { formatMoney } from "@/lib/format";
+import { updateCardSalePriceAction } from "@/lib/actions";
+import EditableAmount from "@/components/EditableAmount";
 import type { Card } from "@/lib/types";
 
 const PAGE_SIZE = 5;
@@ -49,7 +51,14 @@ export default function PaginatedSalesTable({
                   {formatMoney(card.purchasePrice, currency)}
                 </td>
                 <td className="px-3 py-2 text-right text-zinc-600 dark:text-zinc-300">
-                  {formatMoney(card.sale!.salePrice, currency)}
+                  <EditableAmount
+                    action={updateCardSalePriceAction}
+                    hiddenFields={{ cardId: card.id }}
+                    amount={card.sale!.salePrice}
+                    currency={currency}
+                    ariaLabel="Edit sale amount"
+                    min="0"
+                  />
                 </td>
                 <td
                   className={`px-3 py-2 text-right font-semibold ${

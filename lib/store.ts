@@ -170,6 +170,79 @@ export async function insertCardIfAffordable(
   }
 }
 
+export type UpdatePriceResult = "ok" | "not-found" | "insufficient-balance";
+
+// Locks the investment row (and the card row) so a concurrent purchase can't
+// read a stale available balance while this edit is in flight.
+export async function updateCardPurchasePrice(
+  userId: string,
+  cardId: string,
+  newPrice: number
+): Promise<UpdatePriceResult> {
+  const client = new Client(process.env.DATABASE_URL);
+  await client.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const invResult = await client.query(
+      "SELECT amount FROM investment WHERE user_id = $1 FOR UPDATE",
+      [userId]
+    );
+    if (invResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return "not-found";
+    }
+
+    const cardResult = await client.query(
+      "SELECT id FROM cards WHERE id = $1 AND user_id = $2 FOR UPDATE",
+      [cardId, userId]
+    );
+    if (cardResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return "not-found";
+    }
+
+    const sumResult = await client.query(
+      "SELECT COALESCE(SUM(purchase_price), 0) AS total FROM cards WHERE user_id = $1 AND id != $2",
+      [userId, cardId]
+    );
+    const investedAmount = toNumber(invResult.rows[0].amount);
+    const otherCardsCost = toNumber(sumResult.rows[0].total);
+    const availableBalance = investedAmount - otherCardsCost;
+
+    if (newPrice > availableBalance) {
+      await client.query("ROLLBACK");
+      return "insufficient-balance";
+    }
+
+    await client.query(
+      "UPDATE cards SET purchase_price = $1 WHERE id = $2 AND user_id = $3",
+      [newPrice, cardId, userId]
+    );
+    await client.query("COMMIT");
+    return "ok";
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw err;
+  } finally {
+    await client.end();
+  }
+}
+
+export async function updateCardSalePrice(
+  userId: string,
+  cardId: string,
+  newSalePrice: number
+): Promise<boolean> {
+  const rows = await sql`
+    UPDATE cards SET sale_price = ${newSalePrice}
+    WHERE id = ${cardId} AND user_id = ${userId} AND status = 'sold'
+    RETURNING id
+  `;
+  return rows.length > 0;
+}
+
 export async function deleteCard(userId: string, id: string): Promise<void> {
   await sql`DELETE FROM cards WHERE id = ${id} AND user_id = ${userId}`;
 }
