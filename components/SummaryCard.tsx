@@ -6,15 +6,14 @@ export default function SummaryCard({
 }: {
   label: string;
   value: string;
-  tone?: "default" | "positive" | "negative" | "accent" | "purple";
+  tone?: "default" | "positive" | "negative" | "accent";
   hint?: string;
 }) {
   const toneClasses: Record<string, string> = {
     default: "text-zinc-900 dark:text-zinc-50",
-    positive: "text-emerald-600 dark:text-emerald-400",
+    positive: "text-amber-600 dark:text-amber-400",
     negative: "text-red-600 dark:text-red-400",
     accent: "text-blue-600 dark:text-blue-400",
-    purple: "text-purple-600 dark:text-purple-400",
   };
 
   return (

@@ -105,7 +105,7 @@ export default async function AdminSubscriptionsPage({
             —
           </p>
         ) : (
-          <p className="mt-1 space-x-3 text-lg font-semibold text-emerald-600 dark:text-emerald-400">
+          <p className="mt-1 space-x-3 text-lg font-semibold text-amber-600 dark:text-amber-400">
             {Object.entries(revenueByCurrency).map(([currency, amount]) => (
               <span key={currency}>{formatMoney(amount, currency)}</span>
             ))}

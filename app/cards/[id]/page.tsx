@@ -174,7 +174,7 @@ export default async function CardDetailPage({
                 <span
                   className={`font-semibold ${
                     (profit ?? 0) >= 0
-                      ? "text-emerald-600 dark:text-emerald-400"
+                      ? "text-amber-600 dark:text-amber-400"
                       : "text-red-600 dark:text-red-400"
                   }`}
                 >

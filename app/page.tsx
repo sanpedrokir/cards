@@ -102,7 +102,7 @@ export default async function DashboardPage({
         <SummaryCard
           label="Total Funds (Available funds + Sales)"
           value={formatMoney(totals.totalFunds, currency)}
-          tone="purple"
+          tone="accent"
         />
       </div>
 

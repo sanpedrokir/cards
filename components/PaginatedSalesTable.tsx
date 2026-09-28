@@ -54,7 +54,7 @@ export default function PaginatedSalesTable({
                 <td
                   className={`px-3 py-2 text-right font-semibold ${
                     profit >= 0
-                      ? "text-emerald-600 dark:text-emerald-400"
+                      ? "text-amber-600 dark:text-amber-400"
                       : "text-red-600 dark:text-red-400"
                   }`}
                 >
@@ -100,7 +100,7 @@ export default function PaginatedSalesTable({
             <td
               className={`px-3 py-2 text-right ${
                 totalProfit >= 0
-                  ? "text-emerald-600 dark:text-emerald-400"
+                  ? "text-amber-600 dark:text-amber-400"
                   : "text-red-600 dark:text-red-400"
               }`}
             >

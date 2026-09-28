@@ -52,7 +52,7 @@ export default function CardTile({
             <span
               className={
                 profit >= 0
-                  ? "font-semibold text-emerald-600 dark:text-emerald-400"
+                  ? "font-semibold text-amber-600 dark:text-amber-400"
                   : "font-semibold text-red-600 dark:text-red-400"
               }
             >
