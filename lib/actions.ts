@@ -12,10 +12,9 @@ import { searchEbayActiveListings, type EbayListing } from "./ebay";
 import {
   deleteCard,
   getCardById,
-  getCards,
   getInvestment,
   getSubscription,
-  insertCard,
+  insertCardIfAffordable,
   isSubscriptionGateEnabled,
   markCardSold,
   setInvestmentAmount,
@@ -23,7 +22,6 @@ import {
   upsertInvestment,
   upsertSubscriptionCustomer,
 } from "./store";
-import { getTotals } from "./calculations";
 import { todayIso } from "./format";
 import type { Card, Sale } from "./types";
 import type { FormState } from "./form-state";
@@ -76,6 +74,7 @@ async function encodeImage(
     const compressed = await sharp(buffer)
       .rotate()
       .resize({ width: 900, height: 900, fit: "inside", withoutEnlargement: true })
+      .flatten({ background: { r: 255, g: 255, b: 255 } })
       .jpeg({ quality: 82 })
       .toBuffer();
 
@@ -264,13 +263,6 @@ export async function purchaseCard(
     return { error: "Set up your initial investment before purchasing cards." };
   }
 
-  const cards = await getCards(userId);
-  const { availableBalance } = getTotals({ investment, cards });
-
-  if (purchasePrice > availableBalance) {
-    return { error: "Insufficient available investment balance." };
-  }
-
   const id = randomUUID();
   const card: Card = {
     id,
@@ -289,7 +281,10 @@ export async function purchaseCard(
     status: "available",
     createdAt: new Date().toISOString(),
   };
-  await insertCard(userId, card);
+  const affordable = await insertCardIfAffordable(userId, card);
+  if (!affordable) {
+    return { error: "Insufficient available investment balance." };
+  }
 
   revalidateCardPaths();
   redirect(`/cards/${id}`);
@@ -442,7 +437,7 @@ export async function checkEbayPriceForQuery(
   gradingCompany?: string,
   grade?: string
 ): Promise<EbayPriceEstimate> {
-  await requireSignedInUserId();
+  await requirePageUserId();
 
   if (!name.trim()) {
     return { listings: [], error: "Enter a card name first." };

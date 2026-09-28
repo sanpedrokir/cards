@@ -62,6 +62,7 @@ export default function SignInPage() {
 
   async function handleVerifyTrustSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setStuckStatus(null);
     const formData = new FormData(e.currentTarget);
     const code = String(formData.get("code") ?? "");
 
@@ -77,6 +78,7 @@ export default function SignInPage() {
 
   async function handleForgotEmailSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setStuckStatus(null);
     const formData = new FormData(e.currentTarget);
     const emailAddress = String(formData.get("email") ?? "").trim();
 
@@ -92,6 +94,7 @@ export default function SignInPage() {
 
   async function handleForgotCodeSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setStuckStatus(null);
     const formData = new FormData(e.currentTarget);
     const code = String(formData.get("code") ?? "");
 
@@ -103,6 +106,7 @@ export default function SignInPage() {
 
   async function handleNewPasswordSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setStuckStatus(null);
     const formData = new FormData(e.currentTarget);
     const password = String(formData.get("password") ?? "");
 
@@ -219,6 +223,21 @@ export default function SignInPage() {
                 </p>
               )}
             </div>
+
+            {stuckStatus && (
+              <p className="text-sm text-red-600 dark:text-red-400">
+                Clerk needs an extra verification step ({stuckStatus}) that
+                this sign-in form doesn&apos;t support yet. Please contact the
+                app owner.
+              </p>
+            )}
+
+            {errors?.global && errors.global.length > 0 && (
+              <p className="text-sm text-red-600 dark:text-red-400">
+                {friendlyError(errors.global[0].message)}
+              </p>
+            )}
+
             <button
               type="submit"
               disabled={fetchStatus === "fetching"}
@@ -245,6 +264,21 @@ export default function SignInPage() {
                 </p>
               )}
             </div>
+
+            {stuckStatus && (
+              <p className="text-sm text-red-600 dark:text-red-400">
+                Clerk needs an extra verification step ({stuckStatus}) that
+                this sign-in form doesn&apos;t support yet. Please contact the
+                app owner.
+              </p>
+            )}
+
+            {errors?.global && errors.global.length > 0 && (
+              <p className="text-sm text-red-600 dark:text-red-400">
+                {friendlyError(errors.global[0].message)}
+              </p>
+            )}
+
             <button
               type="submit"
               disabled={fetchStatus === "fetching"}
@@ -275,6 +309,21 @@ export default function SignInPage() {
                 </p>
               )}
             </div>
+
+            {stuckStatus && (
+              <p className="text-sm text-red-600 dark:text-red-400">
+                Clerk needs an extra verification step ({stuckStatus}) that
+                this sign-in form doesn&apos;t support yet. Please contact the
+                app owner.
+              </p>
+            )}
+
+            {errors?.global && errors.global.length > 0 && (
+              <p className="text-sm text-red-600 dark:text-red-400">
+                {friendlyError(errors.global[0].message)}
+              </p>
+            )}
+
             <button
               type="submit"
               disabled={fetchStatus === "fetching"}
@@ -305,6 +354,21 @@ export default function SignInPage() {
                 </p>
               )}
             </div>
+
+            {stuckStatus && (
+              <p className="text-sm text-red-600 dark:text-red-400">
+                Clerk needs an extra verification step ({stuckStatus}) that
+                this sign-in form doesn&apos;t support yet. Please contact the
+                app owner.
+              </p>
+            )}
+
+            {errors?.global && errors.global.length > 0 && (
+              <p className="text-sm text-red-600 dark:text-red-400">
+                {friendlyError(errors.global[0].message)}
+              </p>
+            )}
+
             <button
               type="submit"
               disabled={fetchStatus === "fetching"}

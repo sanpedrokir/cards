@@ -5,6 +5,12 @@ import { getAllSubscriptions } from "@/lib/store";
 import { getStripe } from "@/lib/stripe";
 import { formatDate, formatMoney } from "@/lib/format";
 
+// Stripe currencies with no minor unit -- unit_amount is already whole units.
+const ZERO_DECIMAL_CURRENCIES = new Set([
+  "bif", "clp", "djf", "gnf", "jpy", "kmf", "krw", "mga",
+  "pyg", "rwf", "ugx", "vnd", "vuv", "xaf", "xof", "xpf",
+]);
+
 function statusTone(status: string) {
   if (status === "active" || status === "trialing") {
     return "text-emerald-600 dark:text-emerald-400";
@@ -61,9 +67,10 @@ export default async function AdminSubscriptionsPage({
       const item = sub?.items.data[0];
       const price = item?.price;
       if (price?.unit_amount && price.currency) {
+        const isZeroDecimal = ZERO_DECIMAL_CURRENCIES.has(price.currency);
         const currency = price.currency.toUpperCase();
-        revenueByCurrency[currency] =
-          (revenueByCurrency[currency] ?? 0) + price.unit_amount / 100;
+        const amount = isZeroDecimal ? price.unit_amount : price.unit_amount / 100;
+        revenueByCurrency[currency] = (revenueByCurrency[currency] ?? 0) + amount;
       }
     }
   }

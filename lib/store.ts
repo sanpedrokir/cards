@@ -109,19 +109,34 @@ export async function setInvestmentAmount(userId: string, amount: number): Promi
   `;
 }
 
-export async function insertCard(userId: string, card: Card): Promise<void> {
-  await sql`
+// Checks the available-balance and inserts in a single statement (rather than
+// a separate read-then-write) to shrink the window for a double-submit race
+// to overspend the investment balance.
+export async function insertCardIfAffordable(
+  userId: string,
+  card: Card
+): Promise<boolean> {
+  const rows = await sql`
     INSERT INTO cards (
       id, user_id, name, purchase_price, purchase_date, category, series, card_number,
       grade, grading_company, cert_number, quantity, notes, image_url, status, created_at
-    ) VALUES (
+    )
+    SELECT
       ${card.id}, ${userId}, ${card.name}, ${card.purchasePrice}, ${card.purchaseDate},
       ${card.category ?? null}, ${card.series ?? null}, ${card.cardNumber ?? null},
       ${card.grade ?? null}, ${card.gradingCompany ?? null}, ${card.certNumber ?? null},
       ${card.quantity ?? null},
       ${card.notes ?? null}, ${card.imageUrl ?? null}, ${card.status}, ${card.createdAt}
+    WHERE ${card.purchasePrice} <= (
+      SELECT i.amount - COALESCE(
+        (SELECT SUM(c.purchase_price) FROM cards c WHERE c.user_id = ${userId}), 0
+      )
+      FROM investment i
+      WHERE i.user_id = ${userId}
     )
+    RETURNING id
   `;
+  return rows.length > 0;
 }
 
 export async function deleteCard(userId: string, id: string): Promise<void> {
