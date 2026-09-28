@@ -114,6 +114,13 @@ export default function SignUpPage() {
             >
               {fetchStatus === "fetching" ? "Sending code…" : "Send code"}
             </button>
+            <p className="text-center text-xs text-zinc-400 dark:text-zinc-500">
+              By continuing, you agree to our{" "}
+              <a href="/privacy" className="underline">
+                Privacy Policy
+              </a>
+              .
+            </p>
           </form>
         )}
 
