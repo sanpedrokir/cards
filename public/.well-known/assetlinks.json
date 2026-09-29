@@ -3,6 +3,9 @@
   "target": {
     "namespace": "android_app",
     "package_name": "app.vaultedcards.twa",
-    "sha256_cert_fingerprints": ["98:92:8A:DC:45:C2:ED:80:8E:A6:EA:C9:A1:A6:DB:05:EA:49:70:62:7B:A2:CC:A9:61:DD:8B:4D:B0:3E:97:B4"]
+    "sha256_cert_fingerprints": [
+      "98:92:8A:DC:45:C2:ED:80:8E:A6:EA:C9:A1:A6:DB:05:EA:49:70:62:7B:A2:CC:A9:61:DD:8B:4D:B0:3E:97:B4",
+      "B0:ED:0C:91:E7:E7:C4:F5:43:94:F8:0F:0A:62:2F:B0:D3:14:DF:B1:E9:BB:C6:D7:C3:BC:5D:BC:60:93:AA:5C"
+    ]
   }
 }]
