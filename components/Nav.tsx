@@ -89,8 +89,15 @@ export default function Nav() {
   const { user } = useUser();
   const email = user?.primaryEmailAddress?.emailAddress;
 
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+  // "/cards" is a prefix of "/cards/new", so a plain startsWith() check would
+  // light up both "Vaulted Cards" and "Purchase" at once. Instead, pick the
+  // single most specific (longest) matching href and only mark that one active.
+  const matches = (href: string) =>
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+  const activeHref = [...NAV_ITEMS]
+    .sort((a, b) => b.href.length - a.href.length)
+    .find((item) => matches(item.href))?.href;
+  const isActive = (href: string) => href === activeHref;
 
   function handleSignOut() {
     signOut(() => router.push("/sign-in"));
