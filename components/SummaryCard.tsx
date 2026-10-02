@@ -26,25 +26,25 @@ export default function SummaryCard({
   };
 
   return (
-    <div className="surface p-4">
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+    <div className="surface flex items-center gap-3 p-3">
+      {icon && (
+        <span
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm ${iconToneClasses[tone]}`}
+        >
+          {icon}
+        </span>
+      )}
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
           {label}
         </p>
-        {icon && (
-          <span
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-base ${iconToneClasses[tone]}`}
-          >
-            {icon}
-          </span>
+        <p className={`text-lg font-semibold tabular-nums ${toneClasses[tone]}`}>
+          {value}
+        </p>
+        {hint && (
+          <p className="text-xs text-slate-400 dark:text-slate-500">{hint}</p>
         )}
       </div>
-      <p className={`mt-1 text-2xl font-semibold tabular-nums ${toneClasses[tone]}`}>
-        {value}
-      </p>
-      {hint && (
-        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{hint}</p>
-      )}
     </div>
   );
 }

@@ -44,7 +44,8 @@ export default function InvestmentForm({
               </div>
               <input type="hidden" name="currency" value={investment.currency} />
               <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-                Use the Currency section below to switch and convert.
+                Change this from the dashboard&apos;s pencil icon next to
+                Overall Fund Invested.
               </p>
             </>
           ) : (

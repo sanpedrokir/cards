@@ -84,16 +84,13 @@ export default async function DashboardPage({
               {formatMoney(totals.inventoryCost, currency)}
             </span>
           </div>
-          <Link href="/investment" className="link-muted">
-            Change currency
-          </Link>
         </div>
         <Link href="/cards/new" className="btn-primary-sm">
           <span className="text-base leading-none">+</span> Purchase
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-1 gap-2">
         <SummaryCard
           label="Total Sales"
           value={formatMoney(totals.totalSales, currency)}
