@@ -11,6 +11,9 @@
 :root {
   --background: #f3f7fe;
   --foreground: #16202e;
+  /* Reinforces the <meta name="color-scheme"> tag: tells the browser this
+     page is light-only, so it doesn't apply its own auto-dark repaint. */
+  color-scheme: light;
 }
 
 @theme inline {

@@ -25,6 +25,10 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: "#1d7bf0",
+  // Without this, Android Chrome's "force dark" heuristic can repaint the
+  // whole page with an auto-generated dark theme when the OS is in dark
+  // mode, overriding our actual (light) design entirely.
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -24,33 +24,24 @@ export default function PaginatedSalesTable({
   const pageItems = soldCards.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
 
   return (
-    <div className="surface overflow-hidden">
-      <table className="w-full text-sm">
-        <thead className="bg-slate-50 text-xs uppercase text-slate-500 dark:bg-white/5 dark:text-slate-400">
-          <tr>
-            <th className="px-3 py-2 text-left font-medium">Card</th>
-            <th className="px-3 py-2 text-right font-medium">Cost</th>
-            <th className="px-3 py-2 text-right font-medium">Sold</th>
-            <th className="px-3 py-2 text-right font-medium">Profit</th>
-          </tr>
-        </thead>
-        <tbody>
-          {pageItems.map((card) => {
-            const profit = cardProfit(card);
-            return (
-              <tr key={card.id} className="border-t border-slate-100 dark:border-white/5">
-                <td className="max-w-[120px] truncate px-3 py-2">
-                  <Link
-                    href={`/cards/${card.id}`}
-                    className="text-slate-900 hover:text-blue-600 hover:underline dark:text-white dark:hover:text-blue-400"
-                  >
-                    {card.name}
-                  </Link>
-                </td>
-                <td className="px-3 py-2 text-right text-slate-600 dark:text-slate-300">
-                  {formatMoney(card.purchasePrice, currency)}
-                </td>
-                <td className="px-3 py-2 text-right text-slate-600 dark:text-slate-300">
+    <div className="surface overflow-hidden divide-y divide-slate-100 dark:divide-white/5">
+      {pageItems.map((card) => {
+        const profit = cardProfit(card);
+        const isProfit = profit >= 0;
+        return (
+          <div key={card.id} className="flex items-center gap-3 p-3">
+            <div className="min-w-0 flex-1">
+              <Link
+                href={`/cards/${card.id}`}
+                className="block truncate text-sm font-medium text-slate-900 hover:text-blue-600 hover:underline dark:text-white dark:hover:text-blue-400"
+              >
+                {card.name}
+              </Link>
+              <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-slate-500 dark:text-slate-400">
+                <span>Cost {formatMoney(card.purchasePrice, currency)}</span>
+                <span aria-hidden>→</span>
+                <span className="inline-flex items-center gap-1">
+                  Sold
                   <EditableAmount
                     action={updateCardSalePriceAction}
                     hiddenFields={{ cardId: card.id }}
@@ -59,66 +50,58 @@ export default function PaginatedSalesTable({
                     ariaLabel="Edit sale amount"
                     min="0"
                   />
-                </td>
-                <td
-                  className={`px-3 py-2 text-right font-semibold ${
-                    profit >= 0
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-rose-600 dark:text-rose-400"
-                  }`}
-                >
-                  {profit >= 0 ? "+" : ""}
-                  {formatMoney(profit, currency)}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-        <tfoot>
-          {pageCount > 1 && (
-            <tr className="border-t border-slate-100 dark:border-white/5">
-              <td colSpan={4} className="px-3 py-2">
-                <div className="flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={() => setPage((p) => Math.max(0, p - 1))}
-                    disabled={page === 0}
-                    className="rounded-full px-3 py-1 text-sm font-medium text-blue-600 disabled:cursor-not-allowed disabled:opacity-40 dark:text-blue-400"
-                  >
-                    ← Prev
-                  </button>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
-                    Page {page + 1} of {pageCount}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
-                    disabled={page >= pageCount - 1}
-                    className="rounded-full px-3 py-1 text-sm font-medium text-blue-600 disabled:cursor-not-allowed disabled:opacity-40 dark:text-blue-400"
-                  >
-                    Next →
-                  </button>
-                </div>
-              </td>
-            </tr>
-          )}
-          <tr className="border-t-2 border-slate-200 bg-slate-50 font-semibold dark:border-white/10 dark:bg-white/5">
-            <td colSpan={3} className="px-3 py-2 text-right text-slate-700 dark:text-slate-300">
-              Total Profit
-            </td>
-            <td
-              className={`px-3 py-2 text-right ${
-                totalProfit >= 0
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-rose-600 dark:text-rose-400"
+                </span>
+              </p>
+            </div>
+            <span
+              className={`shrink-0 whitespace-nowrap text-sm font-semibold ${
+                isProfit ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
               }`}
             >
-              {totalProfit >= 0 ? "+" : ""}
-              {formatMoney(totalProfit, currency)}
-            </td>
-          </tr>
-        </tfoot>
-      </table>
+              {isProfit ? "+" : ""}
+              {formatMoney(profit, currency)}
+            </span>
+          </div>
+        );
+      })}
+
+      {pageCount > 1 && (
+        <div className="flex items-center justify-between p-3">
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={page === 0}
+            className="rounded-full px-3 py-1 text-sm font-medium text-blue-600 disabled:cursor-not-allowed disabled:opacity-40 dark:text-blue-400"
+          >
+            ← Prev
+          </button>
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            Page {page + 1} of {pageCount}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+            disabled={page >= pageCount - 1}
+            className="rounded-full px-3 py-1 text-sm font-medium text-blue-600 disabled:cursor-not-allowed disabled:opacity-40 dark:text-blue-400"
+          >
+            Next →
+          </button>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between bg-slate-50 p-3 font-semibold dark:bg-white/5">
+        <span className="text-sm text-slate-700 dark:text-slate-300">Total Profit</span>
+        <span
+          className={`text-sm ${
+            totalProfit >= 0
+              ? "text-emerald-600 dark:text-emerald-400"
+              : "text-rose-600 dark:text-rose-400"
+          }`}
+        >
+          {totalProfit >= 0 ? "+" : ""}
+          {formatMoney(totalProfit, currency)}
+        </span>
+      </div>
     </div>
   );
 }
