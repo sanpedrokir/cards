@@ -204,7 +204,6 @@ export default function PurchaseForm({
               step="0.01"
               min="0.01"
               required
-              placeholder="850.00"
               className="input-field"
             />
           </div>
