@@ -35,7 +35,7 @@ export default async function DashboardPage({
       )}
 
       {cards.length === 0 && (
-        <p className="notice-info text-center">
+        <p className="text-center text-sm text-slate-900 dark:text-white">
           Welcome to Vaulted! Record your first purchase to get started — a
           spending budget is optional, set one up any time.
         </p>

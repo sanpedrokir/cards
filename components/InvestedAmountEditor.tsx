@@ -38,6 +38,7 @@ export default function InvestedAmountEditor({
   const currencyFormRef = useRef<HTMLFormElement>(null);
   const savedAmountRef = useRef(false);
   const savedCurrencyRef = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   const [amountInput, setAmountInput] = useState(String(amount));
@@ -66,10 +67,9 @@ export default function InvestedAmountEditor({
 
   const isSaving = isSavingAmount || isSavingCurrency;
 
-  function handleAmountBlur(e: React.FocusEvent<HTMLInputElement>) {
-    const value = Number(e.target.value);
-    if (!e.target.value || Number.isNaN(value) || value <= 0 || value === amount) {
-      setEditing(false);
+  function saveAmountIfChanged() {
+    const value = Number(amountInput);
+    if (amountInput === "" || Number.isNaN(value) || value < 0 || value === amount) {
       return;
     }
     savedAmountRef.current = true;
@@ -78,13 +78,26 @@ export default function InvestedAmountEditor({
     });
   }
 
-  function handleCurrencyChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const next = e.target.value;
-    if (next === currency) {
-      setPendingCurrency(null);
+  // Handled at the container level (not on the amount input alone) so that
+  // moving focus from the amount field to the currency <select> -- both
+  // inside this same editor -- doesn't get treated as "clicked away,
+  // close the editor," which was silently closing the row (and discarding
+  // the click) before the select could ever open.
+  function handleContainerBlur(e: React.FocusEvent<HTMLDivElement>) {
+    if (containerRef.current?.contains(e.relatedTarget as Node | null)) {
       return;
     }
-    setPendingCurrency(next);
+    if (pendingCurrency) {
+      // A currency-change confirmation is up; let the user decide there.
+      return;
+    }
+    saveAmountIfChanged();
+    setEditing(false);
+  }
+
+  function handleCurrencyChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const next = e.target.value;
+    setPendingCurrency(next === currency ? null : next);
   }
 
   function handleConfirmCurrency() {
@@ -97,7 +110,11 @@ export default function InvestedAmountEditor({
 
   if (editing) {
     return (
-      <div className="inline-flex flex-wrap items-center gap-2">
+      <div
+        ref={containerRef}
+        onBlur={handleContainerBlur}
+        className="inline-flex flex-wrap items-center gap-2"
+      >
         <span className="text-slate-500 dark:text-slate-400">Overall Fund Invested:</span>
 
         <form ref={amountFormRef} action={amountFormAction} className="contents">
@@ -105,13 +122,12 @@ export default function InvestedAmountEditor({
             name="amount"
             type="number"
             step="0.01"
-            min="0.01"
+            min="0"
             required
             value={amountInput}
             onChange={(e) => setAmountInput(e.target.value)}
             autoFocus
             disabled={isSaving}
-            onBlur={handleAmountBlur}
             onKeyDown={(e) => {
               if (e.key === "Enter") e.currentTarget.blur();
               if (e.key === "Escape") setEditing(false);

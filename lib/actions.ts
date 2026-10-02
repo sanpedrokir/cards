@@ -218,8 +218,8 @@ export async function saveInvestment(
   const date = textField(formData, "date") ?? todayIso();
   const notes = textField(formData, "notes");
 
-  if (amount === undefined || amount <= 0) {
-    return { error: "Enter a valid investment amount greater than zero." };
+  if (amount === undefined || amount < 0) {
+    return { error: "Enter a valid investment amount." };
   }
 
   await upsertInvestment(userId, { amount, currency, date, notes });
@@ -235,8 +235,8 @@ export async function updateInvestmentAmount(
   const userId = await requirePageUserId();
   const amount = numberField(formData, "amount");
 
-  if (amount === undefined || amount <= 0) {
-    return { error: "Enter a valid amount greater than zero." };
+  if (amount === undefined || amount < 0) {
+    return { error: "Enter a valid amount." };
   }
 
   const investment = await getInvestment(userId);

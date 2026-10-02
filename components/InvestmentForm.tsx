@@ -25,7 +25,7 @@ export default function InvestmentForm({
           name="amount"
           type="number"
           step="0.01"
-          min="0.01"
+          min="0"
           required
           defaultValue={investment?.amount}
           className="input-field"
