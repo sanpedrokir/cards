@@ -76,6 +76,51 @@ export async function getCards(userId: string): Promise<Card[]> {
   return rows.map(mapCard);
 }
 
+export interface CardsPageOptions {
+  status: string;
+  query: string;
+  page: number;
+  pageSize: number;
+}
+
+export interface CardsPageResult {
+  cards: Card[];
+  totalCount: number;
+}
+
+// Fetches only the one page of cards actually being displayed (with their
+// full embedded photo), instead of the Vaulted Cards list loading every
+// card a user owns on every visit just to filter/slice it in memory.
+export async function getCardsPage(
+  userId: string,
+  { status, query, page, pageSize }: CardsPageOptions
+): Promise<CardsPageResult> {
+  const offset = (Math.max(1, page) - 1) * pageSize;
+  const likeQuery = `%${query}%`;
+
+  const [rows, countRows] = await Promise.all([
+    sql`
+      SELECT * FROM cards
+      WHERE user_id = ${userId}
+        AND (${status} = 'all' OR status = ${status})
+        AND (${query} = '' OR name ILIKE ${likeQuery})
+      ORDER BY created_at DESC
+      LIMIT ${pageSize} OFFSET ${offset}
+    `,
+    sql`
+      SELECT COUNT(*) AS total FROM cards
+      WHERE user_id = ${userId}
+        AND (${status} = 'all' OR status = ${status})
+        AND (${query} = '' OR name ILIKE ${likeQuery})
+    `,
+  ]);
+
+  return {
+    cards: rows.map(mapCard),
+    totalCount: toNumber(countRows[0].total),
+  };
+}
+
 export async function getCardById(userId: string, id: string): Promise<Card | null> {
   const rows = await sql`
     SELECT * FROM cards WHERE id = ${id} AND user_id = ${userId}

@@ -31,6 +31,8 @@ export default function CardFilterBar({
       if (next.q === "") params.delete("q");
       else params.set("q", next.q);
     }
+    // Changing the filter/search invalidates whatever page you were on.
+    params.delete("page");
     const query = params.toString();
     startTransition(() => {
       router.replace(query ? `${pathname}?${query}` : pathname);
