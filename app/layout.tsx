@@ -3,6 +3,7 @@ import { Roboto, Roboto_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import Nav from "@/components/Nav";
 import AdminFooterLink from "@/components/AdminFooterLink";
+import LightboxProvider from "@/components/LightboxProvider";
 import "./globals.css";
 
 const roboto = Roboto({
@@ -39,11 +40,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <ClerkProvider>
-          <Nav />
-          <main className="mx-auto w-full max-w-4xl flex-1 px-4 pb-24 pt-4 sm:px-6 sm:pb-12 sm:pt-6">
-            {children}
-          </main>
-          <AdminFooterLink />
+          <LightboxProvider>
+            <Nav />
+            <main className="mx-auto w-full max-w-4xl flex-1 px-4 pb-24 pt-4 sm:px-6 sm:pb-12 sm:pt-6">
+              {children}
+            </main>
+            <AdminFooterLink />
+          </LightboxProvider>
         </ClerkProvider>
       </body>
     </html>
