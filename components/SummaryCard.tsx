@@ -39,7 +39,7 @@ export default function SummaryCard({
           </span>
         )}
       </div>
-      <p className={`mt-1 text-2xl font-bold tabular-nums ${toneClasses[tone]}`}>
+      <p className={`mt-1 font-serif text-2xl font-semibold tabular-nums ${toneClasses[tone]}`}>
         {value}
       </p>
       {hint && (

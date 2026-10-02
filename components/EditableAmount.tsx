@@ -84,7 +84,7 @@ export default function EditableAmount({
             if (e.key === "Enter") e.currentTarget.blur();
             if (e.key === "Escape") setEditing(false);
           }}
-          className="w-24 rounded-lg border border-slate-300 px-2 py-1 text-right text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:opacity-60 dark:border-white/10 dark:bg-slate-900"
+          className="w-24 rounded-lg border border-slate-300 px-2 py-1 text-right text-sm focus:border-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:opacity-60 dark:border-white/10 dark:bg-slate-900"
         />
         {isSaving && (
           <span className="text-xs text-slate-400 dark:text-slate-500">Saving…</span>

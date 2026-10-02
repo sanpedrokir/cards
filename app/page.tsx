@@ -34,13 +34,10 @@ export default async function DashboardPage({
           <img
             src="/vaulted-logo.png"
             alt="Vaulted"
-            className="mx-auto h-28 w-28 rounded-2xl shadow-lg shadow-indigo-600/20"
+            className="mx-auto h-28 w-28 rounded-2xl shadow-lg shadow-amber-600/20"
           />
-          <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Welcome to{" "}
-            <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-              Vaulted
-            </span>
+          <h1 className="mt-4 font-serif text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            Welcome to <span className="text-amber-700">Vaulted</span>
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Set up your fund to start tracking purchases, sales and profit.
@@ -77,7 +74,7 @@ export default async function DashboardPage({
           />
           <div>
             <span className="text-slate-500 dark:text-slate-400">Available Balance: </span>
-            <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+            <span className="font-serif font-semibold text-amber-700 dark:text-amber-400">
               {formatMoney(totals.availableBalance, currency)}
             </span>
           </div>

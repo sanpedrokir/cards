@@ -62,7 +62,7 @@ export function VaultIcon() {
 
 export function CardPlaceholderIcon({ className = "h-8 w-8" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={`${className} text-indigo-300`}>
+    <svg viewBox="0 0 24 24" fill="none" className={`${className} text-amber-300`}>
       <rect x="4" y="2.5" width="16" height="19" rx="2.2" stroke="currentColor" strokeWidth={1.5} />
       <circle cx="8.3" cy="7.2" r="1.3" stroke="currentColor" strokeWidth={1.3} />
       <path d="M7 16.5h10M7 19h6" stroke="currentColor" strokeWidth={1.3} strokeLinecap="round" />

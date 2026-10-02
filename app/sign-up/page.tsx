@@ -76,7 +76,7 @@ export default function SignUpPage() {
       <h1 className="page-title">Create your account</h1>
       <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
         Already have an account?{" "}
-        <a href="/sign-in" className="font-medium text-indigo-600 dark:text-indigo-400">
+        <a href="/sign-in" className="font-medium text-amber-700 dark:text-amber-400">
           Sign in
         </a>
       </p>
