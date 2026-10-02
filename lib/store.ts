@@ -109,7 +109,7 @@ export async function setInvestmentAmount(userId: string, amount: number): Promi
   `;
 }
 
-export type PurchaseResult = "ok" | "no-investment" | "insufficient-balance";
+export type PurchaseResult = "ok" | "insufficient-balance";
 
 // Locks the user's investment row for the duration of the transaction so a
 // double-submit (double-click, two tabs) can't have both requests read the
@@ -127,22 +127,24 @@ export async function insertCardIfAffordable(
       "SELECT amount FROM investment WHERE user_id = $1 FOR UPDATE",
       [userId]
     );
-    if (invResult.rows.length === 0) {
-      await client.query("ROLLBACK");
-      return "no-investment";
-    }
 
-    const sumResult = await client.query(
-      "SELECT COALESCE(SUM(purchase_price), 0) AS total FROM cards WHERE user_id = $1",
-      [userId]
-    );
-    const investedAmount = toNumber(invResult.rows[0].amount);
-    const purchaseCost = toNumber(sumResult.rows[0].total);
-    const availableBalance = investedAmount - purchaseCost;
+    // No budget set yet -- purchases aren't capped until the user opts into
+    // one. Once they do, this check applies to every purchase from then on,
+    // computed against the full historical purchase cost (including
+    // anything bought before the budget existed).
+    if (invResult.rows.length > 0) {
+      const sumResult = await client.query(
+        "SELECT COALESCE(SUM(purchase_price), 0) AS total FROM cards WHERE user_id = $1",
+        [userId]
+      );
+      const investedAmount = toNumber(invResult.rows[0].amount);
+      const purchaseCost = toNumber(sumResult.rows[0].total);
+      const availableBalance = investedAmount - purchaseCost;
 
-    if (card.purchasePrice > availableBalance) {
-      await client.query("ROLLBACK");
-      return "insufficient-balance";
+      if (card.purchasePrice > availableBalance) {
+        await client.query("ROLLBACK");
+        return "insufficient-balance";
+      }
     }
 
     await client.query(
@@ -182,15 +184,6 @@ export async function updateCardPurchasePrice(
   try {
     await client.query("BEGIN");
 
-    const invResult = await client.query(
-      "SELECT amount FROM investment WHERE user_id = $1 FOR UPDATE",
-      [userId]
-    );
-    if (invResult.rows.length === 0) {
-      await client.query("ROLLBACK");
-      return "not-found";
-    }
-
     const cardResult = await client.query(
       "SELECT id FROM cards WHERE id = $1 AND user_id = $2 FOR UPDATE",
       [cardId, userId]
@@ -200,17 +193,25 @@ export async function updateCardPurchasePrice(
       return "not-found";
     }
 
-    const sumResult = await client.query(
-      "SELECT COALESCE(SUM(purchase_price), 0) AS total FROM cards WHERE user_id = $1 AND id != $2",
-      [userId, cardId]
+    const invResult = await client.query(
+      "SELECT amount FROM investment WHERE user_id = $1 FOR UPDATE",
+      [userId]
     );
-    const investedAmount = toNumber(invResult.rows[0].amount);
-    const otherCardsCost = toNumber(sumResult.rows[0].total);
-    const availableBalance = investedAmount - otherCardsCost;
 
-    if (newPrice > availableBalance) {
-      await client.query("ROLLBACK");
-      return "insufficient-balance";
+    // No budget set -- edits aren't capped until the user opts into one.
+    if (invResult.rows.length > 0) {
+      const sumResult = await client.query(
+        "SELECT COALESCE(SUM(purchase_price), 0) AS total FROM cards WHERE user_id = $1 AND id != $2",
+        [userId, cardId]
+      );
+      const investedAmount = toNumber(invResult.rows[0].amount);
+      const otherCardsCost = toNumber(sumResult.rows[0].total);
+      const availableBalance = investedAmount - otherCardsCost;
+
+      if (newPrice > availableBalance) {
+        await client.query("ROLLBACK");
+        return "insufficient-balance";
+      }
     }
 
     await client.query(

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { requirePageUserId } from "@/lib/auth-helpers";
 import { readDb } from "@/lib/store";
 import { getTotals } from "@/lib/calculations";
@@ -9,11 +8,7 @@ export default async function NewCardPage() {
   const userId = await requirePageUserId();
   const db = await readDb(userId);
 
-  if (!db.investment) {
-    redirect("/investment");
-  }
-
-  const totals = getTotals(db);
+  const availableBalance = db.investment ? getTotals(db).availableBalance : null;
 
   return (
     <div className="mx-auto max-w-lg space-y-4">
@@ -26,8 +21,8 @@ export default async function NewCardPage() {
 
       <div className="surface p-5">
         <PurchaseForm
-          availableBalance={totals.availableBalance}
-          currency={db.investment.currency}
+          availableBalance={availableBalance}
+          currency={db.investment?.currency ?? "SGD"}
         />
       </div>
     </div>

@@ -13,7 +13,7 @@ export default async function InvestmentPage() {
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           {investment
             ? "Update the amount invested into your card business."
-            : "Record the initial amount invested into your card business."}
+            : "Optional: set a spending budget for your card business. You can skip this and just start purchasing — set it up here any time."}
         </p>
       </div>
 

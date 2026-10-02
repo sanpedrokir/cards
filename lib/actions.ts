@@ -336,9 +336,6 @@ export async function purchaseCard(
     createdAt: new Date().toISOString(),
   };
   const result = await insertCardIfAffordable(userId, card);
-  if (result === "no-investment") {
-    return { error: "Set up your initial investment before purchasing cards." };
-  }
   if (result === "insufficient-balance") {
     return { error: "Insufficient available investment balance." };
   }

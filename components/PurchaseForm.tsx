@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useRef, useState, useTransition } from "react";
 import {
   purchaseCard,
@@ -16,7 +17,7 @@ export default function PurchaseForm({
   availableBalance,
   currency,
 }: {
-  availableBalance: number;
+  availableBalance: number | null;
   currency: string;
 }) {
   const [state, formAction] = useActionState(purchaseCard, initialFormState);
@@ -109,12 +110,21 @@ export default function PurchaseForm({
 
   return (
     <form action={formAction} className="space-y-5">
-      <div className="notice-info">
-        Available balance:{" "}
-        <span className="font-semibold">
-          {formatMoney(availableBalance, currency)}
-        </span>
-      </div>
+      {availableBalance !== null ? (
+        <div className="notice-info">
+          Available balance:{" "}
+          <span className="font-semibold">
+            {formatMoney(availableBalance, currency)}
+          </span>
+        </div>
+      ) : (
+        <div className="notice-neutral">
+          {"No spending budget set — this purchase won't be limited. "}
+          <Link href="/investment" className="font-medium underline">
+            Set one up (optional)
+          </Link>
+        </div>
+      )}
 
       <fieldset className="space-y-4">
         <div>

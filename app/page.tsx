@@ -5,7 +5,6 @@ import { getTotals } from "@/lib/calculations";
 import { formatMoney } from "@/lib/format";
 import SummaryCard from "@/components/SummaryCard";
 import { SalesIcon, ProfitUpIcon, ProfitDownIcon, VaultIcon } from "@/components/icons";
-import InvestmentForm from "@/components/InvestmentForm";
 import InvestedAmountEditor from "@/components/InvestedAmountEditor";
 import PaginatedSalesTable from "@/components/PaginatedSalesTable";
 
@@ -20,38 +19,8 @@ export default async function DashboardPage({
   const { checkout } = await searchParams;
   const justSubscribed = checkout === "success";
 
-  if (!investment) {
-    return (
-      <div className="mx-auto max-w-md">
-        {justSubscribed && (
-          <p className="notice-success mb-4 text-center">
-            Subscribed! If you don&apos;t see your receipt email, please check
-            your spam/junk folder.
-          </p>
-        )}
-        <div className="text-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/vaulted-logo.png"
-            alt="Vaulted"
-            className="mx-auto h-28 w-28 rounded-2xl shadow-lg shadow-amber-500/25"
-          />
-          <h1 className="mt-4 text-2xl font-medium tracking-tight text-slate-900 dark:text-white">
-            Welcome to <span className="font-bold text-amber-700">Vaulted</span>
-          </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Set up your fund to start tracking purchases, sales and profit.
-          </p>
-        </div>
-        <div className="surface mt-6 p-5">
-          <InvestmentForm investment={null} />
-        </div>
-      </div>
-    );
-  }
-
   const totals = getTotals(db);
-  const currency = investment.currency;
+  const currency = investment?.currency ?? "SGD";
   const soldCards = cards
     .filter((c) => c.status === "sold" && c.sale)
     .sort((a, b) => (a.sale!.saleDate < b.sale!.saleDate ? 1 : -1));
@@ -65,19 +34,38 @@ export default async function DashboardPage({
         </p>
       )}
 
+      {cards.length === 0 && (
+        <p className="notice-info text-center">
+          Welcome to Vaulted! Record your first purchase to get started — a
+          spending budget is optional, set one up any time.
+        </p>
+      )}
+
       <div className="surface flex flex-wrap items-center justify-between gap-4 p-4">
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-          <InvestedAmountEditor
-            amount={totals.investedAmount}
-            currency={currency}
-            since={investment.date}
-          />
-          <div>
-            <span className="text-slate-500 dark:text-slate-400">Available Balance: </span>
-            <span className="font-semibold text-amber-700 dark:text-amber-400">
-              {formatMoney(totals.availableBalance, currency)}
-            </span>
-          </div>
+          {investment ? (
+            <InvestedAmountEditor
+              amount={totals.investedAmount}
+              currency={currency}
+              since={investment.date}
+            />
+          ) : (
+            <div>
+              <span className="text-slate-500 dark:text-slate-400">Overall Fund Invested: </span>
+              <span className="font-semibold text-slate-900 dark:text-white">Not set</span>{" "}
+              <Link href="/investment" className="link-muted">
+                Set up (optional)
+              </Link>
+            </div>
+          )}
+          {investment && (
+            <div>
+              <span className="text-slate-500 dark:text-slate-400">Available Balance: </span>
+              <span className="font-semibold text-amber-700 dark:text-amber-400">
+                {formatMoney(totals.availableBalance, currency)}
+              </span>
+            </div>
+          )}
           <div>
             <span className="text-slate-500 dark:text-slate-400">Cards Inventory: </span>
             <span className="font-semibold text-slate-900 dark:text-white">
@@ -102,12 +90,14 @@ export default async function DashboardPage({
           tone={totals.totalProfit >= 0 ? "positive" : "negative"}
           icon={totals.totalProfit >= 0 ? <ProfitUpIcon /> : <ProfitDownIcon />}
         />
-        <SummaryCard
-          label="Total Funds (Available funds + Sales)"
-          value={formatMoney(totals.totalFunds, currency)}
-          tone="accent"
-          icon={<VaultIcon />}
-        />
+        {investment && (
+          <SummaryCard
+            label="Total Funds (Available funds + Sales)"
+            value={formatMoney(totals.totalFunds, currency)}
+            tone="accent"
+            icon={<VaultIcon />}
+          />
+        )}
       </div>
 
       <div>
