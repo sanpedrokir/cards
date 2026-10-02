@@ -54,7 +54,7 @@ export default async function DashboardPage({
               <span className="text-slate-500 dark:text-slate-400">Overall Fund Invested: </span>
               <span className="font-semibold text-slate-900 dark:text-white">Not set</span>{" "}
               <Link href="/investment" className="link-muted">
-                Set up (optional)
+                (Setup now, optional)
               </Link>
             </div>
           )}
