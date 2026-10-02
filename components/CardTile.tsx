@@ -20,7 +20,7 @@ export default function CardTile({
       href={`/cards/${card.id}`}
       className="surface flex gap-3 p-3 transition-transform hover:-translate-y-0.5 hover:shadow-md"
     >
-      <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-orange-100 to-amber-50 dark:from-orange-500/15 dark:to-amber-500/10">
+      <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-stone-100 to-amber-50 dark:from-stone-500/15 dark:to-amber-500/10">
         {card.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img

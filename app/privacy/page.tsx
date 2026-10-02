@@ -99,7 +99,7 @@ export default function PrivacyPage() {
           Questions about this policy or your data? Email{" "}
           <a
             href="mailto:vaultedsup@gmail.com"
-            className="font-bold text-orange-600 dark:text-amber-400"
+            className="font-medium text-amber-700 dark:text-amber-400"
           >
             vaultedsup@gmail.com
           </a>

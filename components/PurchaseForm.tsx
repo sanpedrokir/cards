@@ -118,7 +118,7 @@ export default function PurchaseForm({
           <div className="mt-1 flex items-center gap-3">
             <label
               htmlFor="image"
-              className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-teal-500 px-4 py-2 text-sm font-extrabold text-white shadow-[0_3px_0_0_#0f766e] transition-all hover:brightness-105 active:translate-y-[2px] active:shadow-[0_1px_0_0_#0f766e]"
+              className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm ring-1 ring-amber-500/40 transition-all hover:bg-slate-800"
             >
               Upload/Scan
             </label>

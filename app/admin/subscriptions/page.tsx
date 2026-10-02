@@ -115,7 +115,7 @@ export default async function AdminSubscriptionsPage({
             href={s === "all" ? "/admin/subscriptions" : `/admin/subscriptions?status=${s}`}
             className={`rounded-full px-3 py-1 text-xs font-medium ${
               activeFilter === s
-                ? "bg-orange-500 text-white shadow-[0_3px_0_0_#c2410c]"
+                ? "bg-slate-900 text-white ring-1 ring-amber-500/40"
                 : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
             }`}
           >
