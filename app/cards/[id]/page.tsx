@@ -187,17 +187,6 @@ export default async function CardDetailPage({
           )}
         </div>
 
-        {card.status === "available" && (
-          <div className="mt-4 flex justify-center">
-            <Link
-              href={`/cards/${card.id}/sell`}
-              className="btn-primary-sm"
-            >
-              Mark as Sold
-            </Link>
-          </div>
-        )}
-
         <DeleteCardButton cardId={card.id} cardName={card.name} />
       </div>
 
