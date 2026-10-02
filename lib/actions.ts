@@ -75,11 +75,16 @@ async function encodeImage(
   const buffer = Buffer.from(await file.arrayBuffer());
 
   try {
+    // Cards are only ever displayed as small thumbnails (CardTile, card
+    // detail) except when someone taps through to view the photo full-size
+    // before selling -- 800px is comfortably sharp for that on a phone
+    // screen, while keeping stored rows (and every page that lists cards)
+    // noticeably lighter than a near-original-resolution photo would be.
     const compressed = await sharp(buffer)
       .rotate()
-      .resize({ width: 900, height: 900, fit: "inside", withoutEnlargement: true })
+      .resize({ width: 800, height: 800, fit: "inside", withoutEnlargement: true })
       .flatten({ background: { r: 255, g: 255, b: 255 } })
-      .jpeg({ quality: 82 })
+      .jpeg({ quality: 78 })
       .toBuffer();
 
     return { dataUrl: `data:image/jpeg;base64,${compressed.toString("base64")}` };
