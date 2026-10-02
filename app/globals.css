@@ -135,4 +135,9 @@ body {
   .page-title {
     @apply font-serif text-2xl font-semibold tracking-tight text-slate-900 dark:text-white;
   }
+
+  /* Loading-state skeleton block */
+  .skeleton {
+    @apply animate-pulse rounded-xl bg-slate-200/70 dark:bg-white/10;
+  }
 }
