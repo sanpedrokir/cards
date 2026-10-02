@@ -100,7 +100,7 @@ export default async function AdminSubscriptionsPage({
             —
           </p>
         ) : (
-          <p className="mt-1 space-x-3 text-lg font-semibold text-blue-600 dark:text-blue-400">
+          <p className="mt-1 space-x-3 text-lg font-semibold text-amber-700 dark:text-amber-400">
             {Object.entries(revenueByCurrency).map(([currency, amount]) => (
               <span key={currency}>{formatMoney(amount, currency)}</span>
             ))}
@@ -115,7 +115,7 @@ export default async function AdminSubscriptionsPage({
             href={s === "all" ? "/admin/subscriptions" : `/admin/subscriptions?status=${s}`}
             className={`rounded-full px-3 py-1 text-xs font-medium ${
               activeFilter === s
-                ? "bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-sm shadow-blue-600/25"
+                ? "bg-gradient-to-r from-amber-400 to-amber-600 text-amber-950 shadow-sm shadow-amber-500/30"
                 : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
             }`}
           >

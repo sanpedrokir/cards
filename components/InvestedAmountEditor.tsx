@@ -64,7 +64,7 @@ export default function InvestedAmountEditor({
             if (e.key === "Enter") e.currentTarget.blur();
             if (e.key === "Escape") setEditing(false);
           }}
-          className="w-28 rounded-lg border border-slate-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60 dark:border-white/10 dark:bg-slate-900"
+          className="w-28 rounded-lg border border-slate-300 px-2 py-1 text-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:opacity-60 dark:border-white/10 dark:bg-slate-900"
         />
         {isSaving && (
           <span className="text-xs text-slate-400 dark:text-slate-500">Saving…</span>
@@ -79,7 +79,7 @@ export default function InvestedAmountEditor({
   return (
     <div className="flex items-center gap-1">
       <span className="text-slate-500 dark:text-slate-400">Overall Fund Invested: </span>
-      <span className="font-semibold text-blue-600 dark:text-blue-400">
+      <span className="font-semibold text-amber-700 dark:text-amber-400">
         {formatMoney(amount, currency)}
       </span>
       <span className="ml-1 text-xs text-slate-400 dark:text-slate-500">

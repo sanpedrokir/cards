@@ -33,7 +33,7 @@ export default function PaginatedSalesTable({
             <div className="min-w-0 flex-1">
               <Link
                 href={`/cards/${card.id}`}
-                className="block truncate text-sm font-medium text-slate-900 hover:text-blue-600 hover:underline dark:text-white dark:hover:text-blue-400"
+                className="block truncate text-sm font-medium text-slate-900 hover:text-amber-700 hover:underline dark:text-white dark:hover:text-amber-400"
               >
                 {card.name}
               </Link>
@@ -71,7 +71,7 @@ export default function PaginatedSalesTable({
             type="button"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
-            className="rounded-full px-3 py-1 text-sm font-medium text-blue-600 disabled:cursor-not-allowed disabled:opacity-40 dark:text-blue-400"
+            className="rounded-full px-3 py-1 text-sm font-medium text-amber-700 disabled:cursor-not-allowed disabled:opacity-40 dark:text-amber-400"
           >
             ← Prev
           </button>
@@ -82,7 +82,7 @@ export default function PaginatedSalesTable({
             type="button"
             onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
             disabled={page >= pageCount - 1}
-            className="rounded-full px-3 py-1 text-sm font-medium text-blue-600 disabled:cursor-not-allowed disabled:opacity-40 dark:text-blue-400"
+            className="rounded-full px-3 py-1 text-sm font-medium text-amber-700 disabled:cursor-not-allowed disabled:opacity-40 dark:text-amber-400"
           >
             Next →
           </button>

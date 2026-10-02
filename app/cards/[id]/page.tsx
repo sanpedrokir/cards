@@ -48,7 +48,7 @@ export default async function CardDetailPage({
 
       <div className="surface p-5">
         <div className="flex gap-4">
-          <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-sky-100 dark:from-blue-500/15 dark:to-sky-500/10">
+          <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-slate-100 to-amber-50 dark:from-slate-500/15 dark:to-amber-500/10">
             {card.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
