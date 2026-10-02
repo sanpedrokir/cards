@@ -1,7 +1,15 @@
 @import "tailwindcss";
 
+/* Bright/white theme: force light mode everywhere by making the `dark:`
+   variant only match an explicit `.dark` ancestor class, which this app
+   never applies. This neutralizes every `dark:` utility across the app
+   (and the device's prefers-color-scheme setting) without having to touch
+   every component file. To restore automatic dark mode, delete this line
+   and see backup-indigo-dark-theme for the previous palette. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #f5f6fb;
+  --background: #ffffff;
   --foreground: #1a1a2e;
 }
 
@@ -10,13 +18,6 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0b0c17;
-    --foreground: #e9e9f2;
-  }
 }
 
 html {
@@ -29,25 +30,12 @@ body {
   background-color: var(--background);
   background-image: radial-gradient(
       circle at 8% -10%,
-      rgba(99, 102, 241, 0.16),
+      rgba(99, 102, 241, 0.06),
       transparent 42%
     ),
-    radial-gradient(circle at 100% 0%, rgba(245, 158, 11, 0.14), transparent 38%),
-    radial-gradient(circle at 50% 100%, rgba(236, 72, 153, 0.06), transparent 45%);
+    radial-gradient(circle at 100% 0%, rgba(245, 158, 11, 0.05), transparent 38%);
   background-attachment: fixed;
   min-height: 100%;
-}
-
-@media (prefers-color-scheme: dark) {
-  body {
-    background-image: radial-gradient(
-        circle at 8% -10%,
-        rgba(99, 102, 241, 0.3),
-        transparent 42%
-      ),
-      radial-gradient(circle at 100% 0%, rgba(245, 158, 11, 0.1), transparent 38%),
-      radial-gradient(circle at 50% 100%, rgba(236, 72, 153, 0.07), transparent 45%);
-  }
 }
 
 @layer components {
