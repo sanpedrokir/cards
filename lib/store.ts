@@ -240,6 +240,40 @@ export async function updateCardSalePrice(
   return rows.length > 0;
 }
 
+// Converts every stored amount for a user (investment + every card's
+// purchase/sale price and fees) to a new currency by multiplying by `rate`,
+// in one transaction so the currency label and the amounts it labels never
+// go out of sync partway through.
+export async function convertCurrency(
+  userId: string,
+  toCurrency: string,
+  rate: number
+): Promise<void> {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+    await client.query(
+      `UPDATE investment SET currency = $1, amount = ROUND(amount * $2, 2) WHERE user_id = $3`,
+      [toCurrency, rate, userId]
+    );
+    await client.query(
+      `UPDATE cards SET
+        purchase_price = ROUND(purchase_price * $1, 2),
+        sale_price = CASE WHEN sale_price IS NOT NULL THEN ROUND(sale_price * $1, 2) ELSE NULL END,
+        fees = CASE WHEN fees IS NOT NULL THEN ROUND(fees * $1, 2) ELSE NULL END
+      WHERE user_id = $2`,
+      [rate, userId]
+    );
+    await client.query("COMMIT");
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 export async function deleteCard(userId: string, id: string): Promise<void> {
   await sql`DELETE FROM cards WHERE id = ${id} AND user_id = ${userId}`;
 }

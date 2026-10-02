@@ -37,18 +37,30 @@ export default function InvestmentForm({
           <label htmlFor="currency" className="label-field">
             Currency
           </label>
-          <select
-            id="currency"
-            name="currency"
-            defaultValue={investment?.currency ?? "SGD"}
-            className="input-field"
-          >
-            {CURRENCIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
+          {investment ? (
+            <>
+              <div className="input-field flex items-center bg-slate-50 text-slate-500 dark:bg-white/5 dark:text-slate-400">
+                {investment.currency}
+              </div>
+              <input type="hidden" name="currency" value={investment.currency} />
+              <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                Use the Currency section below to switch and convert.
+              </p>
+            </>
+          ) : (
+            <select
+              id="currency"
+              name="currency"
+              defaultValue="SGD"
+              className="input-field"
+            >
+              {CURRENCIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         <div>

@@ -9,7 +9,9 @@ import { currentUser } from "@clerk/nextjs/server";
 import { requireAdminUserId, requirePageUserId, requireSignedInUserId } from "./auth-helpers";
 import { getStripe, getAppUrl } from "./stripe";
 import { searchEbayActiveListings, type EbayListing } from "./ebay";
+import { getExchangeRate } from "./exchange-rates";
 import {
+  convertCurrency,
   deleteCard,
   getCardById,
   getInvestment,
@@ -126,13 +128,29 @@ export async function analyzeCardPhoto(
     return { error: "Card scanning isn't configured yet." };
   }
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const base64 = buffer.toString("base64");
+  const rawBuffer = Buffer.from(await file.arrayBuffer());
+
+  let base64: string;
+  try {
+    // Downscale before sending for analysis: a full-resolution phone photo
+    // (several MB) takes much longer to upload to Claude and for the model
+    // to process than a smaller image, with no benefit for reading printed
+    // text. This only affects the copy sent for scanning, not the photo
+    // saved with the card (see encodeImage below).
+    const scanBuffer = await sharp(rawBuffer)
+      .rotate()
+      .resize({ width: 1024, height: 1024, fit: "inside", withoutEnlargement: true })
+      .jpeg({ quality: 80 })
+      .toBuffer();
+    base64 = scanBuffer.toString("base64");
+  } catch {
+    return { error: "Couldn't read that photo. Please try a different one." };
+  }
 
   try {
     const client = new Anthropic({ apiKey });
     const response = await client.messages.create({
-      model: "claude-sonnet-5",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 300,
       messages: [
         {
@@ -140,8 +158,7 @@ export async function analyzeCardPhoto(
           content: [
             {
               type: "image",
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              source: { type: "base64", media_type: file.type as any, data: base64 },
+              source: { type: "base64", media_type: "image/jpeg", data: base64 },
             },
             {
               type: "text",
@@ -226,6 +243,41 @@ export async function updateInvestmentAmount(
 
   revalidateInvestmentPaths();
   redirect("/");
+}
+
+export async function changeCurrencyAction(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const userId = await requirePageUserId();
+  const toCurrency = textField(formData, "currency");
+
+  if (!toCurrency) {
+    return { error: "Select a currency." };
+  }
+
+  const investment = await getInvestment(userId);
+  if (!investment) {
+    return { error: "Set up your initial investment first." };
+  }
+  if (investment.currency === toCurrency) {
+    return { error: `You're already using ${toCurrency}.` };
+  }
+
+  let rate: number;
+  try {
+    rate = await getExchangeRate(investment.currency, toCurrency);
+  } catch {
+    return {
+      error: "Couldn't fetch today's exchange rate. Please try again in a moment.",
+    };
+  }
+
+  await convertCurrency(userId, toCurrency, rate);
+
+  revalidateInvestmentPaths();
+  revalidateCardPaths();
+  return {};
 }
 
 export async function purchaseCard(
