@@ -22,7 +22,7 @@ export default function SellPickerForm({
   return (
     <form action={formAction} className="space-y-5">
       <div>
-        <label htmlFor="cardId" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="cardId" className="label-field">
           Card *
         </label>
         <select
@@ -31,7 +31,7 @@ export default function SellPickerForm({
           required
           value={selectedCardId}
           onChange={(e) => setSelectedCardId(e.target.value)}
-          className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+          className="input-field"
         >
           <option value="" disabled>
             Select Card
@@ -48,7 +48,7 @@ export default function SellPickerForm({
             href={selectedCard.imageUrl}
             target="_blank"
             rel="noreferrer"
-            className="mt-2 inline-block h-20 w-16 overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700"
+            className="mt-2 inline-block h-20 w-16 overflow-hidden rounded-lg border border-slate-200 dark:border-white/10"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -66,7 +66,7 @@ export default function SellPickerForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="salePrice" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label htmlFor="salePrice" className="label-field">
             Sale Amount *
           </label>
           <input
@@ -77,58 +77,58 @@ export default function SellPickerForm({
             min="0"
             required
             placeholder="1200.00"
-            className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+            className="input-field"
           />
         </div>
         <div>
-          <span className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <span className="label-field">
             Sale Date
           </span>
-          <div className="mt-1 flex h-[46px] w-full items-center rounded-xl border border-zinc-200 bg-zinc-50 px-3 text-base text-zinc-500 dark:border-zinc-800 dark:bg-zinc-800/50 dark:text-zinc-400">
+          <div className="mt-1 flex h-[46px] w-full items-center rounded-xl border border-slate-200 bg-slate-50 px-3 text-base text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
             {formatDate(todayIso())}
           </div>
         </div>
       </div>
 
       <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Comment <span className="text-zinc-400">(optional)</span>
+        <label htmlFor="notes" className="label-field">
+          Comment <span className="text-slate-400">(optional)</span>
         </label>
         <textarea
           id="notes"
           name="notes"
           rows={3}
           placeholder="Add a comment about this sale..."
-          className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+          className="input-field"
         />
       </div>
 
-      <details className="group rounded-xl border border-zinc-200 dark:border-zinc-800">
-        <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+      <details className="group rounded-xl border border-slate-200 dark:border-white/10">
+        <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
           More details (optional)
         </summary>
         <fieldset className="space-y-4 px-4 pb-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="buyer" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label htmlFor="buyer" className="label-field">
                 Buyer
               </label>
               <input
                 id="buyer"
                 name="buyer"
                 type="text"
-                className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+                className="input-field"
               />
             </div>
             <div>
-              <label htmlFor="channel" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label htmlFor="channel" className="label-field">
                 Marketplace / Channel
               </label>
               <select
                 id="channel"
                 name="channel"
                 defaultValue=""
-                className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+                className="input-field"
               >
                 <option value="" disabled>
                   Select...
@@ -143,8 +143,8 @@ export default function SellPickerForm({
           </div>
 
           <div>
-            <label htmlFor="fees" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Fees <span className="text-zinc-400">(optional)</span>
+            <label htmlFor="fees" className="label-field">
+              Fees <span className="text-slate-400">(optional)</span>
             </label>
             <input
               id="fees"
@@ -153,17 +153,13 @@ export default function SellPickerForm({
               step="0.01"
               min="0"
               placeholder="0.00"
-              className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+              className="input-field"
             />
           </div>
         </fieldset>
       </details>
 
-      {state?.error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-400">
-          {state.error}
-        </p>
-      )}
+      {state?.error && <p className="notice-error">{state.error}</p>}
 
       <SubmitButton className="w-full">Confirm Sale</SubmitButton>
     </form>

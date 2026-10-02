@@ -103,7 +103,7 @@ export default function PurchaseForm({
 
   return (
     <form action={formAction} className="space-y-5">
-      <div className="rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:bg-blue-950/40 dark:text-blue-300">
+      <div className="notice-info">
         Available balance:{" "}
         <span className="font-semibold">
           {formatMoney(availableBalance, currency)}
@@ -112,13 +112,13 @@ export default function PurchaseForm({
 
       <fieldset className="space-y-4">
         <div>
-          <span className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <span className="label-field">
             Photo
           </span>
           <div className="mt-1 flex items-center gap-3">
             <label
               htmlFor="image"
-              className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+              className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:brightness-110"
             >
               Upload/Scan
             </label>
@@ -131,19 +131,19 @@ export default function PurchaseForm({
               onChange={handleFileChange}
               className="sr-only"
             />
-            <span className="truncate text-sm text-zinc-500 dark:text-zinc-400">
+            <span className="truncate text-sm text-slate-500 dark:text-slate-400">
               {fileName ?? "No file chosen"}
             </span>
           </div>
-          <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
             Take a photo with your camera, or upload one from a scanner app --
             we&apos;ll automatically fill in the fields below.
           </p>
           {isScanning && (
-            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Scanning…</p>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Scanning…</p>
           )}
           {scanError && (
-            <p className="mt-2 text-sm text-red-600 dark:text-red-400">{scanError}</p>
+            <p className="mt-2 text-sm text-rose-600 dark:text-rose-400">{scanError}</p>
           )}
           {scanNotice && !scanError && (
             <p className="mt-2 text-sm text-emerald-600 dark:text-emerald-400">
@@ -153,7 +153,7 @@ export default function PurchaseForm({
         </div>
 
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label htmlFor="name" className="label-field">
             Card Name *
           </label>
           <input
@@ -163,13 +163,13 @@ export default function PurchaseForm({
             type="text"
             required
             placeholder="2023 Pokémon Charizard PSA 10"
-            className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+            className="input-field"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="purchasePrice" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label htmlFor="purchasePrice" className="label-field">
               Purchase Price *
             </label>
             <input
@@ -180,26 +180,26 @@ export default function PurchaseForm({
               min="0.01"
               required
               placeholder="850.00"
-              className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+              className="input-field"
             />
           </div>
           <div>
-            <span className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <span className="label-field">
               Purchase Date
             </span>
-            <div className="mt-1 flex h-[46px] w-full items-center rounded-xl border border-zinc-200 bg-zinc-50 px-3 text-base text-zinc-500 dark:border-zinc-800 dark:bg-zinc-800/50 dark:text-zinc-400">
+            <div className="mt-1 flex h-[46px] w-full items-center rounded-xl border border-slate-200 bg-slate-50 px-3 text-base text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
               {formatDate(todayIso())}
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+        <div className="rounded-xl border border-slate-200 p-4 dark:border-white/10">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">
                 eBay Market Check
               </p>
-              <p className="text-xs text-zinc-400 dark:text-zinc-500">
+              <p className="text-xs text-slate-400 dark:text-slate-500">
                 See if you&apos;re paying a fair price.
               </p>
             </div>
@@ -207,14 +207,14 @@ export default function PurchaseForm({
               type="button"
               onClick={handleCheckEbay}
               disabled={isCheckingEbay}
-              className="shrink-0 rounded-full bg-zinc-900 px-4 py-1.5 text-xs font-semibold text-white hover:bg-zinc-800 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900"
+              className="btn-chip"
             >
               {isCheckingEbay ? "Checking…" : "Check eBay Price"}
             </button>
           </div>
 
           {ebayResult?.error && (
-            <p className="mt-3 text-sm text-red-600 dark:text-red-400">{ebayResult.error}</p>
+            <p className="mt-3 text-sm text-rose-600 dark:text-rose-400">{ebayResult.error}</p>
           )}
 
           {ebayResult && !ebayResult.error && (
@@ -241,12 +241,12 @@ export default function PurchaseForm({
                       href={listing.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                      className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
-                      <span className="truncate text-zinc-600 dark:text-zinc-300">
+                      <span className="truncate text-slate-600 dark:text-slate-300">
                         {listing.title}
                       </span>
-                      <span className="shrink-0 font-medium text-zinc-900 dark:text-zinc-50">
+                      <span className="shrink-0 font-medium text-slate-900 dark:text-white">
                         {formatMoney(listing.price, listing.currency)}
                       </span>
                     </a>
@@ -258,14 +258,14 @@ export default function PurchaseForm({
         </div>
       </fieldset>
 
-      <details ref={detailsRef} open className="group rounded-xl border border-zinc-200 dark:border-zinc-800">
-        <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+      <details ref={detailsRef} open className="group rounded-xl border border-slate-200 dark:border-white/10">
+        <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
           More details (optional)
         </summary>
         <fieldset className="space-y-4 px-4 pb-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label htmlFor="category" className="label-field">
                 Category
               </label>
               <input
@@ -273,11 +273,11 @@ export default function PurchaseForm({
                 name="category"
                 type="text"
                 placeholder="Pokémon"
-                className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+                className="input-field"
               />
             </div>
             <div>
-              <label htmlFor="series" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label htmlFor="series" className="label-field">
                 Set / Series
               </label>
               <input
@@ -286,13 +286,13 @@ export default function PurchaseForm({
                 name="series"
                 type="text"
                 placeholder="Base Set"
-                className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+                className="input-field"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="cardNumber" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label htmlFor="cardNumber" className="label-field">
               Card Number
             </label>
             <input
@@ -301,13 +301,13 @@ export default function PurchaseForm({
               name="cardNumber"
               type="text"
               placeholder="4/102"
-              className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+              className="input-field"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="grade" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label htmlFor="grade" className="label-field">
                 Grade
               </label>
               <input
@@ -316,11 +316,11 @@ export default function PurchaseForm({
                 name="grade"
                 type="text"
                 placeholder="0 if ungraded"
-                className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+                className="input-field"
               />
             </div>
             <div>
-              <label htmlFor="gradingCompany" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label htmlFor="gradingCompany" className="label-field">
                 Grading Company
               </label>
               <input
@@ -329,13 +329,13 @@ export default function PurchaseForm({
                 name="gradingCompany"
                 type="text"
                 placeholder="PSA"
-                className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+                className="input-field"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="certNumber" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label htmlFor="certNumber" className="label-field">
               Cert / Serial # (PSA)
             </label>
             <input
@@ -344,29 +344,25 @@ export default function PurchaseForm({
               name="certNumber"
               type="text"
               placeholder="115823198"
-              className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+              className="input-field"
             />
           </div>
 
           <div>
-            <label htmlFor="notes" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label htmlFor="notes" className="label-field">
               Notes
             </label>
             <textarea
               id="notes"
               name="notes"
               rows={3}
-              className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
+              className="input-field"
             />
           </div>
         </fieldset>
       </details>
 
-      {state?.error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-400">
-          {state.error}
-        </p>
-      )}
+      {state?.error && <p className="notice-error">{state.error}</p>}
 
       <SubmitButton className="w-full">Purchase</SubmitButton>
     </form>

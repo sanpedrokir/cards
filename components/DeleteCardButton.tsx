@@ -14,7 +14,7 @@ export default function DeleteCardButton({
     <form action={deleteCardAction.bind(null, cardId)}>
       <ConfirmSubmitButton
         triggerLabel="Delete Card"
-        triggerClassName="mt-3 block text-center text-sm font-medium text-red-600 underline-offset-2 hover:underline dark:text-red-400"
+        triggerClassName="mt-3 block text-center text-sm font-medium text-rose-600 underline-offset-2 hover:underline dark:text-rose-400"
         title="Delete this card?"
         message={`"${cardName}" will be permanently removed. This cannot be undone.`}
         confirmLabel="Delete"

@@ -22,19 +22,14 @@ export default async function SellCardPage({
 
   return (
     <div className="mx-auto max-w-lg space-y-4">
-      <Link
-        href={`/cards/${id}`}
-        className="text-sm font-medium text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-      >
+      <Link href={`/cards/${id}`} className="link-muted">
         ← Back
       </Link>
-      <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-        Sell {card.name}
-      </h1>
+      <h1 className="page-title">Sell {card.name}</h1>
 
       <EbayPriceCheck cardId={card.id} />
 
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="surface p-5">
         <SellForm
           cardId={card.id}
           purchasePrice={card.purchasePrice}

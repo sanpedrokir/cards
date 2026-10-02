@@ -18,7 +18,7 @@ function statusTone(status: string) {
   if (status === "past_due") {
     return "text-amber-600 dark:text-amber-400";
   }
-  return "text-zinc-500 dark:text-zinc-400";
+  return "text-slate-500 dark:text-slate-400";
 }
 
 export default async function AdminSubscriptionsPage({
@@ -85,23 +85,18 @@ export default async function AdminSubscriptionsPage({
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-          Subscriptions
-        </h1>
-        <Link
-          href="/admin"
-          className="text-sm font-medium text-blue-600 dark:text-blue-400"
-        >
+        <h1 className="page-title">Subscriptions</h1>
+        <Link href="/admin" className="link-muted">
           ← Admin
         </Link>
       </div>
 
-      <div className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+      <div className="surface p-4">
+        <p className="text-xs text-slate-500 dark:text-slate-400">
           Total monthly revenue ({active.length} active)
         </p>
         {Object.keys(revenueByCurrency).length === 0 ? (
-          <p className="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+          <p className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">
             —
           </p>
         ) : (
@@ -120,8 +115,8 @@ export default async function AdminSubscriptionsPage({
             href={s === "all" ? "/admin/subscriptions" : `/admin/subscriptions?status=${s}`}
             className={`rounded-full px-3 py-1 text-xs font-medium ${
               activeFilter === s
-                ? "bg-blue-600 text-white"
-                : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
             }`}
           >
             {s === "all" ? "All" : s}
@@ -130,13 +125,13 @@ export default async function AdminSubscriptionsPage({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
+        <p className="surface-dashed p-6">
           No subscriptions{activeFilter === "all" ? " yet" : ` with status "${activeFilter}"`}.
         </p>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800">
+        <div className="surface overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-zinc-50 text-xs uppercase text-zinc-500 dark:bg-zinc-800/50 dark:text-zinc-400">
+            <thead className="bg-slate-50 text-xs uppercase text-slate-500 dark:bg-white/5 dark:text-slate-400">
               <tr>
                 <th className="px-3 py-2 text-left font-medium">User Email</th>
                 <th className="px-3 py-2 text-left font-medium">Status</th>
@@ -145,22 +140,22 @@ export default async function AdminSubscriptionsPage({
                 <th className="px-3 py-2 text-left font-medium">Transaction #</th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-zinc-900">
+            <tbody>
               {filtered.map((s) => (
-                <tr key={s.userId} className="border-t border-zinc-100 dark:border-zinc-800">
-                  <td className="px-3 py-2 text-zinc-900 dark:text-zinc-50">
+                <tr key={s.userId} className="border-t border-slate-100 dark:border-white/5">
+                  <td className="px-3 py-2 text-slate-900 dark:text-white">
                     {emailByUserId.get(s.userId) ?? s.userId}
                   </td>
                   <td className={`px-3 py-2 font-medium ${statusTone(s.status)}`}>
                     {s.status}
                   </td>
-                  <td className="px-3 py-2 text-zinc-600 dark:text-zinc-300">
+                  <td className="px-3 py-2 text-slate-600 dark:text-slate-300">
                     {formatDate(s.createdAt.slice(0, 10))}
                   </td>
-                  <td className="px-3 py-2 text-zinc-600 dark:text-zinc-300">
+                  <td className="px-3 py-2 text-slate-600 dark:text-slate-300">
                     {s.currentPeriodEnd ? formatDate(s.currentPeriodEnd.slice(0, 10)) : "—"}
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs text-zinc-500 dark:text-zinc-400">
+                  <td className="px-3 py-2 font-mono text-xs text-slate-500 dark:text-slate-400">
                     {s.stripeSubscriptionId ?? "—"}
                   </td>
                 </tr>

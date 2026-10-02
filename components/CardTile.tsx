@@ -12,13 +12,14 @@ export default function CardTile({
   currency: string;
 }) {
   const profit = card.sale ? cardProfit(card) : null;
+  const isProfit = (profit ?? 0) >= 0;
 
   return (
     <Link
       href={`/cards/${card.id}`}
-      className="flex gap-3 rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+      className="surface flex gap-3 p-3 transition-transform hover:-translate-y-0.5 hover:shadow-md"
     >
-      <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
+      <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-indigo-100 to-amber-50 dark:from-indigo-500/15 dark:to-amber-500/10">
         {card.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -35,29 +36,31 @@ export default function CardTile({
 
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <p className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+          <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">
             {card.name}
           </p>
           <StatusBadge status={card.status} />
         </div>
-        <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
           Purchased {formatDate(card.purchaseDate)} ·{" "}
           {formatMoney(card.purchasePrice, currency)}
         </p>
 
         {card.sale && profit !== null && (
-          <p className="mt-1 text-xs">
-            Sold {formatDate(card.sale.saleDate)} ·{" "}
-            {formatMoney(card.sale.salePrice, currency)} ·{" "}
+          <p className="mt-1 flex items-center gap-1 text-xs">
+            <span className="text-slate-500 dark:text-slate-400">
+              Sold {formatDate(card.sale.saleDate)} ·{" "}
+              {formatMoney(card.sale.salePrice, currency)} ·
+            </span>
             <span
-              className={
-                profit >= 0
-                  ? "font-semibold text-amber-600 dark:text-amber-400"
-                  : "font-semibold text-red-600 dark:text-red-400"
-              }
+              className={`inline-flex items-center gap-0.5 font-semibold ${
+                isProfit
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-rose-600 dark:text-rose-400"
+              }`}
             >
-              {profit >= 0 ? "+" : ""}
-              {formatMoney(profit, currency)}
+              {isProfit ? "▲" : "▼"}
+              {formatMoney(Math.abs(profit), currency)}
             </span>
           </p>
         )}

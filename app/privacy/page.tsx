@@ -1,11 +1,9 @@
 export default function PrivacyPage() {
   return (
-    <div className="mx-auto max-w-2xl space-y-6 text-sm text-zinc-700 dark:text-zinc-300">
+    <div className="mx-auto max-w-2xl space-y-6 text-sm text-slate-700 dark:text-slate-300">
       <div>
-        <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-          Privacy Policy
-        </h1>
-        <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+        <h1 className="page-title">Privacy Policy</h1>
+        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
           Last updated: September 2026
         </p>
       </div>
@@ -18,7 +16,7 @@ export default function PrivacyPage() {
       </p>
 
       <section className="space-y-2">
-        <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+        <h2 className="text-base font-semibold text-slate-900 dark:text-white">
           Information we collect
         </h2>
         <ul className="list-disc space-y-1 pl-5">
@@ -40,7 +38,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+        <h2 className="text-base font-semibold text-slate-900 dark:text-white">
           How we use it
         </h2>
         <p>
@@ -53,7 +51,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+        <h2 className="text-base font-semibold text-slate-900 dark:text-white">
           Third-party services
         </h2>
         <p>We rely on the following providers to run the app:</p>
@@ -83,7 +81,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+        <h2 className="text-base font-semibold text-slate-900 dark:text-white">
           Data retention and deletion
         </h2>
         <p>
@@ -94,14 +92,14 @@ export default function PrivacyPage() {
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+        <h2 className="text-base font-semibold text-slate-900 dark:text-white">
           Contact
         </h2>
         <p>
           Questions about this policy or your data? Email{" "}
           <a
             href="mailto:vaultedsup@gmail.com"
-            className="font-medium text-blue-600 dark:text-blue-400"
+            className="font-medium text-indigo-600 dark:text-indigo-400"
           >
             vaultedsup@gmail.com
           </a>

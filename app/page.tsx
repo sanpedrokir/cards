@@ -23,7 +23,7 @@ export default async function DashboardPage({
     return (
       <div className="mx-auto max-w-md">
         {justSubscribed && (
-          <p className="mb-4 text-center text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="notice-success mb-4 text-center">
             Subscribed! If you don&apos;t see your receipt email, please check
             your spam/junk folder.
           </p>
@@ -33,13 +33,19 @@ export default async function DashboardPage({
           <img
             src="/vaulted-logo.png"
             alt="Vaulted"
-            className="mx-auto h-28 w-28"
+            className="mx-auto h-28 w-28 rounded-2xl shadow-lg shadow-indigo-600/20"
           />
-          <h1 className="mt-4 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-            Welcome to Vaulted
+          <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            Welcome to{" "}
+            <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+              Vaulted
+            </span>
           </h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Set up your fund to start tracking purchases, sales and profit.
+          </p>
         </div>
-        <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="surface mt-6 p-5">
           <InvestmentForm investment={null} />
         </div>
       </div>
@@ -55,37 +61,34 @@ export default async function DashboardPage({
   return (
     <div className="space-y-6">
       {justSubscribed && (
-        <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="notice-success text-center">
           Subscribed! If you don&apos;t see your receipt email, please check
           your spam/junk folder.
         </p>
       )}
-      <div className="flex flex-wrap gap-x-6 gap-y-1 border-b border-zinc-200 pb-4 text-sm dark:border-zinc-800">
-        <InvestedAmountEditor
-          amount={totals.investedAmount}
-          currency={currency}
-          since={investment.date}
-        />
-        <div>
-          <span className="text-zinc-500 dark:text-zinc-400">Available Balance: </span>
-          <span className="font-semibold text-blue-600 dark:text-blue-400">
-            {formatMoney(totals.availableBalance, currency)}
-          </span>
-        </div>
-        <div>
-          <span className="text-zinc-500 dark:text-zinc-400">Cards Inventory: </span>
-          <span className="font-semibold text-zinc-900 dark:text-zinc-50">
-            {formatMoney(totals.inventoryCost, currency)}
-          </span>
-        </div>
-      </div>
 
-      <div className="flex items-center justify-end">
-        <Link
-          href="/cards/new"
-          className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-        >
-          + Purchase
+      <div className="surface flex flex-wrap items-center justify-between gap-4 p-4">
+        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+          <InvestedAmountEditor
+            amount={totals.investedAmount}
+            currency={currency}
+            since={investment.date}
+          />
+          <div>
+            <span className="text-slate-500 dark:text-slate-400">Available Balance: </span>
+            <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+              {formatMoney(totals.availableBalance, currency)}
+            </span>
+          </div>
+          <div>
+            <span className="text-slate-500 dark:text-slate-400">Cards Inventory: </span>
+            <span className="font-semibold text-slate-900 dark:text-white">
+              {formatMoney(totals.inventoryCost, currency)}
+            </span>
+          </div>
+        </div>
+        <Link href="/cards/new" className="btn-primary-sm">
+          <span className="text-base leading-none">+</span> Purchase
         </Link>
       </div>
 
@@ -93,36 +96,34 @@ export default async function DashboardPage({
         <SummaryCard
           label="Total Sales"
           value={formatMoney(totals.totalSales, currency)}
+          icon="💰"
         />
         <SummaryCard
           label="Total Profit"
           value={formatMoney(totals.totalProfit, currency)}
           tone={totals.totalProfit >= 0 ? "positive" : "negative"}
+          icon={totals.totalProfit >= 0 ? "📈" : "📉"}
         />
         <SummaryCard
           label="Total Funds (Available funds + Sales)"
           value={formatMoney(totals.totalFunds, currency)}
           tone="accent"
+          icon="🏦"
         />
       </div>
 
       <div>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
             Sales
           </h2>
-          <Link
-            href="/cards?status=sold"
-            className="text-sm font-medium text-blue-600 dark:text-blue-400"
-          >
+          <Link href="/cards?status=sold" className="link-muted">
             View all
           </Link>
         </div>
 
         {soldCards.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-            No sales yet.
-          </p>
+          <p className="surface-dashed p-6">No sales yet.</p>
         ) : (
           <PaginatedSalesTable
             soldCards={soldCards}

@@ -100,12 +100,14 @@ export default function Nav() {
 
   if (!isSignedIn) {
     return (
-      <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80">
+      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur dark:border-white/10 dark:bg-slate-950/80">
         <div className="mx-auto flex max-w-4xl items-center justify-center px-6 py-3">
-          <Link href="/" className="flex items-center gap-2 text-base font-semibold text-zinc-900 dark:text-zinc-50">
+          <Link href="/" className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/vaulted-logo.png" alt="" className="h-8 w-8" />
-            Vaulted
+            <img src="/vaulted-logo.png" alt="" className="h-8 w-8 rounded-lg shadow-sm" />
+            <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+              Vaulted
+            </span>
           </Link>
         </div>
       </header>
@@ -114,36 +116,38 @@ export default function Nav() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80 sm:hidden">
+      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur dark:border-white/10 dark:bg-slate-950/80 sm:hidden">
         <div className="flex items-center justify-between px-4 py-2">
           <div className="w-12" />
-          <Link href="/">
+          <Link href="/" className="flex items-center gap-1.5 text-sm font-bold text-slate-900 dark:text-white">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/vaulted-logo.png" alt="Vaulted" className="h-8 w-8" />
+            <img src="/vaulted-logo.png" alt="Vaulted" className="h-8 w-8 rounded-lg shadow-sm" />
           </Link>
           <button
             onClick={handleSignOut}
-            className="w-12 text-right text-[11px] font-medium text-zinc-500 dark:text-zinc-400"
+            className="w-12 text-right text-[11px] font-medium text-slate-500 dark:text-slate-400"
           >
             Sign out
           </button>
         </div>
         {email && (
-          <div className="border-t border-zinc-100 px-4 py-1 text-center text-[11px] text-zinc-400 dark:border-zinc-900 dark:text-zinc-500">
+          <div className="border-t border-slate-100 px-4 py-1 text-center text-[11px] text-slate-400 dark:border-white/5 dark:text-slate-500">
             {email}
           </div>
         )}
       </header>
 
-      <header className="sticky top-0 z-40 hidden border-b border-zinc-200 bg-white/80 backdrop-blur sm:block dark:border-zinc-800 dark:bg-zinc-950/80">
+      <header className="sticky top-0 z-40 hidden border-b border-slate-200/70 bg-white/80 backdrop-blur sm:block dark:border-white/10 dark:bg-slate-950/80">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-3">
-          <Link href="/" className="flex items-center gap-2 text-base font-semibold text-zinc-900 dark:text-zinc-50">
+          <Link href="/" className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/vaulted-logo.png" alt="" className="h-8 w-8" />
-            Vaulted
+            <img src="/vaulted-logo.png" alt="" className="h-8 w-8 rounded-lg shadow-sm" />
+            <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+              Vaulted
+            </span>
           </Link>
           {email && (
-            <span className="text-xs text-zinc-400 dark:text-zinc-500">{email}</span>
+            <span className="text-xs text-slate-400 dark:text-slate-500">{email}</span>
           )}
           <nav className="flex items-center gap-1">
             {NAV_ITEMS.map((item) => {
@@ -152,11 +156,7 @@ export default function Nav() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                    active
-                      ? "bg-blue-600 text-white"
-                      : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
-                  }`}
+                  className={active ? "pill-active" : "pill"}
                 >
                   {item.label}
                 </Link>
@@ -164,7 +164,7 @@ export default function Nav() {
             })}
             <button
               onClick={handleSignOut}
-              className="ml-2 rounded-full px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              className="ml-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10"
             >
               Sign out
             </button>
@@ -172,7 +172,7 @@ export default function Nav() {
         </div>
       </header>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white/95 backdrop-blur pb-[env(safe-area-inset-bottom)] sm:hidden dark:border-zinc-800 dark:bg-zinc-950/95">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/70 bg-white/95 backdrop-blur pb-[env(safe-area-inset-bottom)] sm:hidden dark:border-white/10 dark:bg-slate-950/95">
         <div className="mx-auto flex max-w-md items-stretch justify-between px-2">
           {NAV_ITEMS.map((item) => {
             const active = isActive(item.href);
@@ -180,10 +180,10 @@ export default function Nav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium ${
+                className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium transition-colors ${
                   active
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-zinc-500 dark:text-zinc-400"
+                    ? "text-indigo-600 dark:text-indigo-400"
+                    : "text-slate-500 dark:text-slate-400"
                 }`}
               >
                 {item.icon(active)}

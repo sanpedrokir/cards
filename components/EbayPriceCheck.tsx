@@ -16,26 +16,26 @@ export default function EbayPriceCheck({ cardId }: { cardId: string }) {
   }
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="surface p-5">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
           eBay Market Check
         </h2>
         <button
           type="button"
           onClick={handleCheck}
           disabled={isPending}
-          className="shrink-0 rounded-full bg-zinc-900 px-4 py-1.5 text-xs font-semibold text-white hover:bg-zinc-800 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900"
+          className="btn-chip"
         >
           {isPending ? "Checking…" : "Check eBay Price"}
         </button>
       </div>
-      <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+      <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
         Guideline only, not a guaranteed sale price.
       </p>
 
       {result?.error && (
-        <p className="mt-3 text-sm text-red-600 dark:text-red-400">{result.error}</p>
+        <p className="mt-3 text-sm text-rose-600 dark:text-rose-400">{result.error}</p>
       )}
 
       {result && !result.error && (
@@ -64,12 +64,12 @@ export default function EbayPriceCheck({ cardId }: { cardId: string }) {
                   href={listing.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                  className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-white/5"
                 >
-                  <span className="truncate text-zinc-600 dark:text-zinc-300">
+                  <span className="truncate text-slate-600 dark:text-slate-300">
                     {listing.title}
                   </span>
-                  <span className="shrink-0 font-medium text-zinc-900 dark:text-zinc-50">
+                  <span className="shrink-0 font-medium text-slate-900 dark:text-white">
                     {formatMoney(listing.price, listing.currency)}
                   </span>
                 </a>

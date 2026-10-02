@@ -84,13 +84,13 @@ export default function EditableAmount({
             if (e.key === "Enter") e.currentTarget.blur();
             if (e.key === "Escape") setEditing(false);
           }}
-          className="w-24 rounded-lg border border-zinc-300 px-2 py-1 text-right text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900"
+          className="w-24 rounded-lg border border-slate-300 px-2 py-1 text-right text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:opacity-60 dark:border-white/10 dark:bg-slate-900"
         />
         {isSaving && (
-          <span className="text-xs text-zinc-400 dark:text-zinc-500">Saving…</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500">Saving…</span>
         )}
         {state?.error && (
-          <p className="w-full text-right text-xs text-red-600 dark:text-red-400">
+          <p className="w-full text-right text-xs text-rose-600 dark:text-rose-400">
             {state.error}
           </p>
         )}
@@ -105,7 +105,7 @@ export default function EditableAmount({
         type="button"
         onClick={() => setEditing(true)}
         aria-label={ariaLabel}
-        className="rounded-full p-0.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+        className="btn-ghost-icon p-0.5"
       >
         <PencilIcon />
       </button>

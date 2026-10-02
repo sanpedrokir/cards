@@ -13,8 +13,11 @@ export async function requirePageUserId(): Promise<string> {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  const gateEnabled = await isSubscriptionGateEnabled();
-  if (gateEnabled && !(await hasActiveSubscription(userId))) {
+  const [gateEnabled, hasSubscription] = await Promise.all([
+    isSubscriptionGateEnabled(),
+    hasActiveSubscription(userId),
+  ]);
+  if (gateEnabled && !hasSubscription) {
     redirect("/pricing");
   }
 

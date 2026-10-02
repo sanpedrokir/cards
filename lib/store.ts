@@ -1,6 +1,5 @@
 import "server-only";
-import { Client } from "@neondatabase/serverless";
-import { sql } from "./db";
+import { sql, pool } from "./db";
 import type { Card, Database, Investment, Sale } from "./types";
 
 function toNumber(value: unknown): number {
@@ -119,8 +118,7 @@ export async function insertCardIfAffordable(
   userId: string,
   card: Card
 ): Promise<PurchaseResult> {
-  const client = new Client(process.env.DATABASE_URL);
-  await client.connect();
+  const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
@@ -166,7 +164,7 @@ export async function insertCardIfAffordable(
     await client.query("ROLLBACK").catch(() => {});
     throw err;
   } finally {
-    await client.end();
+    client.release();
   }
 }
 
@@ -179,8 +177,7 @@ export async function updateCardPurchasePrice(
   cardId: string,
   newPrice: number
 ): Promise<UpdatePriceResult> {
-  const client = new Client(process.env.DATABASE_URL);
-  await client.connect();
+  const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
@@ -226,7 +223,7 @@ export async function updateCardPurchasePrice(
     await client.query("ROLLBACK").catch(() => {});
     throw err;
   } finally {
-    await client.end();
+    client.release();
   }
 }
 

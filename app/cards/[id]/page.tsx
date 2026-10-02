@@ -41,16 +41,13 @@ export default async function CardDetailPage({
   return (
     <div className="mx-auto max-w-lg space-y-5">
       {sold === "1" && <SaleCelebration />}
-      <Link
-        href="/cards"
-        className="text-sm font-medium text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-      >
+      <Link href="/cards" className="link-muted">
         ← Back to Vaulted Cards
       </Link>
 
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="surface p-5">
         <div className="flex gap-4">
-          <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800">
+          <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-indigo-100 to-amber-50 dark:from-indigo-500/15 dark:to-amber-500/10">
             {card.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -66,17 +63,17 @@ export default async function CardDetailPage({
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
-              <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+              <h1 className="text-lg font-semibold text-slate-900 dark:text-white">
                 {card.name}
               </h1>
               <StatusBadge status={card.status} />
             </div>
-            <dl className="mt-2 space-y-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+            <dl className="mt-2 space-y-0.5 text-sm text-slate-500 dark:text-slate-400">
               {details
                 .filter(([, value]) => value)
                 .map(([label, value]) => (
                   <div key={label} className="flex gap-1">
-                    <dt className="text-zinc-400 dark:text-zinc-500">
+                    <dt className="text-slate-400 dark:text-slate-500">
                       {label}:
                     </dt>
                     <dd>{value}</dd>
@@ -87,23 +84,23 @@ export default async function CardDetailPage({
         </div>
 
         {card.notes && (
-          <p className="mt-4 rounded-lg bg-zinc-50 p-3 text-sm text-zinc-600 dark:bg-zinc-800/50 dark:text-zinc-300">
+          <p className="mt-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-600 dark:bg-white/5 dark:text-slate-300">
             {card.notes}
           </p>
         )}
       </div>
 
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+      <div className="surface p-5">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
           Financial Information
         </h2>
 
         <div className="mt-3 space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-zinc-500 dark:text-zinc-400">
+            <span className="text-slate-500 dark:text-slate-400">
               Purchase Price
             </span>
-            <span className="font-medium text-zinc-900 dark:text-zinc-50">
+            <span className="font-medium text-slate-900 dark:text-white">
               <EditableAmount
                 action={updateCardPurchasePriceAction}
                 hiddenFields={{ cardId: card.id }}
@@ -115,10 +112,10 @@ export default async function CardDetailPage({
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-zinc-500 dark:text-zinc-400">
+            <span className="text-slate-500 dark:text-slate-400">
               Purchase Date
             </span>
-            <span className="font-medium text-zinc-900 dark:text-zinc-50">
+            <span className="font-medium text-slate-900 dark:text-white">
               {formatDate(card.purchaseDate)}
             </span>
           </div>
@@ -126,10 +123,10 @@ export default async function CardDetailPage({
           {card.sale && (
             <>
               <div className="flex justify-between">
-                <span className="text-zinc-500 dark:text-zinc-400">
+                <span className="text-slate-500 dark:text-slate-400">
                   Selling Price
                 </span>
-                <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                <span className="font-medium text-slate-900 dark:text-white">
                   <EditableAmount
                     action={updateCardSalePriceAction}
                     hiddenFields={{ cardId: card.id }}
@@ -141,57 +138,57 @@ export default async function CardDetailPage({
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500 dark:text-zinc-400">
+                <span className="text-slate-500 dark:text-slate-400">
                   Sale Date
                 </span>
-                <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                <span className="font-medium text-slate-900 dark:text-white">
                   {formatDate(card.sale.saleDate)}
                 </span>
               </div>
               {card.sale.fees !== undefined && (
                 <div className="flex justify-between">
-                  <span className="text-zinc-500 dark:text-zinc-400">
+                  <span className="text-slate-500 dark:text-slate-400">
                     Fees
                   </span>
-                  <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                  <span className="font-medium text-slate-900 dark:text-white">
                     {formatMoney(card.sale.fees, currency)}
                   </span>
                 </div>
               )}
               {card.sale.buyer && (
                 <div className="flex justify-between">
-                  <span className="text-zinc-500 dark:text-zinc-400">
+                  <span className="text-slate-500 dark:text-slate-400">
                     Buyer
                   </span>
-                  <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                  <span className="font-medium text-slate-900 dark:text-white">
                     {card.sale.buyer}
                   </span>
                 </div>
               )}
               {card.sale.channel && (
                 <div className="flex justify-between">
-                  <span className="text-zinc-500 dark:text-zinc-400">
+                  <span className="text-slate-500 dark:text-slate-400">
                     Channel
                   </span>
-                  <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                  <span className="font-medium text-slate-900 dark:text-white">
                     {card.sale.channel}
                   </span>
                 </div>
               )}
               {card.sale.notes && (
-                <p className="mt-2 rounded-lg bg-zinc-50 p-3 text-zinc-600 dark:bg-zinc-800/50 dark:text-zinc-300">
+                <p className="mt-2 rounded-lg bg-slate-50 p-3 text-slate-600 dark:bg-white/5 dark:text-slate-300">
                   {card.sale.notes}
                 </p>
               )}
-              <div className="flex justify-between border-t border-zinc-200 pt-2 text-base dark:border-zinc-800">
-                <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+              <div className="flex justify-between border-t border-slate-200 pt-2 text-base dark:border-white/10">
+                <span className="font-semibold text-slate-900 dark:text-white">
                   Profit
                 </span>
                 <span
                   className={`font-semibold ${
                     (profit ?? 0) >= 0
-                      ? "text-amber-600 dark:text-amber-400"
-                      : "text-red-600 dark:text-red-400"
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-rose-600 dark:text-rose-400"
                   }`}
                 >
                   {(profit ?? 0) >= 0 ? "+" : ""}
@@ -206,7 +203,7 @@ export default async function CardDetailPage({
           <div className="mt-4 flex justify-center">
             <Link
               href={`/cards/${card.id}/sell`}
-              className="inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              className="btn-primary-sm"
             >
               Mark as Sold
             </Link>

@@ -9,17 +9,15 @@ export default async function AdminPage() {
 
   return (
     <div className="mx-auto max-w-md space-y-4">
-      <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-        Admin
-      </h1>
+      <h1 className="page-title">Admin</h1>
 
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="surface p-5">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+            <p className="text-sm font-medium text-slate-900 dark:text-white">
               Subscription required
             </p>
-            <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
               {enabled
                 ? "Users without an active subscription are sent to /pricing."
                 : "Everyone has free access right now — no subscription needed."}
@@ -28,11 +26,7 @@ export default async function AdminPage() {
           <form action={toggleSubscriptionGate}>
             <button
               type="submit"
-              className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold text-white ${
-                enabled
-                  ? "bg-red-600 hover:bg-red-700"
-                  : "bg-blue-600 hover:bg-blue-700"
-              }`}
+              className={`shrink-0 ${enabled ? "btn-danger" : "btn-primary"} px-4 py-2 text-sm`}
             >
               {enabled ? "Turn Off" : "Turn On"}
             </button>
@@ -42,7 +36,7 @@ export default async function AdminPage() {
 
       <Link
         href="/admin/subscriptions"
-        className="block rounded-2xl border border-zinc-200 bg-white p-5 text-sm font-medium text-blue-600 shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-blue-400 dark:hover:bg-zinc-800/50"
+        className="surface block p-5 text-sm font-medium text-indigo-600 hover:bg-slate-50 dark:text-indigo-400 dark:hover:bg-white/5"
       >
         View subscriptions →
       </Link>
