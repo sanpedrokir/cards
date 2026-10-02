@@ -14,7 +14,7 @@ export default async function PricingPage() {
         <img
           src="/vaulted-logo.png"
           alt="Vaulted"
-          className="mx-auto h-20 w-20 rounded-2xl shadow-lg shadow-amber-600/20"
+          className="mx-auto h-20 w-20 rounded-2xl shadow-lg shadow-blue-600/20"
         />
         <h1 className="mt-4 text-xl font-bold text-slate-900 dark:text-white">
           {gateEnabled ? "Subscribe to Vaulted" : "Vaulted is free right now"}

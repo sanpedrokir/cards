@@ -81,7 +81,7 @@ export default function SignInPage() {
       <h1 className="page-title">Sign in</h1>
       <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
         New to Vaulted?{" "}
-        <a href="/sign-up" className="font-medium text-amber-700 dark:text-amber-400">
+        <a href="/sign-up" className="font-medium text-blue-600 dark:text-blue-400">
           Create an account
         </a>
       </p>

@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Track investment, purchases, sales and profit for your card business.",
     start_url: "/",
     display: "standalone",
-    background_color: "#faf8f3",
-    theme_color: "#17120a",
+    background_color: "#f3f7fe",
+    theme_color: "#1d7bf0",
     icons: [
       {
         src: "/vaulted-logo.png",

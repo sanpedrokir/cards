@@ -36,7 +36,7 @@ export default async function AdminPage() {
 
       <Link
         href="/admin/subscriptions"
-        className="surface block p-5 text-sm font-medium text-amber-700 hover:bg-slate-50 dark:text-amber-400 dark:hover:bg-white/5"
+        className="surface block p-5 text-sm font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-white/5"
       >
         View subscriptions →
       </Link>

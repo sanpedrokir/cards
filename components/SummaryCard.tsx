@@ -15,14 +15,14 @@ export default function SummaryCard({
     default: "text-slate-900 dark:text-white",
     positive: "text-emerald-600 dark:text-emerald-400",
     negative: "text-rose-600 dark:text-rose-400",
-    accent: "text-amber-600 dark:text-amber-400",
+    accent: "text-blue-600 dark:text-blue-400",
   };
 
   const iconToneClasses: Record<string, string> = {
     default: "bg-slate-100 text-slate-500 dark:bg-white/10 dark:text-slate-300",
     positive: "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400",
     negative: "bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400",
-    accent: "bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400",
+    accent: "bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400",
   };
 
   return (
@@ -39,7 +39,7 @@ export default function SummaryCard({
           </span>
         )}
       </div>
-      <p className={`mt-1 font-serif text-2xl font-semibold tabular-nums ${toneClasses[tone]}`}>
+      <p className={`mt-1 text-2xl font-semibold tabular-nums ${toneClasses[tone]}`}>
         {value}
       </p>
       {hint && (
