@@ -46,7 +46,7 @@ export default function CardImage({
         if (e.key === "Enter" || e.key === " ") handleOpen(e);
       }}
       aria-label={`View larger photo of ${alt}`}
-      className={`relative ${className} shrink-0 cursor-pointer overflow-hidden`}
+      className={`relative inline-block ${className} shrink-0 cursor-pointer overflow-hidden`}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt={alt} className="h-full w-full object-cover" />
