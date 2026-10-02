@@ -7,6 +7,7 @@ import { formatMoney, formatDate, todayIso, SALE_CHANNELS } from "@/lib/format";
 import type { Card } from "@/lib/types";
 import SubmitButton from "./SubmitButton";
 import EbayPriceCheck from "./EbayPriceCheck";
+import CardImage from "./CardImage";
 
 export default function SellPickerForm({
   cards,
@@ -44,19 +45,13 @@ export default function SellPickerForm({
         </select>
 
         {selectedCard?.imageUrl && (
-          <a
-            href={selectedCard.imageUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-2 inline-block h-20 w-16 overflow-hidden rounded-lg border border-slate-200 dark:border-white/10"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+          <div className="mt-2">
+            <CardImage
               src={selectedCard.imageUrl}
               alt={selectedCard.name}
-              className="h-full w-full object-cover"
+              className="h-20 w-16 rounded-lg border border-slate-200 dark:border-white/10"
             />
-          </a>
+          </div>
         )}
       </div>
 

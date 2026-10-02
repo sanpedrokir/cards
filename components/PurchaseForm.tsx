@@ -10,6 +10,7 @@ import {
 import { initialFormState } from "@/lib/form-state";
 import { formatMoney, formatDate, todayIso } from "@/lib/format";
 import SubmitButton from "./SubmitButton";
+import CardImage from "./CardImage";
 
 export default function PurchaseForm({
   availableBalance,
@@ -32,6 +33,7 @@ export default function PurchaseForm({
   const certNumberRef = useRef<HTMLInputElement>(null);
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   // Tracks which fields currently hold a value from a *previous* scan (as
   // opposed to something the user typed themselves), so a re-scan can clear
   // stale auto-filled values without ever touching user-typed input.
@@ -64,6 +66,10 @@ export default function PurchaseForm({
   function handleFileChange() {
     const file = imageInputRef.current?.files?.[0];
     setFileName(file?.name ?? null);
+    setPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return file ? URL.createObjectURL(file) : null;
+    });
     if (!file) return;
 
     setScanError(null);
@@ -135,6 +141,15 @@ export default function PurchaseForm({
               {fileName ?? "No file chosen"}
             </span>
           </div>
+          {previewUrl && (
+            <div className="mt-2">
+              <CardImage
+                src={previewUrl}
+                alt="Selected card photo"
+                className="h-24 w-20 rounded-xl"
+              />
+            </div>
+          )}
           <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
             Take a photo with your camera, or upload one from a scanner app --
             we&apos;ll automatically fill in the fields below.

@@ -3,7 +3,7 @@ import type { Card } from "@/lib/types";
 import { cardProfit } from "@/lib/calculations";
 import { formatDate, formatMoney } from "@/lib/format";
 import StatusBadge from "./StatusBadge";
-import { CardPlaceholderIcon } from "./icons";
+import CardImage from "./CardImage";
 
 export default function CardTile({
   card,
@@ -20,20 +20,7 @@ export default function CardTile({
       href={`/cards/${card.id}`}
       className="surface flex gap-3 p-3 transition-transform hover:-translate-y-0.5 hover:shadow-md"
     >
-      <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-slate-100 to-amber-50 dark:from-slate-500/15 dark:to-amber-500/10">
-        {card.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={card.imageUrl}
-            alt={card.name}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <CardPlaceholderIcon />
-          </div>
-        )}
-      </div>
+      <CardImage src={card.imageUrl} alt={card.name} className="h-24 w-20 rounded-lg" />
 
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
