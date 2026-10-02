@@ -3,6 +3,7 @@ import type { Card } from "@/lib/types";
 import { cardProfit } from "@/lib/calculations";
 import { formatDate, formatMoney } from "@/lib/format";
 import StatusBadge from "./StatusBadge";
+import { CardPlaceholderIcon } from "./icons";
 
 export default function CardTile({
   card,
@@ -28,8 +29,8 @@ export default function CardTile({
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-2xl">
-            🃏
+          <div className="flex h-full w-full items-center justify-center">
+            <CardPlaceholderIcon />
           </div>
         )}
       </div>

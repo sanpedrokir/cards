@@ -9,6 +9,7 @@ import DeleteCardButton from "@/components/DeleteCardButton";
 import EbayPriceCheck from "@/components/EbayPriceCheck";
 import SaleCelebration from "@/components/SaleCelebration";
 import EditableAmount from "@/components/EditableAmount";
+import { CardPlaceholderIcon } from "@/components/icons";
 import { updateCardPurchasePriceAction, updateCardSalePriceAction } from "@/lib/actions";
 
 export default async function CardDetailPage({
@@ -56,8 +57,8 @@ export default async function CardDetailPage({
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-4xl">
-                🃏
+              <div className="flex h-full w-full items-center justify-center">
+                <CardPlaceholderIcon className="h-12 w-12" />
               </div>
             )}
           </div>

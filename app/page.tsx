@@ -4,6 +4,7 @@ import { readDb } from "@/lib/store";
 import { getTotals } from "@/lib/calculations";
 import { formatMoney } from "@/lib/format";
 import SummaryCard from "@/components/SummaryCard";
+import { SalesIcon, ProfitUpIcon, ProfitDownIcon, VaultIcon } from "@/components/icons";
 import InvestmentForm from "@/components/InvestmentForm";
 import InvestedAmountEditor from "@/components/InvestedAmountEditor";
 import PaginatedSalesTable from "@/components/PaginatedSalesTable";
@@ -96,19 +97,19 @@ export default async function DashboardPage({
         <SummaryCard
           label="Total Sales"
           value={formatMoney(totals.totalSales, currency)}
-          icon="💰"
+          icon={<SalesIcon />}
         />
         <SummaryCard
           label="Total Profit"
           value={formatMoney(totals.totalProfit, currency)}
           tone={totals.totalProfit >= 0 ? "positive" : "negative"}
-          icon={totals.totalProfit >= 0 ? "📈" : "📉"}
+          icon={totals.totalProfit >= 0 ? <ProfitUpIcon /> : <ProfitDownIcon />}
         />
         <SummaryCard
           label="Total Funds (Available funds + Sales)"
           value={formatMoney(totals.totalFunds, currency)}
           tone="accent"
-          icon="🏦"
+          icon={<VaultIcon />}
         />
       </div>
 
