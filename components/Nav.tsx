@@ -112,7 +112,7 @@ export default function Nav() {
           <Link href="/" className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/vaulted-logo.png" alt="" className="h-8 w-8 rounded-lg shadow-sm" />
-            <span className="font-bold text-amber-700">Vaulted</span>
+            <span className="font-bold text-slate-900">Vaulted</span>
           </Link>
         </div>
       </header>
@@ -147,7 +147,7 @@ export default function Nav() {
           <Link href="/" className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/vaulted-logo.png" alt="" className="h-8 w-8 rounded-lg shadow-sm" />
-            <span className="font-bold text-amber-700">Vaulted</span>
+            <span className="font-bold text-slate-900">Vaulted</span>
           </Link>
           {email && (
             <span className="text-xs text-slate-400 dark:text-slate-500">{email}</span>
