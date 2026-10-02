@@ -92,12 +92,6 @@ export default async function DashboardPage({
 
       <div className="grid grid-cols-1 gap-3">
         <SummaryCard
-          label="Total Funds (Available funds + Sales)"
-          value={formatMoney(totals.totalFunds, currency)}
-          tone="accent"
-          icon={<VaultIcon />}
-        />
-        <SummaryCard
           label="Total Sales"
           value={formatMoney(totals.totalSales, currency)}
           icon={<SalesIcon />}
@@ -107,6 +101,12 @@ export default async function DashboardPage({
           value={formatMoney(totals.totalProfit, currency)}
           tone={totals.totalProfit >= 0 ? "positive" : "negative"}
           icon={totals.totalProfit >= 0 ? <ProfitUpIcon /> : <ProfitDownIcon />}
+        />
+        <SummaryCard
+          label="Total Funds (Available funds + Sales)"
+          value={formatMoney(totals.totalFunds, currency)}
+          tone="accent"
+          icon={<VaultIcon />}
         />
       </div>
 
