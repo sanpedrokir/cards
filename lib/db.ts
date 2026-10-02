@@ -13,4 +13,10 @@ const globalForPool = globalThis as unknown as { __neonPool?: Pool };
 
 export const pool =
   globalForPool.__neonPool ??
-  (globalForPool.__neonPool = new Pool({ connectionString: process.env.DATABASE_URL }));
+  (globalForPool.__neonPool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    max: 10,
+    // Fail fast with a clear error if the pool is ever exhausted, instead of
+    // a purchase/sale action hanging indefinitely waiting for a connection.
+    connectionTimeoutMillis: 10_000,
+  }));

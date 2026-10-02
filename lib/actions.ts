@@ -153,7 +153,12 @@ export async function analyzeCardPhoto(
   }
 
   try {
-    const client = new Anthropic({ apiKey });
+    // Defaults are a 10-minute timeout and 2 silent retries -- fine for a
+    // background job, bad for a form field someone is staring at. If the API
+    // is rate-limited or slow, fail fast with a clear message instead of
+    // leaving "Scanning..." stuck for a long time while the SDK quietly
+    // retries with backoff.
+    const client = new Anthropic({ apiKey, timeout: 20_000, maxRetries: 1 });
     const response = await client.messages.create({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 300,
@@ -203,7 +208,12 @@ If you cannot identify the card at all, reply with {"error": "Could not identify
       gradingCompany: parsed.gradingCompany ?? undefined,
       certNumber: parsed.certNumber ?? undefined,
     };
-  } catch {
+  } catch (err) {
+    if (err instanceof Anthropic.APIError && err.status === 429) {
+      return {
+        error: "Scanning is busy right now (too many people scanning at once). Please try again in a moment, or enter the details manually.",
+      };
+    }
     return { error: "Couldn't read that photo. Please enter the details manually." };
   }
 }
