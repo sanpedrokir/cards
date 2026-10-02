@@ -74,7 +74,7 @@ export default async function DashboardPage({
           </div>
         </div>
         <Link href="/cards/new" className="btn-primary-sm">
-          <span className="text-base leading-none">+</span> Purchase
+          <span className="text-base leading-none">+</span> Buy
         </Link>
       </div>
 

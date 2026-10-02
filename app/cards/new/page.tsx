@@ -17,7 +17,7 @@ export default async function NewCardPage() {
           ← Back
         </Link>
       </div>
-      <h1 className="page-title">Purchase</h1>
+      <h1 className="page-title">Buy</h1>
 
       <div className="surface p-5">
         <PurchaseForm

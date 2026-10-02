@@ -10,7 +10,7 @@ export default async function SalesPage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-4">
-      <h1 className="page-title">Sales</h1>
+      <h1 className="page-title">Sell</h1>
 
       {availableCards.length === 0 ? (
         <div className="surface-dashed p-8">

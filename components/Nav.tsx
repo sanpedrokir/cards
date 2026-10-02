@@ -22,7 +22,7 @@ const NAV_ITEMS = [
   },
   {
     href: "/cards/new",
-    label: "Purchase",
+    label: "Buy",
     icon: (active: boolean) => (
       <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
         <circle
@@ -43,7 +43,7 @@ const NAV_ITEMS = [
   },
   {
     href: "/sales",
-    label: "Sales",
+    label: "Sell",
     icon: (active: boolean) => (
       <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
         <path
@@ -90,7 +90,7 @@ export default function Nav() {
   const email = user?.primaryEmailAddress?.emailAddress;
 
   // "/cards" is a prefix of "/cards/new", so a plain startsWith() check would
-  // light up both "Vaulted Cards" and "Purchase" at once. Instead, pick the
+  // light up both "Vaulted Cards" and "Buy" at once. Instead, pick the
   // single most specific (longest) matching href and only mark that one active.
   const matches = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
