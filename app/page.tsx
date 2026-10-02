@@ -130,6 +130,12 @@ export default async function DashboardPage({
           />
         )}
       </div>
+
+      <p className="pt-2 text-center text-xs text-slate-400 dark:text-slate-500">
+        <a href="mailto:vaultedsup@gmail.com" className="hover:text-amber-700 dark:hover:text-amber-400">
+          Contact Vaulted Support
+        </a>
+      </p>
     </div>
   );
 }
