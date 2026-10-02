@@ -9,7 +9,7 @@ import DeleteCardButton from "@/components/DeleteCardButton";
 import EbayPriceCheck from "@/components/EbayPriceCheck";
 import SaleCelebration from "@/components/SaleCelebration";
 import EditableAmount from "@/components/EditableAmount";
-import { CardPlaceholderIcon } from "@/components/icons";
+import CardImage from "@/components/CardImage";
 import { updateCardPurchasePriceAction, updateCardSalePriceAction } from "@/lib/actions";
 
 export default async function CardDetailPage({
@@ -48,20 +48,7 @@ export default async function CardDetailPage({
 
       <div className="surface p-5">
         <div className="flex gap-4">
-          <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-slate-100 to-amber-50 dark:from-slate-500/15 dark:to-amber-500/10">
-            {card.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={card.imageUrl}
-                alt={card.name}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center">
-                <CardPlaceholderIcon className="h-12 w-12" />
-              </div>
-            )}
-          </div>
+          <CardImage src={card.imageUrl} alt={card.name} />
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
               <h1 className="text-lg font-semibold text-slate-900 dark:text-white">
