@@ -64,10 +64,6 @@ export default function PrivacyPage() {
             if you subscribe. We never see or store your card number.
           </li>
           <li>
-            <strong>AI service provider</strong> — processes a card photo you
-            choose to scan, solely to extract its printed details.
-          </li>
-          <li>
             <strong>Public marketplace listing search</strong> — only used if
             you use the optional market price check feature.
           </li>
