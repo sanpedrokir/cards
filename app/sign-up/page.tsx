@@ -98,19 +98,30 @@ export default function SignUpPage() {
                 Email
               </label>
               <input id="email" name="email" type="email" required className={inputClass} />
-              {errors?.fields?.emailAddress && (
-                <p className="mt-1 text-sm text-rose-600 dark:text-rose-400">
-                  {friendlyError(errors.fields.emailAddress.message)}
-                  {errors.fields.emailAddress.message?.toLowerCase().includes("taken") && (
-                    <>
-                      {" "}
-                      <a href="/sign-in" className="font-medium underline">
-                        Sign in
-                      </a>
-                    </>
-                  )}
-                </p>
-              )}
+              {errors?.fields?.emailAddress && (() => {
+                const isExistingAccount = errors.fields.emailAddress.message
+                  ?.toLowerCase()
+                  .includes("taken");
+                return (
+                  <p
+                    className={`mt-1 text-sm ${
+                      isExistingAccount
+                        ? "text-slate-900 dark:text-white"
+                        : "text-rose-600 dark:text-rose-400"
+                    }`}
+                  >
+                    {friendlyError(errors.fields.emailAddress.message)}
+                    {isExistingAccount && (
+                      <>
+                        {" "}
+                        <a href="/sign-in" className="font-medium underline">
+                          Sign in
+                        </a>
+                      </>
+                    )}
+                  </p>
+                );
+              })()}
             </div>
 
             {errors?.global && errors.global.length > 0 && (
