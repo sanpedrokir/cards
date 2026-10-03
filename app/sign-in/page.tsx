@@ -9,7 +9,7 @@ const inputClass = "input-field";
 function friendlyError(message?: string | null): string | undefined {
   if (!message) return undefined;
   if (message.toLowerCase().includes("couldn't find your account")) {
-    return "Couldn't find your account. Please create an account first.";
+    return "Looks like you're new here — sign up to get started.";
   }
   return message;
 }
@@ -94,11 +94,30 @@ export default function SignInPage() {
                 Email
               </label>
               <input id="email" name="email" type="email" required className={inputClass} />
-              {errors?.fields?.identifier && (
-                <p className="mt-1 text-sm text-rose-600 dark:text-rose-400">
-                  {friendlyError(errors.fields.identifier.message)}
-                </p>
-              )}
+              {errors?.fields?.identifier && (() => {
+                const isNewUser = errors.fields.identifier.message
+                  ?.toLowerCase()
+                  .includes("couldn't find your account");
+                return (
+                  <p
+                    className={`mt-1 text-sm ${
+                      isNewUser
+                        ? "text-slate-900 dark:text-white"
+                        : "text-rose-600 dark:text-rose-400"
+                    }`}
+                  >
+                    {friendlyError(errors.fields.identifier.message)}
+                    {isNewUser && (
+                      <>
+                        {" "}
+                        <a href="/sign-up" className="font-medium underline">
+                          Sign up
+                        </a>
+                      </>
+                    )}
+                  </p>
+                );
+              })()}
             </div>
 
             {errors?.global && errors.global.length > 0 && (
