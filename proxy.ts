@@ -4,6 +4,7 @@ const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/api/stripe/webhook",
+  "/api/sentry-test",
   "/privacy",
   "/.well-known/assetlinks.json",
 ]);
