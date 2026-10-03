@@ -10,14 +10,14 @@ const inputClass = "input-field";
 type Step = "email" | "code";
 
 export default function SignInPage() {
-  const { signIn, errors, fetchStatus } = useSignIn();
-  const { signUp, errors: signUpErrors } = useSignUp();
+  const { signIn, fetchStatus } = useSignIn();
+  const { signUp } = useSignUp();
   const { isSignedIn } = useAuth();
   const router = useRouter();
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [stuckStatus, setStuckStatus] = useState<string | null>(null);
-  const [transferError, setTransferError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   async function finalizeSignIn() {
     await signIn.finalize({
@@ -48,7 +48,7 @@ export default function SignInPage() {
   async function handleEmailSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStuckStatus(null);
-    setTransferError(null);
+    setFormError(null);
 
     const formData = new FormData(e.currentTarget);
     const emailAddress = String(formData.get("email") ?? "").trim();
@@ -58,10 +58,16 @@ export default function SignInPage() {
       identifier: emailAddress,
       signUpIfMissing: true,
     });
-    if (createError) return;
+    if (createError) {
+      setFormError(createError.message || "Something went wrong. Please try again.");
+      return;
+    }
 
     const { error: sendError } = await signIn.emailCode.sendCode();
-    if (sendError) return;
+    if (sendError) {
+      setFormError(sendError.message || "Couldn't send the code. Please try again.");
+      return;
+    }
 
     setStep("code");
   }
@@ -69,7 +75,7 @@ export default function SignInPage() {
   async function handleTransfer() {
     const { error } = await signUp.create({ transfer: true });
     if (error) {
-      setTransferError("Something went wrong creating your account. Please try again.");
+      setFormError("Something went wrong creating your account. Please try again.");
       return;
     }
 
@@ -83,7 +89,7 @@ export default function SignInPage() {
   async function handleCodeSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStuckStatus(null);
-    setTransferError(null);
+    setFormError(null);
 
     const formData = new FormData(e.currentTarget);
     const code = String(formData.get("code") ?? "");
@@ -93,7 +99,9 @@ export default function SignInPage() {
     if (error) {
       if (isClerkAPIResponseError(error) && error.errors[0]?.code === "sign_up_if_missing_transfer") {
         await handleTransfer();
+        return;
       }
+      setFormError(error.message || "Invalid code. Please try again.");
       return;
     }
 
@@ -118,8 +126,7 @@ export default function SignInPage() {
     <div className="mx-auto max-w-md">
       <h1 className="page-title">Sign in</h1>
       <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-        Enter your email — we&apos;ll sign you in, or set up your account
-        automatically if you&apos;re new here.
+        Enter your email — we&apos;ll set up your account if you&apos;re new!
       </p>
 
       <div className="surface mt-6 p-5">
@@ -130,17 +137,10 @@ export default function SignInPage() {
                 Email
               </label>
               <input id="email" name="email" type="email" required className={inputClass} />
-              {errors?.fields?.identifier && (
-                <p className="mt-1 text-sm text-rose-600 dark:text-rose-400">
-                  {errors.fields.identifier.message}
-                </p>
-              )}
             </div>
 
-            {errors?.global && errors.global.length > 0 && (
-              <p className="text-sm text-rose-600 dark:text-rose-400">
-                {errors.global[0].message}
-              </p>
+            {formError && (
+              <p className="text-sm text-rose-600 dark:text-rose-400">{formError}</p>
             )}
 
             <div id="clerk-captcha" />
@@ -173,11 +173,6 @@ export default function SignInPage() {
                 Verification code
               </label>
               <input id="code" name="code" type="text" required className={inputClass} />
-              {errors?.fields?.code && (
-                <p className="mt-1 text-sm text-rose-600 dark:text-rose-400">
-                  {errors.fields.code.message}
-                </p>
-              )}
             </div>
 
             {stuckStatus && (
@@ -187,20 +182,8 @@ export default function SignInPage() {
               </p>
             )}
 
-            {transferError && (
-              <p className="text-sm text-rose-600 dark:text-rose-400">{transferError}</p>
-            )}
-
-            {signUpErrors?.global && signUpErrors.global.length > 0 && (
-              <p className="text-sm text-rose-600 dark:text-rose-400">
-                {signUpErrors.global[0].message}
-              </p>
-            )}
-
-            {errors?.global && errors.global.length > 0 && (
-              <p className="text-sm text-rose-600 dark:text-rose-400">
-                {errors.global[0].message}
-              </p>
+            {formError && (
+              <p className="text-sm text-rose-600 dark:text-rose-400">{formError}</p>
             )}
 
             <button
@@ -223,7 +206,7 @@ export default function SignInPage() {
                 signIn.reset();
                 setStep("email");
                 setStuckStatus(null);
-                setTransferError(null);
+                setFormError(null);
               }}
               className="w-full text-center text-sm font-medium text-slate-400 dark:text-slate-500"
             >
