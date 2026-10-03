@@ -31,8 +31,8 @@ export default function PrivacyPage() {
           </li>
           <li>
             <strong>Payment information:</strong> if you subscribe, your
-            payment is processed directly by Stripe. We never see or store
-            your card number.
+            payment is processed directly by our payment processor. We never
+            see or store your card number.
           </li>
         </ul>
       </section>
@@ -44,9 +44,9 @@ export default function PrivacyPage() {
         <p>
           Your data is used solely to provide the app&apos;s features:
           tracking your cards, calculating profit, processing subscription
-          payments, and (if you use it) looking up comparable eBay listings
-          or scanning a card photo to auto-fill its details. We don&apos;t
-          sell your data or use it for advertising.
+          payments, and (if you use it) looking up comparable marketplace
+          listings or scanning a card photo to auto-fill its details. We
+          don&apos;t sell your data or use it for advertising.
         </p>
       </section>
 
@@ -54,30 +54,37 @@ export default function PrivacyPage() {
         <h2 className="text-base font-semibold text-slate-900 dark:text-white">
           Third-party services
         </h2>
-        <p>We rely on the following providers to run the app:</p>
+        <p>
+          We rely on trusted third-party providers to run the app, and only
+          share the minimum data each one needs to do its job:
+        </p>
         <ul className="list-disc space-y-1 pl-5">
           <li>
-            <strong>Clerk</strong> — authentication (email sign-in codes).
-          </li>
-          <li>
-            <strong>Stripe</strong> — subscription billing.
-          </li>
-          <li>
-            <strong>Neon</strong> — database hosting for your card/investment
+            <strong>Authentication provider</strong> — manages secure email
+            sign-in codes; does not have access to your card or investment
             data.
           </li>
           <li>
-            <strong>Vercel</strong> — application hosting.
+            <strong>Payment processor</strong> — handles subscription billing
+            if you subscribe. We never see or store your card number.
           </li>
           <li>
-            <strong>Anthropic</strong> — processes a card photo you choose to
-            scan, to extract its details.
+            <strong>Cloud infrastructure providers</strong> — host the app
+            and securely store your card/investment data.
           </li>
           <li>
-            <strong>eBay</strong> — public listing searches, if you use the
-            market price check feature.
+            <strong>AI service provider</strong> — processes a card photo you
+            choose to scan, solely to extract its printed details.
+          </li>
+          <li>
+            <strong>Public marketplace listing search</strong> — only used if
+            you use the optional market price check feature.
           </li>
         </ul>
+        <p className="text-xs text-slate-400 dark:text-slate-500">
+          We&apos;re happy to share the specific providers we use if you have
+          questions — just reach out using the contact email below.
+        </p>
       </section>
 
       <section className="space-y-2">
