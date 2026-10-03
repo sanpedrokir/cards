@@ -25,11 +25,6 @@ export default function PrivacyPage() {
             sign in via a one-time emailed code.
           </li>
           <li>
-            <strong>Card and investment data:</strong> the purchase price,
-            sale price, notes, and photos of cards you add, and your
-            investment/fund records.
-          </li>
-          <li>
             <strong>Payment information:</strong> if you subscribe, your
             payment is processed directly by our payment processor. We never
             see or store your card number.
