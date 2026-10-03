@@ -388,7 +388,7 @@ export default function PurchaseForm({
 
       {state?.error && <p className="notice-error">{state.error}</p>}
 
-      <SubmitButton className="w-full">Purchase</SubmitButton>
+      <SubmitButton className="w-full">Add Card</SubmitButton>
     </form>
   );
 }
