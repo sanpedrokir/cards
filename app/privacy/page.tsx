@@ -64,10 +64,6 @@ export default function PrivacyPage() {
             if you subscribe. We never see or store your card number.
           </li>
           <li>
-            <strong>Cloud infrastructure providers</strong> — host the app
-            and securely store your card/investment data.
-          </li>
-          <li>
             <strong>AI service provider</strong> — processes a card photo you
             choose to scan, solely to extract its printed details.
           </li>
@@ -79,17 +75,6 @@ export default function PrivacyPage() {
         <p className="text-xs text-slate-400 dark:text-slate-500">
           We&apos;re happy to share the specific providers we use if you have
           questions — just reach out using the contact email below.
-        </p>
-      </section>
-
-      <section className="space-y-2">
-        <h2 className="text-base font-semibold text-slate-900 dark:text-white">
-          Data retention and deletion
-        </h2>
-        <p>
-          Your data is kept for as long as your account is active. To
-          request deletion of your account and all associated data, contact
-          us using the email below.
         </p>
       </section>
 
