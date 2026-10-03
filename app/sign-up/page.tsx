@@ -6,6 +6,15 @@ import { useSignUp, useAuth } from "@clerk/nextjs";
 
 const inputClass = "input-field";
 
+function friendlyError(message?: string | null): string | undefined {
+  if (!message) return undefined;
+  const lower = message.toLowerCase();
+  if (lower.includes("taken") || lower.includes("already") || lower.includes("exists")) {
+    return "You already have an account with this email — sign in instead.";
+  }
+  return message;
+}
+
 type Step = "email" | "code";
 
 export default function SignUpPage() {
@@ -91,14 +100,22 @@ export default function SignUpPage() {
               <input id="email" name="email" type="email" required className={inputClass} />
               {errors?.fields?.emailAddress && (
                 <p className="mt-1 text-sm text-rose-600 dark:text-rose-400">
-                  {errors.fields.emailAddress.message}
+                  {friendlyError(errors.fields.emailAddress.message)}
+                  {errors.fields.emailAddress.message?.toLowerCase().includes("taken") && (
+                    <>
+                      {" "}
+                      <a href="/sign-in" className="font-medium underline">
+                        Sign in
+                      </a>
+                    </>
+                  )}
                 </p>
               )}
             </div>
 
             {errors?.global && errors.global.length > 0 && (
               <p className="text-sm text-rose-600 dark:text-rose-400">
-                {errors.global[0].message}
+                {friendlyError(errors.global[0].message)}
               </p>
             )}
 
