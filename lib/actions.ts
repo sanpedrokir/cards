@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import Anthropic from "@anthropic-ai/sdk";
 import sharp from "sharp";
+import { put, del } from "@vercel/blob";
 import { currentUser } from "@clerk/nextjs/server";
 import { requireAdminUserId, requirePageUserId, requireSignedInUserId } from "./auth-helpers";
 import { getStripe, getAppUrl } from "./stripe";
@@ -63,7 +64,7 @@ function textField(formData: FormData, name: string): string | undefined {
 
 async function encodeImage(
   file: File | null
-): Promise<{ dataUrl?: string; error?: string }> {
+): Promise<{ url?: string; error?: string }> {
   if (!file || file.size === 0) return {};
   if (!file.type.startsWith("image/")) {
     return { error: "Please upload a valid image file." };
@@ -87,7 +88,12 @@ async function encodeImage(
       .jpeg({ quality: 78 })
       .toBuffer();
 
-    return { dataUrl: `data:image/jpeg;base64,${compressed.toString("base64")}` };
+    const blob = await put(`card-photos/${randomUUID()}.jpg`, compressed, {
+      access: "public",
+      contentType: "image/jpeg",
+    });
+
+    return { url: blob.url };
   } catch {
     return { error: "Couldn't process that image. Please try a different photo." };
   }
@@ -320,7 +326,7 @@ export async function purchaseCard(
     return { error: "Enter a valid purchase price greater than zero." };
   }
 
-  const { dataUrl: imageUrl, error: imageError } = await encodeImage(
+  const { url: imageUrl, error: imageError } = await encodeImage(
     imageFile instanceof File ? imageFile : null
   );
   if (imageError) {
@@ -411,6 +417,12 @@ export async function deleteCardAction(cardId: string): Promise<void> {
   if (!card) return;
 
   await deleteCard(userId, cardId);
+
+  // Best-effort: don't fail the delete if blob cleanup has trouble (and
+  // older cards may still have a legacy data: URI, which isn't a blob at all).
+  if (card.imageUrl?.startsWith("https://")) {
+    await del(card.imageUrl).catch(() => {});
+  }
 
   revalidateCardPaths();
   redirect("/cards");
