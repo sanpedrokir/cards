@@ -37,7 +37,7 @@ export default async function CardsPage({
       <div className="flex items-center justify-between">
         <h1 className="page-title">Vaulted Cards</h1>
         <Link href="/cards/new" className="btn-primary-sm">
-          <span className="text-base leading-none">+</span> Buy
+          <span className="text-base leading-none">+</span> Add Card
         </Link>
       </div>
 
