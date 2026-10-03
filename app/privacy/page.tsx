@@ -80,6 +80,16 @@ export default function PrivacyPage() {
 
       <section className="space-y-2">
         <h2 className="text-base font-semibold text-slate-900 dark:text-white">
+          Data retention and deletion
+        </h2>
+        <p>
+          To request deletion of your account and data, contact us using the
+          email below.
+        </p>
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-base font-semibold text-slate-900 dark:text-white">
           Contact
         </h2>
         <p>
