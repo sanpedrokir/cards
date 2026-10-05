@@ -4,6 +4,11 @@ import { useState, useTransition } from "react";
 import { checkEbayPrice, type EbayPriceEstimate } from "@/lib/actions";
 import { formatMoney } from "@/lib/format";
 
+function formatEbayMoney(amount: number, currency: string): string {
+  const text = formatMoney(amount, currency);
+  return currency === "USD" ? text.replace(/^\$/, "US$") : text;
+}
+
 export default function EbayPriceCheck({ cardId }: { cardId: string }) {
   const [isPending, startTransition] = useTransition();
   const [result, setResult] = useState<EbayPriceEstimate | null>(null);
@@ -31,7 +36,8 @@ export default function EbayPriceCheck({ cardId }: { cardId: string }) {
         </button>
       </div>
       <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-        Guideline only, not a guaranteed sale price.
+        Guideline only, not a guaranteed sale price. All eBay prices are in
+        US dollars (US$).
       </p>
 
       {result?.error && (
@@ -46,7 +52,7 @@ export default function EbayPriceCheck({ cardId }: { cardId: string }) {
                 Suggested selling price
               </p>
               <p className="text-lg font-semibold text-emerald-800 dark:text-emerald-300">
-                {formatMoney(result.recommendedPrice, result.currency ?? "USD")}
+                {formatEbayMoney(result.recommendedPrice, result.currency ?? "USD")}
               </p>
               <p className="mt-1 text-xs text-emerald-700/80 dark:text-emerald-400/80">
                 Based on {result.listings.length} similar active eBay listing
@@ -70,7 +76,7 @@ export default function EbayPriceCheck({ cardId }: { cardId: string }) {
                     {listing.title}
                   </span>
                   <span className="shrink-0 font-medium text-slate-900 dark:text-white">
-                    {formatMoney(listing.price, listing.currency)}
+                    {formatEbayMoney(listing.price, listing.currency)}
                   </span>
                 </a>
               </li>
