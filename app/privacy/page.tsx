@@ -75,10 +75,6 @@ export default function PrivacyPage() {
             the form. It is not used for advertising.
           </li>
           <li>
-            <strong>Cloud storage</strong> — stores the card photos you
-            choose to keep on your cards.
-          </li>
-          <li>
             <strong>Public marketplace listing search</strong> — only used if
             you use the optional market price check feature.
           </li>
@@ -94,9 +90,8 @@ export default function PrivacyPage() {
           Data retention and deletion
         </h2>
         <p>
-          We keep your data while your account is active. To request deletion
-          of your account and all of your data, email us using the address
-          below and we will delete it. See also our{" "}
+          To request deletion of your account and all of your data, email us
+          using the address below and we will delete it. See also our{" "}
           <a href="/support" className="font-medium text-amber-700 dark:text-amber-400">
             Support page
           </a>
