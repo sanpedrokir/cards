@@ -25,10 +25,6 @@ export default function PrivacyPage() {
             sign in via a one-time emailed code.
           </li>
           <li>
-            <strong>Card data you enter:</strong> the trading cards you add,
-            with purchase and sale prices, dates, and notes.
-          </li>
-          <li>
             <strong>Photos you upload:</strong> photos of your trading cards,
             if you choose to add them or use the scan feature. The camera and
             photo library are only accessed when you use these features.
