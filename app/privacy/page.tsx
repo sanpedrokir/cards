@@ -25,6 +25,15 @@ export default function PrivacyPage() {
             sign in via a one-time emailed code.
           </li>
           <li>
+            <strong>Card data you enter:</strong> the trading cards you add,
+            with purchase and sale prices, dates, and notes.
+          </li>
+          <li>
+            <strong>Photos you upload:</strong> photos of your trading cards,
+            if you choose to add them or use the scan feature. The camera and
+            photo library are only accessed when you use these features.
+          </li>
+          <li>
             <strong>Payment information:</strong> if you subscribe, your
             payment is processed directly by our payment processor. We never
             see or store your card number.
@@ -64,6 +73,16 @@ export default function PrivacyPage() {
             if you subscribe. We never see or store your card number.
           </li>
           <li>
+            <strong>AI service</strong> — if you use the scan feature, a copy
+            of the card photo is sent to a third-party AI service solely to
+            read the card&apos;s details (such as name and set) and fill in
+            the form. It is not used for advertising.
+          </li>
+          <li>
+            <strong>Cloud storage</strong> — stores the card photos you
+            choose to keep on your cards.
+          </li>
+          <li>
             <strong>Public marketplace listing search</strong> — only used if
             you use the optional market price check feature.
           </li>
@@ -79,8 +98,13 @@ export default function PrivacyPage() {
           Data retention and deletion
         </h2>
         <p>
-          To request deletion of your account and data, contact us using the
-          email below.
+          We keep your data while your account is active. To request deletion
+          of your account and all of your data, email us using the address
+          below and we will delete it. See also our{" "}
+          <a href="/support" className="font-medium text-amber-700 dark:text-amber-400">
+            Support page
+          </a>
+          .
         </p>
       </section>
 
