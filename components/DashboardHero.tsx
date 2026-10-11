@@ -42,13 +42,23 @@ export default function DashboardHero({
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0f4a52] via-[#0c2c3b] to-[#0a1722] p-5 shadow-xl shadow-black/30">
-      {/* Soft glows as plain radial gradients: much cheaper to paint on a
-          phone than blurred elements. */}
+      {/* Artwork (public/dashboard-bg.svg: starry sky, card fan, coins). Toned
+          down on phones, where the figures sit right on top of it. */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-50 sm:opacity-100"
+        style={{
+          backgroundImage: "url(/dashboard-bg.svg)",
+          backgroundSize: "cover",
+          backgroundPosition: "right center",
+          backgroundRepeat: "no-repeat",
+        }}
+      />
+      {/* Soft dark fade on the left so the text stays easy to read. */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
           backgroundImage:
-            "radial-gradient(circle at 100% 0%, rgba(52,211,153,0.28), transparent 55%), radial-gradient(circle at 0% 100%, rgba(56,189,248,0.25), transparent 55%)",
+            "linear-gradient(90deg, rgba(8,18,26,0.65) 0%, rgba(8,18,26,0.2) 55%, rgba(8,18,26,0) 72%)",
         }}
       />
 
@@ -57,7 +67,7 @@ export default function DashboardHero({
           {name} · Total profit
         </p>
         <p
-          className={`mt-1 text-4xl font-extrabold tabular-nums tracking-tight ${
+          className={`mt-1 text-4xl font-extrabold tabular-nums tracking-tight [text-shadow:0_2px_12px_rgba(0,0,0,0.45)] ${
             positive ? "text-white" : "text-rose-300"
           }`}
         >
