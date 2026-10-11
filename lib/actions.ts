@@ -18,6 +18,7 @@ import {
 import { getStripe, getAppUrl } from "./stripe";
 import { searchEbayActiveListings, type EbayListing } from "./ebay";
 import { getExchangeRate } from "./exchange-rates";
+import { cropToCard } from "./card-crop";
 import {
   convertCurrency,
   createCollection,
@@ -93,8 +94,10 @@ async function encodeImage(
     // before selling -- 800px is comfortably sharp for that on a phone
     // screen, while keeping stored rows (and every page that lists cards)
     // noticeably lighter than a near-original-resolution photo would be.
-    const compressed = await sharp(buffer)
-      .rotate()
+    // Apply the phone's rotation first, then crop to the card (best-effort,
+    // see lib/card-crop.ts), then shrink.
+    const oriented = await sharp(buffer).rotate().toBuffer();
+    const compressed = await sharp(await cropToCard(oriented))
       .resize({ width: 800, height: 800, fit: "inside", withoutEnlargement: true })
       .flatten({ background: { r: 255, g: 255, b: 255 } })
       .jpeg({ quality: 78 })
