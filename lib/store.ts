@@ -1,5 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
+import { cache } from "react";
 import { sql, pool } from "./db";
 import type { Card, Collection, CollectionData, Database, Investment, Sale } from "./types";
 
@@ -82,7 +83,11 @@ function mapCollection(row: any): Collection {
 // adopts any cards / budget they already had from before collections
 // existed, in one transaction. The advisory lock stops two simultaneous
 // first requests (e.g. two tabs) from each creating their own default.
-export async function ensureCollections(userId: string): Promise<Collection[]> {
+// cache(): the several helpers that each need the user's collections during
+// one request share a single query instead of repeating it.
+export const ensureCollections = cache(async function ensureCollections(
+  userId: string
+): Promise<Collection[]> {
   const rows = await sql`
     SELECT * FROM collections WHERE user_id = ${userId} ORDER BY created_at, id
   `;
@@ -123,7 +128,7 @@ export async function ensureCollections(userId: string): Promise<Collection[]> {
   } finally {
     client.release();
   }
-}
+});
 
 export const FREE_COLLECTION_LIMIT = 2;
 
@@ -260,11 +265,20 @@ export async function getCards(userId: string, collectionId: string): Promise<Ca
 // the dashboard's per-collection totals. Two queries total regardless of how
 // many collections there are.
 export async function readAllCollections(userId: string): Promise<CollectionData[]> {
-  const collections = await ensureCollections(userId);
-  const [cardRows, investmentRows] = await Promise.all([
+  // All three reads go out together (one round trip, not two in a row).
+  const [collectionRows, cardRows, investmentRows] = await Promise.all([
+    sql`SELECT * FROM collections WHERE user_id = ${userId} ORDER BY created_at, id`,
     sql`SELECT * FROM cards WHERE user_id = ${userId} ORDER BY created_at DESC`,
     sql`SELECT * FROM investment WHERE user_id = ${userId}`,
   ]);
+
+  // First visit ever (or since collections shipped): create + adopt the
+  // default collection, then read again so the adopted rows are included.
+  if (collectionRows.length === 0) {
+    await ensureCollections(userId);
+    return readAllCollections(userId);
+  }
+  const collections = collectionRows.map(mapCollection);
 
   return collections.map((collection) => {
     const investmentRow = investmentRows.find((r) => r.collection_id === collection.id);

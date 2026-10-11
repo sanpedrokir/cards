@@ -45,11 +45,11 @@ export default function DashboardHero({
 
         <div className="mt-4 flex flex-wrap gap-2">
           <MiniStat label="Sales" value={formatMoney(totals.totalSales, currency)} />
-          <MiniStat label="Inventory" value={formatMoney(totals.inventoryCost, currency)} />
+          <MiniStat label="Unsold stock" value={formatMoney(totals.inventoryCost, currency)} />
           {hasBudget ? (
             <MiniStat label="Funds" value={formatMoney(totals.totalFunds, currency)} />
           ) : (
-            <MiniStat label="Cost" value={formatMoney(totals.purchaseCost, currency)} />
+            <MiniStat label="Total spent" value={formatMoney(totals.purchaseCost, currency)} />
           )}
         </div>
       </div>

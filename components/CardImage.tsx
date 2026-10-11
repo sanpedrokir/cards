@@ -54,6 +54,8 @@ export default function CardImage({
       <img
         src={src}
         alt={alt}
+        loading="lazy"
+        decoding="async"
         className={`h-full w-full ${fit === "contain" ? "object-contain" : "object-cover"}`}
       />
     </span>
