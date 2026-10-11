@@ -43,11 +43,17 @@ function parseBox(text: string): Box | null {
   return { left, top, right, bottom };
 }
 
+// If the API is rejecting us outright (out of credits, bad key, rate
+// limited), every upload would wait for a call that is certain to fail. After
+// one such failure, skip the crop for a while and just save the photo.
+const SKIP_AFTER_REJECTION_MS = 10 * 60 * 1000;
+let skipUntil = 0;
+
 // `oriented` must already have EXIF rotation applied (so the box the model
 // sees lines up with the pixels we crop).
 export async function cropToCard(oriented: Buffer): Promise<Buffer> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return oriented;
+  if (!apiKey || Date.now() < skipUntil) return oriented;
 
   try {
     const meta = await sharp(oriented).metadata();
@@ -61,7 +67,7 @@ export async function cropToCard(oriented: Buffer): Promise<Buffer> {
       .toBuffer();
 
     // Fail fast: this runs while someone waits for "Add Card" to finish.
-    const client = new Anthropic({ apiKey, timeout: 12_000, maxRetries: 0 });
+    const client = new Anthropic({ apiKey, timeout: 8_000, maxRetries: 0 });
     const response = await client.messages.create({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 100,
@@ -91,7 +97,10 @@ export async function cropToCard(oriented: Buffer): Promise<Buffer> {
     return await sharp(oriented)
       .extract({ left, top, width: right - left, height: bottom - top })
       .toBuffer();
-  } catch {
+  } catch (err) {
+    if (err instanceof Anthropic.APIError && [400, 401, 402, 403, 429].includes(err.status ?? 0)) {
+      skipUntil = Date.now() + SKIP_AFTER_REJECTION_MS;
+    }
     return oriented;
   }
 }
