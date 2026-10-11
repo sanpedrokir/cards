@@ -54,7 +54,7 @@ export default function ConfirmSubmitButton({
           <div
             role="alertdialog"
             aria-modal="true"
-            className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl dark:bg-slate-900"
+            className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl dark:bg-[#12212b]"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-base font-semibold text-slate-900 dark:text-white">

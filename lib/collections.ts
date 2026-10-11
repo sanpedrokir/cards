@@ -1,6 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
-import { ensureCollections } from "./store";
+import { ensureCollections, FREE_COLLECTION_LIMIT, hasActiveSubscription } from "./store";
 import type { Collection } from "./types";
 
 export const ACTIVE_COLLECTION_COOKIE = "vaulted_collection";
@@ -20,6 +20,13 @@ export async function getCollectionContext(userId: string): Promise<CollectionCo
   const wanted = store.get(ACTIVE_COLLECTION_COOKIE)?.value;
   const active = collections.find((c) => c.id === wanted) ?? collections[0];
   return { collections, active };
+}
+
+// Free accounts can have FREE_COLLECTION_LIMIT collections; subscribers (and
+// the admin) have no cap. Returns null for "unlimited".
+export async function getCollectionLimit(userId: string): Promise<number | null> {
+  if (userId === process.env.ADMIN_USER_ID) return null;
+  return (await hasActiveSubscription(userId)) ? null : FREE_COLLECTION_LIMIT;
 }
 
 // For server actions: honour the collection the form was rendered for (so a

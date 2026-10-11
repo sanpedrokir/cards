@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useTransition } from "react";
 import {
   createCollectionAction,
@@ -17,8 +18,25 @@ export interface CollectionSummary {
   cardCount: number;
 }
 
-function NewCollectionForm() {
+function NewCollectionForm({ atLimit, limit }: { atLimit: boolean; limit: number | null }) {
   const [state, formAction] = useActionState(createCollectionAction, initialFormState);
+
+  if (atLimit) {
+    return (
+      <div className="surface space-y-2 p-4">
+        <p className="text-sm font-medium text-slate-900 dark:text-white">
+          Collection limit reached
+        </p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Free accounts can have up to {limit} collections. Subscribe for
+          unlimited collections.
+        </p>
+        <Link href="/pricing" className="btn-primary-sm">
+          See plans
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <form action={formAction} className="surface space-y-3 p-4">
@@ -117,13 +135,18 @@ function CollectionRow({
 export default function CollectionManager({
   collections,
   activeId,
+  limit,
 }: {
   collections: CollectionSummary[];
   activeId: string;
+  limit: number | null;
 }) {
   return (
     <div className="space-y-4">
-      <NewCollectionForm />
+      <NewCollectionForm
+        atLimit={limit !== null && collections.length >= limit}
+        limit={limit}
+      />
       {collections.map((c) => (
         <CollectionRow
           key={c.id}

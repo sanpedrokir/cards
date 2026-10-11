@@ -9,7 +9,7 @@ const NAV_ITEMS = [
     href: "/",
     label: "Dashboard",
     icon: (active: boolean) => (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
+      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7">
         <path
           d="M4 12 12 4l8 8M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"
           stroke="currentColor"
@@ -24,7 +24,7 @@ const NAV_ITEMS = [
     href: "/cards/new",
     label: "Add Card",
     icon: (active: boolean) => (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
+      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7">
         <circle
           cx="12"
           cy="12"
@@ -45,7 +45,7 @@ const NAV_ITEMS = [
     href: "/sales",
     label: "Sell",
     icon: (active: boolean) => (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
+      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7">
         <path
           d="M3 7.5h18M3 7.5v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-9M3 7.5l2.5-3.5h13L21 7.5"
           stroke="currentColor"
@@ -61,7 +61,7 @@ const NAV_ITEMS = [
     href: "/cards",
     label: "Vaulted Cards",
     icon: (active: boolean) => (
-      <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
+      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7">
         <rect
           x="3.5"
           y="5.5"
@@ -107,12 +107,12 @@ export default function Nav() {
 
   if (!isSignedIn) {
     return (
-      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur dark:border-white/10 dark:bg-slate-950/80">
+      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur dark:border-white/10 dark:bg-[#060d13]/85">
         <div className="mx-auto flex max-w-4xl items-center justify-center px-6 py-3">
           <Link href="/" className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/vaulted-logo.png" alt="" className="h-8 w-8 rounded-lg shadow-sm" />
-            <span className="font-bold text-slate-900">Vaulted</span>
+            <span className="font-bold text-slate-900 dark:text-white">Vaulted</span>
           </Link>
         </div>
       </header>
@@ -121,7 +121,7 @@ export default function Nav() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur dark:border-white/10 dark:bg-slate-950/80 sm:hidden">
+      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur dark:border-white/10 dark:bg-[#060d13]/85 sm:hidden">
         <div className="flex items-center justify-between px-4 py-2">
           <div className="w-12" />
           <Link href="/" className="flex items-center gap-1.5 text-sm font-bold text-slate-900 dark:text-white">
@@ -142,12 +142,12 @@ export default function Nav() {
         )}
       </header>
 
-      <header className="sticky top-0 z-40 hidden border-b border-slate-200/70 bg-white/80 backdrop-blur sm:block dark:border-white/10 dark:bg-slate-950/80">
+      <header className="sticky top-0 z-40 hidden border-b border-slate-200/70 bg-white/80 backdrop-blur sm:block dark:border-white/10 dark:bg-[#060d13]/85">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-3">
           <Link href="/" className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/vaulted-logo.png" alt="" className="h-8 w-8 rounded-lg shadow-sm" />
-            <span className="font-bold text-slate-900">Vaulted</span>
+            <span className="font-bold text-slate-900 dark:text-white">Vaulted</span>
           </Link>
           {email && (
             <span className="text-xs text-slate-400 dark:text-slate-500">{email}</span>
@@ -175,7 +175,7 @@ export default function Nav() {
         </div>
       </header>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/70 bg-white/95 backdrop-blur pb-[env(safe-area-inset-bottom)] sm:hidden dark:border-white/10 dark:bg-slate-950/95">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/70 bg-white/95 backdrop-blur pb-[env(safe-area-inset-bottom)] sm:hidden dark:border-white/10 dark:bg-[#08121a]/95">
         <div className="mx-auto flex max-w-md items-stretch justify-between px-2">
           {NAV_ITEMS.map((item) => {
             const active = isActive(item.href);

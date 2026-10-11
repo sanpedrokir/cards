@@ -1,9 +1,16 @@
 import Link from "next/link";
 import type { Card } from "@/lib/types";
 import { cardProfit } from "@/lib/calculations";
-import { formatDate, formatMoney } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
 import StatusBadge from "./StatusBadge";
 import CardImage from "./CardImage";
+
+// Grade is stored as text; "0" means an ungraded (raw) card.
+function gradeLabel(card: Card): string | null {
+  const grade = card.grade && card.grade !== "0" ? card.grade : null;
+  if (!card.gradingCompany && !grade) return null;
+  return [card.gradingCompany, grade].filter(Boolean).join(" ");
+}
 
 export default function CardTile({
   card,
@@ -14,43 +21,60 @@ export default function CardTile({
 }) {
   const profit = card.sale ? cardProfit(card) : null;
   const isProfit = (profit ?? 0) >= 0;
+  const grade = gradeLabel(card);
 
   return (
-    <Link
-      href={`/cards/${card.id}`}
-      className="surface flex gap-3 p-3 transition-transform hover:-translate-y-0.5 hover:shadow-md"
-    >
-      <CardImage src={card.imageUrl} alt={card.name} className="h-24 w-20 rounded-lg" />
+    <Link href={`/cards/${card.id}`} className="group block min-w-0">
+      <div className="surface-raised p-3 transition-transform group-hover:-translate-y-0.5">
+        <CardImage
+          src={card.imageUrl}
+          alt={card.name}
+          fit="contain"
+          className="aspect-[3/4] w-full rounded-lg"
+        />
+      </div>
 
-      <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-2">
-          <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">
-            {card.name}
-          </p>
+      <div className="mt-2 space-y-1 px-0.5">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <StatusBadge status={card.status} />
-        </div>
-        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-          Purchased {formatDate(card.purchaseDate)} ·{" "}
-          {formatMoney(card.purchasePrice, currency)}
-        </p>
-
-        {card.sale && profit !== null && (
-          <p className="mt-1 flex items-center gap-1 text-xs">
-            <span className="text-slate-500 dark:text-slate-400">
-              Sold {formatDate(card.sale.saleDate)} ·{" "}
-              {formatMoney(card.sale.salePrice, currency)} ·
+          {card.cardNumber && (
+            <span className="text-sm text-slate-500 dark:text-slate-400">
+              {card.cardNumber}
             </span>
-            <span
-              className={`inline-flex items-center gap-0.5 font-semibold ${
+          )}
+        </div>
+
+        <p className="line-clamp-2 text-[15px] font-bold leading-snug text-slate-900 dark:text-white">
+          {card.name}
+        </p>
+        {card.series && (
+          <p className="truncate text-xs text-slate-500 dark:text-slate-400">{card.series}</p>
+        )}
+        {grade && <span className="tag">{grade}</span>}
+
+        {card.sale && profit !== null ? (
+          <div className="pt-0.5">
+            <p className="text-lg font-bold tabular-nums text-slate-900 dark:text-white">
+              {formatMoney(card.sale.salePrice, currency)}
+            </p>
+            <p
+              className={`text-xs font-semibold ${
                 isProfit
                   ? "text-emerald-600 dark:text-emerald-400"
                   : "text-rose-600 dark:text-rose-400"
               }`}
             >
-              {isProfit ? "▲" : "▼"}
-              {formatMoney(Math.abs(profit), currency)}
-            </span>
-          </p>
+              {isProfit ? "▲" : "▼"} {formatMoney(Math.abs(profit), currency)}{" "}
+              {isProfit ? "profit" : "loss"}
+            </p>
+          </div>
+        ) : (
+          <div className="pt-0.5">
+            <p className="text-lg font-bold tabular-nums text-slate-900 dark:text-white">
+              {formatMoney(card.purchasePrice, currency)}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Cost</p>
+          </div>
         )}
       </div>
     </Link>

@@ -25,18 +25,18 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#d97706",
-  // Without this, Android Chrome's "force dark" heuristic can repaint the
-  // whole page with an auto-generated dark theme when the OS is in dark
-  // mode, overriding our actual (light) design entirely.
-  colorScheme: "light",
+  themeColor: "#060d13",
+  // The app is dark-only (see the `dark` class on <html>); declaring it
+  // keeps native form controls and scrollbars dark and stops Android
+  // Chrome's "force dark" heuristic from repainting the page itself.
+  colorScheme: "dark",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${roboto.variable} ${robotoMono.variable} h-full antialiased`}
+      className={`${roboto.variable} ${robotoMono.variable} dark h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <ClerkProvider>

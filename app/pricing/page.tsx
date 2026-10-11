@@ -30,6 +30,7 @@ export default async function PricingPage() {
         <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
           <li>Track card purchases, sales and profit</li>
           <li>Unlimited cards and sales history</li>
+          <li>Unlimited collections (free accounts: up to 2)</li>
         </ul>
 
         {gateEnabled ? (

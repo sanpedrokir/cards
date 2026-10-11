@@ -1,13 +1,14 @@
 import { requirePageUserId } from "@/lib/auth-helpers";
-import { getCollectionContext } from "@/lib/collections";
+import { getCollectionContext, getCollectionLimit } from "@/lib/collections";
 import { readAllCollections } from "@/lib/store";
 import CollectionManager from "@/components/CollectionManager";
 
 export default async function CollectionsPage() {
   const userId = await requirePageUserId();
-  const [all, { active }] = await Promise.all([
+  const [all, { active }, limit] = await Promise.all([
     readAllCollections(userId),
     getCollectionContext(userId),
+    getCollectionLimit(userId),
   ]);
 
   return (
@@ -27,6 +28,7 @@ export default async function CollectionsPage() {
           cardCount: db.cards.length,
         }))}
         activeId={active.id}
+        limit={limit}
       />
     </div>
   );

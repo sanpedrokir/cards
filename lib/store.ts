@@ -125,12 +125,49 @@ export async function ensureCollections(userId: string): Promise<Collection[]> {
   }
 }
 
-export async function createCollection(userId: string, name: string): Promise<string> {
-  const id = randomUUID();
-  await sql`
-    INSERT INTO collections (id, user_id, name) VALUES (${id}, ${userId}, ${name})
-  `;
-  return id;
+export const FREE_COLLECTION_LIMIT = 2;
+
+export type CreateCollectionResult =
+  | { ok: true; id: string }
+  | { ok: false; reason: "limit-reached" };
+
+// `maxCollections` is null for unlimited. The count and the insert happen
+// under the same per-user lock as ensureCollections/deleteCollection, so two
+// simultaneous requests can't both slip past the limit.
+export async function createCollection(
+  userId: string,
+  name: string,
+  maxCollections: number | null
+): Promise<CreateCollectionResult> {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [userId]);
+
+    if (maxCollections !== null) {
+      const count = await client.query(
+        "SELECT COUNT(*)::int AS n FROM collections WHERE user_id = $1",
+        [userId]
+      );
+      if (count.rows[0].n >= maxCollections) {
+        await client.query("ROLLBACK");
+        return { ok: false, reason: "limit-reached" };
+      }
+    }
+
+    const id = randomUUID();
+    await client.query(
+      "INSERT INTO collections (id, user_id, name) VALUES ($1, $2, $3)",
+      [id, userId, name]
+    );
+    await client.query("COMMIT");
+    return { ok: true, id };
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 export async function renameCollection(

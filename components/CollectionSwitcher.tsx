@@ -29,7 +29,7 @@ export default function CollectionSwitcher({
             await setActiveCollectionAction(id);
           });
         }}
-        className="min-w-0 max-w-[14rem] rounded-xl border-2 border-stone-200 px-2 py-1 text-sm font-medium disabled:opacity-60 dark:border-white/10 dark:bg-slate-900"
+        className="min-w-0 max-w-[14rem] rounded-xl border-2 border-stone-200 px-2 py-1 text-sm font-medium disabled:opacity-60 dark:border-white/10 dark:bg-[#0a141b]"
       >
         {collections.map((c) => (
           <option key={c.id} value={c.id}>

@@ -135,7 +135,7 @@ export default function InvestedAmountEditor({
               if (e.key === "Enter") e.currentTarget.blur();
               if (e.key === "Escape") setEditing(false);
             }}
-            className="w-28 rounded-xl border-2 border-stone-200 px-2 py-1 text-sm focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-200/60 disabled:opacity-60 dark:border-white/10 dark:bg-slate-900"
+            className="w-28 rounded-xl border-2 border-stone-200 px-2 py-1 text-sm focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-200/60 disabled:opacity-60 dark:border-white/10 dark:bg-[#0a141b]"
           />
         </form>
 
@@ -147,7 +147,7 @@ export default function InvestedAmountEditor({
           value={pendingCurrency ?? currency}
           onChange={handleCurrencyChange}
           disabled={isSaving}
-          className="rounded-xl border-2 border-stone-200 px-2 py-1 text-sm disabled:opacity-60 dark:border-white/10 dark:bg-slate-900"
+          className="rounded-xl border-2 border-stone-200 px-2 py-1 text-sm disabled:opacity-60 dark:border-white/10 dark:bg-[#0a141b]"
         >
           {CURRENCIES.map((c) => (
             <option key={c} value={c}>
@@ -174,7 +174,7 @@ export default function InvestedAmountEditor({
             <div
               role="alertdialog"
               aria-modal="true"
-              className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl dark:bg-slate-900"
+              className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl dark:bg-[#0a141b]"
               onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-base font-semibold text-slate-900 dark:text-white">

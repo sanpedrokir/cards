@@ -12,6 +12,7 @@ import { requireAdminUserId, requirePageUserId, requireSignedInUserId } from "./
 import {
   ACTIVE_COLLECTION_COOKIE,
   getCollectionContext,
+  getCollectionLimit,
   resolveCollectionId,
 } from "./collections";
 import { getStripe, getAppUrl } from "./stripe";
@@ -494,8 +495,13 @@ export async function createCollectionAction(
   const error = collectionNameError(name, collections.map((c) => c.name));
   if (error || !name) return { error: error ?? "Enter a collection name." };
 
-  const id = await createCollection(userId, name);
-  await rememberActiveCollection(id);
+  const result = await createCollection(userId, name, await getCollectionLimit(userId));
+  if (!result.ok) {
+    return {
+      error: "Free accounts can have up to 2 collections. Subscribe for unlimited collections.",
+    };
+  }
+  await rememberActiveCollection(result.id);
 
   revalidateCollectionPaths();
   redirect("/");

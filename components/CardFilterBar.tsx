@@ -41,14 +41,25 @@ export default function CardFilterBar({
 
   return (
     <div className="space-y-3">
-      <input
-        type="search"
-        placeholder="Search by card name…"
-        defaultValue={defaultQuery}
-        onChange={(e) => updateParams({ q: e.target.value })}
-        className="input-field mt-0"
-      />
-      <div className="flex gap-2">
+      <div className="relative">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+          className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
+        >
+          <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth={1.8} />
+          <path d="m16 16 4 4" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" />
+        </svg>
+        <input
+          type="search"
+          placeholder="Search by card name…"
+          defaultValue={defaultQuery}
+          onChange={(e) => updateParams({ q: e.target.value })}
+          className="input-field mt-0 rounded-full py-3 pl-11"
+        />
+      </div>
+      <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
         {FILTERS.map((filter) => {
           const active = defaultStatus === filter.value;
           return (

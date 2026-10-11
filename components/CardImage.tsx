@@ -7,10 +7,12 @@ export default function CardImage({
   src,
   alt,
   className = "h-32 w-24 rounded-xl",
+  fit = "cover",
 }: {
   src?: string;
   alt: string;
   className?: string;
+  fit?: "cover" | "contain";
 }) {
   const openLightbox = useLightbox();
 
@@ -49,7 +51,11 @@ export default function CardImage({
       className={`relative inline-block ${className} shrink-0 cursor-pointer overflow-hidden`}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={alt} className="h-full w-full object-cover" />
+      <img
+        src={src}
+        alt={alt}
+        className={`h-full w-full ${fit === "contain" ? "object-contain" : "object-cover"}`}
+      />
     </span>
   );
 }

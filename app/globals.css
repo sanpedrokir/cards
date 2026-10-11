@@ -1,19 +1,35 @@
 @import "tailwindcss";
 
-/* Bright/white theme: force light mode everywhere by making the `dark:`
-   variant only match an explicit `.dark` ancestor class, which this app
-   never applies. This neutralizes every `dark:` utility across the app
-   (and the device's prefers-color-scheme setting) without having to touch
-   every component file. To restore automatic dark mode, delete this line
-   and see backup-indigo-dark-theme for the previous palette. */
+/* Dark theme: the `dark:` variant matches an explicit `.dark` ancestor,
+   which app/layout.tsx puts on <html>. That makes the dark palette below
+   permanent, independent of the device's prefers-color-scheme setting.
+   (Remove the class from <html> to get the old light look back.) */
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f4f4f5;
-  --foreground: #18181b;
-  /* Reinforces the <meta name="color-scheme"> tag: tells the browser this
-     page is light-only, so it doesn't apply its own auto-dark repaint. */
-  color-scheme: light;
+  --background: #060d13;
+  --foreground: #eef1f6;
+  /* Reinforces the <meta name="color-scheme"> tag so form controls and
+     scrollbars render dark too. */
+  color-scheme: dark;
+}
+
+/* Brand accent. The app's existing "amber" utilities (buttons, active tabs,
+   focus rings, links) are remapped here to a fresh mint-to-teal ramp, so the
+   whole UI shifts from gold to green/blue in one place. Light shades are
+   mint, dark shades are deep teal. */
+@theme {
+  --color-amber-50: #ecfdf5;
+  --color-amber-100: #d1fae5;
+  --color-amber-200: #a7f3d0;
+  --color-amber-300: #6ee7b7;
+  --color-amber-400: #34d399;
+  --color-amber-500: #14b8a6;
+  --color-amber-600: #0d9488;
+  --color-amber-700: #0f766e;
+  --color-amber-800: #115e59;
+  --color-amber-900: #134e4a;
+  --color-amber-950: #042f2e;
 }
 
 @theme inline {
@@ -37,10 +53,13 @@ body {
 @layer components {
   /* Card surfaces */
   .surface {
-    @apply rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 dark:border-white/10 dark:bg-slate-900/70 dark:shadow-none;
+    @apply rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 dark:border-white/[0.07] dark:bg-[#0e1a23] dark:shadow-none;
+  }
+  .surface-raised {
+    @apply rounded-2xl bg-slate-100 dark:bg-[#14232e];
   }
   .surface-dashed {
-    @apply rounded-2xl border border-dashed border-slate-300 bg-white/50 text-center text-sm text-slate-500 dark:border-white/15 dark:bg-white/5 dark:text-slate-400;
+    @apply rounded-2xl border border-dashed border-slate-300 bg-white/50 text-center text-sm text-slate-500 dark:border-white/15 dark:bg-white/[0.03] dark:text-slate-400;
   }
 
   /* Buttons */
@@ -51,7 +70,7 @@ body {
     @apply inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-amber-300 to-amber-500 px-3.5 py-1.5 text-sm font-semibold text-amber-950 shadow-sm shadow-amber-400/25 transition-all hover:brightness-105;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-amber-50 hover:border-amber-300 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/15 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700;
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-amber-50 hover:border-amber-300 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/15 dark:bg-white/[0.06] dark:text-slate-200 dark:hover:bg-white/10;
   }
   .btn-danger {
     @apply inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-rose-500 to-red-600 px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-rose-600/25 transition-all hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60;
@@ -65,7 +84,7 @@ body {
 
   /* Forms */
   .input-field {
-    @apply mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm transition-shadow focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/25 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100;
+    @apply mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm transition-shadow focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/25 dark:border-white/10 dark:bg-[#0a141b] dark:text-slate-100 dark:placeholder:text-slate-500;
   }
   .label-field {
     @apply block text-sm font-medium text-slate-700 dark:text-slate-300;
@@ -73,10 +92,15 @@ body {
 
   /* Filter / tab pills */
   .pill {
-    @apply rounded-full px-4 py-1.5 text-sm font-medium transition-colors bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10;
+    @apply shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/[0.07] dark:text-slate-300 dark:hover:bg-white/[0.12];
   }
   .pill-active {
-    @apply rounded-full bg-gradient-to-r from-amber-400 to-amber-600 px-4 py-1.5 text-sm font-semibold text-amber-950 shadow-sm shadow-amber-500/30;
+    @apply shrink-0 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 px-4 py-1.5 text-sm font-semibold text-amber-950 shadow-sm shadow-amber-500/30;
+  }
+
+  /* Small outlined tags (grade, grading company) */
+  .tag {
+    @apply inline-flex items-center rounded border border-sky-500/70 px-1.5 py-px text-[11px] font-semibold leading-4 text-sky-600 dark:border-sky-400/60 dark:text-sky-300;
   }
 
   /* Status badges */
@@ -107,6 +131,14 @@ body {
   }
   .page-title {
     @apply text-2xl font-medium tracking-tight text-slate-900 dark:text-white;
+  }
+
+  /* Horizontal scroller (filter chips) without the visible scrollbar */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 
   /* Loading-state skeleton block */
