@@ -10,7 +10,7 @@ import EbayPriceCheck from "@/components/EbayPriceCheck";
 import SaleCelebration from "@/components/SaleCelebration";
 import EditableAmount from "@/components/EditableAmount";
 import CardImage from "@/components/CardImage";
-import { updateCardPurchasePriceAction, updateCardSalePriceAction } from "@/lib/actions";
+import { updateCardPurchasePriceAction } from "@/lib/actions";
 
 export default async function CardDetailPage({
   params,
@@ -91,14 +91,20 @@ export default async function CardDetailPage({
               Purchase Price
             </span>
             <span className="font-medium text-slate-900 dark:text-white">
-              <EditableAmount
-                action={updateCardPurchasePriceAction}
-                hiddenFields={{ cardId: card.id }}
-                amount={card.purchasePrice}
-                currency={currency}
-                ariaLabel="Edit purchase price"
-                min="0.01"
-              />
+              {/* Sold cards are locked so recorded profit can't be changed
+                  after the fact; unsold cards can still be corrected. */}
+              {card.status === "sold" ? (
+                formatMoney(card.purchasePrice, currency)
+              ) : (
+                <EditableAmount
+                  action={updateCardPurchasePriceAction}
+                  hiddenFields={{ cardId: card.id }}
+                  amount={card.purchasePrice}
+                  currency={currency}
+                  ariaLabel="Edit purchase price"
+                  min="0.01"
+                />
+              )}
             </span>
           </div>
           <div className="flex justify-between">
@@ -117,14 +123,7 @@ export default async function CardDetailPage({
                   Selling Price
                 </span>
                 <span className="font-medium text-slate-900 dark:text-white">
-                  <EditableAmount
-                    action={updateCardSalePriceAction}
-                    hiddenFields={{ cardId: card.id }}
-                    amount={card.sale.salePrice}
-                    currency={currency}
-                    ariaLabel="Edit sale amount"
-                    min="0"
-                  />
+                  {formatMoney(card.sale.salePrice, currency)}
                 </span>
               </div>
               <div className="flex justify-between">

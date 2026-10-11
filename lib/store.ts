@@ -448,7 +448,7 @@ export async function insertCardIfAffordable(
   }
 }
 
-export type UpdatePriceResult = "ok" | "not-found" | "insufficient-balance";
+export type UpdatePriceResult = "ok" | "not-found" | "locked" | "insufficient-balance";
 
 // Locks the investment row (and the card row) so a concurrent purchase can't
 // read a stale available balance while this edit is in flight.
@@ -463,12 +463,17 @@ export async function updateCardPurchasePrice(
     await client.query("BEGIN");
 
     const cardResult = await client.query(
-      "SELECT id, collection_id FROM cards WHERE id = $1 AND user_id = $2 FOR UPDATE",
+      "SELECT id, collection_id, status FROM cards WHERE id = $1 AND user_id = $2 FOR UPDATE",
       [cardId, userId]
     );
     if (cardResult.rows.length === 0) {
       await client.query("ROLLBACK");
       return "not-found";
+    }
+    // Sold cards are locked: their recorded profit shouldn't change later.
+    if (cardResult.rows[0].status === "sold") {
+      await client.query("ROLLBACK");
+      return "locked";
     }
     // The budget that applies is the one belonging to the card's own
     // collection, not whichever collection happens to be selected right now.
@@ -507,19 +512,6 @@ export async function updateCardPurchasePrice(
   } finally {
     client.release();
   }
-}
-
-export async function updateCardSalePrice(
-  userId: string,
-  cardId: string,
-  newSalePrice: number
-): Promise<boolean> {
-  const rows = await sql`
-    UPDATE cards SET sale_price = ${newSalePrice}
-    WHERE id = ${cardId} AND user_id = ${userId} AND status = 'sold'
-    RETURNING id
-  `;
-  return rows.length > 0;
 }
 
 // Converts every stored amount in one collection (its investment + every

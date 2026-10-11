@@ -34,7 +34,6 @@ import {
   setInvestmentAmount,
   setSubscriptionGateEnabled,
   updateCardPurchasePrice,
-  updateCardSalePrice,
   upsertInvestment,
   upsertSubscriptionCustomer,
 } from "./store";
@@ -412,32 +411,11 @@ export async function updateCardPurchasePriceAction(
   if (result === "not-found") {
     return { error: "Card not found." };
   }
+  if (result === "locked") {
+    return { error: "This card has been sold, so its prices are locked." };
+  }
   if (result === "insufficient-balance") {
     return { error: "That price exceeds your available investment balance." };
-  }
-
-  revalidateCardPaths(cardId);
-  return {};
-}
-
-export async function updateCardSalePriceAction(
-  _prevState: FormState,
-  formData: FormData
-): Promise<FormState> {
-  const userId = await requirePageUserId();
-  const cardId = textField(formData, "cardId");
-  const amount = numberField(formData, "amount");
-
-  if (!cardId) {
-    return { error: "Missing card reference." };
-  }
-  if (amount === undefined || amount < 0) {
-    return { error: "Enter a valid sale amount." };
-  }
-
-  const ok = await updateCardSalePrice(userId, cardId, amount);
-  if (!ok) {
-    return { error: "Card not found or not yet sold." };
   }
 
   revalidateCardPaths(cardId);
