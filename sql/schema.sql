@@ -41,18 +41,33 @@ ALTER TABLE cards ADD COLUMN IF NOT EXISTS cert_number TEXT;
 ALTER TABLE investment DROP CONSTRAINT IF EXISTS investment_id_check;
 ALTER TABLE investment DROP COLUMN IF EXISTS id;
 ALTER TABLE investment ADD COLUMN IF NOT EXISTS user_id TEXT;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conrelid = 'investment'::regclass AND contype = 'p'
-  ) THEN
-    ALTER TABLE investment ALTER COLUMN user_id SET NOT NULL;
-    ALTER TABLE investment ADD PRIMARY KEY (user_id);
-  END IF;
-END $$;
+ALTER TABLE investment ALTER COLUMN user_id SET NOT NULL;
 ALTER TABLE cards ADD COLUMN IF NOT EXISTS user_id TEXT NOT NULL;
 
 CREATE INDEX IF NOT EXISTS cards_user_id_idx ON cards (user_id);
+
+-- Collections: each user can have many; every card and every budget
+-- (investment row) belongs to exactly one. The investment table used to be
+-- one row per user (PRIMARY KEY (user_id)); it's now one row per collection.
+-- collection_id stays nullable so rows created before collections existed are
+-- adopted into a user's first ("My Collection") collection the next time
+-- they're seen (see ensureCollections in lib/store.ts, or run
+-- sql/migrate-collections.mjs to adopt them all up front).
+CREATE TABLE IF NOT EXISTS collections (
+  id UUID PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS collections_user_id_idx ON collections (user_id);
+
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS collection_id UUID;
+CREATE INDEX IF NOT EXISTS cards_collection_id_idx ON cards (collection_id);
+
+ALTER TABLE investment ADD COLUMN IF NOT EXISTS collection_id UUID;
+ALTER TABLE investment DROP CONSTRAINT IF EXISTS investment_pkey;
+CREATE UNIQUE INDEX IF NOT EXISTS investment_collection_id_key ON investment (collection_id);
+CREATE INDEX IF NOT EXISTS investment_user_id_idx ON investment (user_id);
 
 -- Direct Stripe subscription billing (not Clerk Billing)
 CREATE TABLE IF NOT EXISTS subscriptions (

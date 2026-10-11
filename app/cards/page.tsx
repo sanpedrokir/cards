@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { requirePageUserId } from "@/lib/auth-helpers";
 import { getInvestment, getCardsPage } from "@/lib/store";
+import { getCollectionContext } from "@/lib/collections";
+import CollectionSwitcher from "@/components/CollectionSwitcher";
 import CardTile from "@/components/CardTile";
 import CardFilterBar from "@/components/CardFilterBar";
 
@@ -13,12 +15,13 @@ export default async function CardsPage({
 }) {
   const { status = "all", q = "", page: pageParam } = await searchParams;
   const userId = await requirePageUserId();
+  const { collections, active } = await getCollectionContext(userId);
   const page = Math.max(1, Number(pageParam) || 1);
   const query = q.trim().toLowerCase();
 
   const [investment, { cards, totalCount }] = await Promise.all([
-    getInvestment(userId),
-    getCardsPage(userId, { status, query, page, pageSize: PAGE_SIZE }),
+    getInvestment(userId, active.id),
+    getCardsPage(userId, active.id, { status, query, page, pageSize: PAGE_SIZE }),
   ]);
   const currency = investment?.currency ?? "SGD";
   const pageCount = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
@@ -34,6 +37,7 @@ export default async function CardsPage({
 
   return (
     <div className="space-y-5">
+      <CollectionSwitcher collections={collections} activeId={active.id} />
       <div className="flex items-center justify-between">
         <h1 className="page-title">Vaulted Cards</h1>
         <Link href="/cards/new" className="btn-primary-sm">

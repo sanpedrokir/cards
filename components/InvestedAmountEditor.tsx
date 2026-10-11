@@ -21,10 +21,12 @@ function PencilIcon() {
 }
 
 export default function InvestedAmountEditor({
+  collectionId,
   amount,
   currency,
   since,
 }: {
+  collectionId: string;
   amount: number;
   currency: string;
   since: string;
@@ -118,6 +120,7 @@ export default function InvestedAmountEditor({
         <span className="text-slate-500 dark:text-slate-400">Overall Fund Invested:</span>
 
         <form ref={amountFormRef} action={amountFormAction} className="contents">
+          <input type="hidden" name="collectionId" value={collectionId} />
           <input
             name="amount"
             type="number"
@@ -137,6 +140,7 @@ export default function InvestedAmountEditor({
         </form>
 
         <form ref={currencyFormRef} action={currencyFormAction} className="contents">
+          <input type="hidden" name="collectionId" value={collectionId} />
           <input type="hidden" name="currency" value={pendingCurrency ?? currency} />
         </form>
         <select

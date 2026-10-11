@@ -1,6 +1,9 @@
 import "server-only";
+import { randomUUID } from "node:crypto";
 import { sql, pool } from "./db";
-import type { Card, Database, Investment, Sale } from "./types";
+import type { Card, Collection, CollectionData, Database, Investment, Sale } from "./types";
+
+export const DEFAULT_COLLECTION_NAME = "My Collection";
 
 function toNumber(value: unknown): number {
   return typeof value === "number" ? value : Number(value);
@@ -47,6 +50,7 @@ function mapCard(row: any): Card {
     imageUrl: row.image_url ?? undefined,
     status: row.status,
     createdAt: toIsoTimestamp(row.created_at),
+    collectionId: row.collection_id ?? undefined,
   };
 
   if (row.status === "sold" && row.sale_price !== null) {
@@ -64,16 +68,177 @@ function mapCard(row: any): Card {
   return card;
 }
 
-export async function getInvestment(userId: string): Promise<Investment | null> {
-  const rows = await sql`SELECT * FROM investment WHERE user_id = ${userId}`;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapCollection(row: any): Collection {
+  return {
+    id: row.id,
+    name: row.name,
+    createdAt: toIsoTimestamp(row.created_at),
+  };
+}
+
+// Every user always has at least one collection. A user's first visit after
+// collections shipped (or a brand-new user) creates "My Collection" and
+// adopts any cards / budget they already had from before collections
+// existed, in one transaction. The advisory lock stops two simultaneous
+// first requests (e.g. two tabs) from each creating their own default.
+export async function ensureCollections(userId: string): Promise<Collection[]> {
+  const rows = await sql`
+    SELECT * FROM collections WHERE user_id = ${userId} ORDER BY created_at, id
+  `;
+  if (rows.length > 0) return rows.map(mapCollection);
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [userId]);
+
+    const existing = await client.query(
+      "SELECT * FROM collections WHERE user_id = $1 ORDER BY created_at, id",
+      [userId]
+    );
+    if (existing.rows.length > 0) {
+      await client.query("COMMIT");
+      return existing.rows.map(mapCollection);
+    }
+
+    const id = randomUUID();
+    const created = await client.query(
+      "INSERT INTO collections (id, user_id, name) VALUES ($1, $2, $3) RETURNING *",
+      [id, userId, DEFAULT_COLLECTION_NAME]
+    );
+    await client.query(
+      "UPDATE cards SET collection_id = $1 WHERE user_id = $2 AND collection_id IS NULL",
+      [id, userId]
+    );
+    await client.query(
+      "UPDATE investment SET collection_id = $1 WHERE user_id = $2 AND collection_id IS NULL",
+      [id, userId]
+    );
+    await client.query("COMMIT");
+    return created.rows.map(mapCollection);
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+export async function createCollection(userId: string, name: string): Promise<string> {
+  const id = randomUUID();
+  await sql`
+    INSERT INTO collections (id, user_id, name) VALUES (${id}, ${userId}, ${name})
+  `;
+  return id;
+}
+
+export async function renameCollection(
+  userId: string,
+  collectionId: string,
+  name: string
+): Promise<boolean> {
+  const rows = await sql`
+    UPDATE collections SET name = ${name}
+    WHERE id = ${collectionId} AND user_id = ${userId}
+    RETURNING id
+  `;
+  return rows.length > 0;
+}
+
+export type DeleteCollectionResult =
+  | { ok: true; imageUrls: string[] }
+  | { ok: false; reason: "not-found" | "last-collection" };
+
+// Deletes the collection together with every card and the budget in it.
+// A user must always keep at least one collection.
+export async function deleteCollection(
+  userId: string,
+  collectionId: string
+): Promise<DeleteCollectionResult> {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [userId]);
+
+    const owned = await client.query(
+      "SELECT id FROM collections WHERE user_id = $1",
+      [userId]
+    );
+    if (!owned.rows.some((r) => r.id === collectionId)) {
+      await client.query("ROLLBACK");
+      return { ok: false, reason: "not-found" };
+    }
+    if (owned.rows.length <= 1) {
+      await client.query("ROLLBACK");
+      return { ok: false, reason: "last-collection" };
+    }
+
+    const images = await client.query(
+      "SELECT image_url FROM cards WHERE user_id = $1 AND collection_id = $2 AND image_url IS NOT NULL",
+      [userId, collectionId]
+    );
+    await client.query("DELETE FROM cards WHERE user_id = $1 AND collection_id = $2", [
+      userId,
+      collectionId,
+    ]);
+    await client.query("DELETE FROM investment WHERE user_id = $1 AND collection_id = $2", [
+      userId,
+      collectionId,
+    ]);
+    await client.query("DELETE FROM collections WHERE user_id = $1 AND id = $2", [
+      userId,
+      collectionId,
+    ]);
+    await client.query("COMMIT");
+    return { ok: true, imageUrls: images.rows.map((r) => String(r.image_url)) };
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+export async function getInvestment(
+  userId: string,
+  collectionId: string
+): Promise<Investment | null> {
+  const rows = await sql`
+    SELECT * FROM investment WHERE user_id = ${userId} AND collection_id = ${collectionId}
+  `;
   return rows.length ? mapInvestment(rows[0]) : null;
 }
 
-export async function getCards(userId: string): Promise<Card[]> {
+export async function getCards(userId: string, collectionId: string): Promise<Card[]> {
   const rows = await sql`
-    SELECT * FROM cards WHERE user_id = ${userId} ORDER BY created_at DESC
+    SELECT * FROM cards
+    WHERE user_id = ${userId} AND collection_id = ${collectionId}
+    ORDER BY created_at DESC
   `;
   return rows.map(mapCard);
+}
+
+// Every collection the user owns, each with its own budget and cards, for
+// the dashboard's per-collection totals. Two queries total regardless of how
+// many collections there are.
+export async function readAllCollections(userId: string): Promise<CollectionData[]> {
+  const collections = await ensureCollections(userId);
+  const [cardRows, investmentRows] = await Promise.all([
+    sql`SELECT * FROM cards WHERE user_id = ${userId} ORDER BY created_at DESC`,
+    sql`SELECT * FROM investment WHERE user_id = ${userId}`,
+  ]);
+
+  return collections.map((collection) => {
+    const investmentRow = investmentRows.find((r) => r.collection_id === collection.id);
+    return {
+      collection,
+      db: {
+        investment: investmentRow ? mapInvestment(investmentRow) : null,
+        cards: cardRows.filter((r) => r.collection_id === collection.id).map(mapCard),
+      },
+    };
+  });
 }
 
 export interface CardsPageOptions {
@@ -93,6 +258,7 @@ export interface CardsPageResult {
 // card a user owns on every visit just to filter/slice it in memory.
 export async function getCardsPage(
   userId: string,
+  collectionId: string,
   { status, query, page, pageSize }: CardsPageOptions
 ): Promise<CardsPageResult> {
   const offset = (Math.max(1, page) - 1) * pageSize;
@@ -101,7 +267,7 @@ export async function getCardsPage(
   const [rows, countRows] = await Promise.all([
     sql`
       SELECT * FROM cards
-      WHERE user_id = ${userId}
+      WHERE user_id = ${userId} AND collection_id = ${collectionId}
         AND (${status} = 'all' OR status = ${status})
         AND (${query} = '' OR name ILIKE ${likeQuery})
       ORDER BY created_at DESC
@@ -109,7 +275,7 @@ export async function getCardsPage(
     `,
     sql`
       SELECT COUNT(*) AS total FROM cards
-      WHERE user_id = ${userId}
+      WHERE user_id = ${userId} AND collection_id = ${collectionId}
         AND (${status} = 'all' OR status = ${status})
         AND (${query} = '' OR name ILIKE ${likeQuery})
     `,
@@ -128,19 +294,23 @@ export async function getCardById(userId: string, id: string): Promise<Card | nu
   return rows.length ? mapCard(rows[0]) : null;
 }
 
-export async function readDb(userId: string): Promise<Database> {
+export async function readDb(userId: string, collectionId: string): Promise<Database> {
   const [investment, cards] = await Promise.all([
-    getInvestment(userId),
-    getCards(userId),
+    getInvestment(userId, collectionId),
+    getCards(userId, collectionId),
   ]);
   return { investment, cards };
 }
 
-export async function upsertInvestment(userId: string, data: Investment): Promise<void> {
+export async function upsertInvestment(
+  userId: string,
+  collectionId: string,
+  data: Investment
+): Promise<void> {
   await sql`
-    INSERT INTO investment (user_id, amount, currency, investment_date, notes)
-    VALUES (${userId}, ${data.amount}, ${data.currency}, ${data.date}, ${data.notes ?? null})
-    ON CONFLICT (user_id) DO UPDATE SET
+    INSERT INTO investment (user_id, collection_id, amount, currency, investment_date, notes)
+    VALUES (${userId}, ${collectionId}, ${data.amount}, ${data.currency}, ${data.date}, ${data.notes ?? null})
+    ON CONFLICT (collection_id) DO UPDATE SET
       amount = EXCLUDED.amount,
       currency = EXCLUDED.currency,
       investment_date = EXCLUDED.investment_date,
@@ -148,9 +318,14 @@ export async function upsertInvestment(userId: string, data: Investment): Promis
   `;
 }
 
-export async function setInvestmentAmount(userId: string, amount: number): Promise<void> {
+export async function setInvestmentAmount(
+  userId: string,
+  collectionId: string,
+  amount: number
+): Promise<void> {
   await sql`
-    UPDATE investment SET amount = ${amount} WHERE user_id = ${userId}
+    UPDATE investment SET amount = ${amount}
+    WHERE user_id = ${userId} AND collection_id = ${collectionId}
   `;
 }
 
@@ -161,6 +336,7 @@ export type PurchaseResult = "ok" | "insufficient-balance";
 // same pre-purchase balance and both succeed.
 export async function insertCardIfAffordable(
   userId: string,
+  collectionId: string,
   card: Card
 ): Promise<PurchaseResult> {
   const client = await pool.connect();
@@ -169,8 +345,8 @@ export async function insertCardIfAffordable(
     await client.query("BEGIN");
 
     const invResult = await client.query(
-      "SELECT amount FROM investment WHERE user_id = $1 FOR UPDATE",
-      [userId]
+      "SELECT amount FROM investment WHERE user_id = $1 AND collection_id = $2 FOR UPDATE",
+      [userId, collectionId]
     );
 
     // No budget set yet -- purchases aren't capped until the user opts into
@@ -179,8 +355,8 @@ export async function insertCardIfAffordable(
     // anything bought before the budget existed).
     if (invResult.rows.length > 0) {
       const sumResult = await client.query(
-        "SELECT COALESCE(SUM(purchase_price), 0) AS total FROM cards WHERE user_id = $1",
-        [userId]
+        "SELECT COALESCE(SUM(purchase_price), 0) AS total FROM cards WHERE user_id = $1 AND collection_id = $2",
+        [userId, collectionId]
       );
       const investedAmount = toNumber(invResult.rows[0].amount);
       const purchaseCost = toNumber(sumResult.rows[0].total);
@@ -194,11 +370,11 @@ export async function insertCardIfAffordable(
 
     await client.query(
       `INSERT INTO cards (
-        id, user_id, name, purchase_price, purchase_date, category, series, card_number,
+        id, user_id, collection_id, name, purchase_price, purchase_date, category, series, card_number,
         grade, grading_company, cert_number, quantity, notes, image_url, status, created_at
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
       [
-        card.id, userId, card.name, card.purchasePrice, card.purchaseDate,
+        card.id, userId, collectionId, card.name, card.purchasePrice, card.purchaseDate,
         card.category ?? null, card.series ?? null, card.cardNumber ?? null,
         card.grade ?? null, card.gradingCompany ?? null, card.certNumber ?? null,
         card.quantity ?? null, card.notes ?? null, card.imageUrl ?? null,
@@ -230,24 +406,27 @@ export async function updateCardPurchasePrice(
     await client.query("BEGIN");
 
     const cardResult = await client.query(
-      "SELECT id FROM cards WHERE id = $1 AND user_id = $2 FOR UPDATE",
+      "SELECT id, collection_id FROM cards WHERE id = $1 AND user_id = $2 FOR UPDATE",
       [cardId, userId]
     );
     if (cardResult.rows.length === 0) {
       await client.query("ROLLBACK");
       return "not-found";
     }
+    // The budget that applies is the one belonging to the card's own
+    // collection, not whichever collection happens to be selected right now.
+    const collectionId: string | null = cardResult.rows[0].collection_id;
 
     const invResult = await client.query(
-      "SELECT amount FROM investment WHERE user_id = $1 FOR UPDATE",
-      [userId]
+      "SELECT amount FROM investment WHERE user_id = $1 AND collection_id IS NOT DISTINCT FROM $2::uuid FOR UPDATE",
+      [userId, collectionId]
     );
 
     // No budget set -- edits aren't capped until the user opts into one.
     if (invResult.rows.length > 0) {
       const sumResult = await client.query(
-        "SELECT COALESCE(SUM(purchase_price), 0) AS total FROM cards WHERE user_id = $1 AND id != $2",
-        [userId, cardId]
+        "SELECT COALESCE(SUM(purchase_price), 0) AS total FROM cards WHERE user_id = $1 AND collection_id IS NOT DISTINCT FROM $3::uuid AND id != $2",
+        [userId, cardId, collectionId]
       );
       const investedAmount = toNumber(invResult.rows[0].amount);
       const otherCardsCost = toNumber(sumResult.rows[0].total);
@@ -286,12 +465,13 @@ export async function updateCardSalePrice(
   return rows.length > 0;
 }
 
-// Converts every stored amount for a user (investment + every card's
-// purchase/sale price and fees) to a new currency by multiplying by `rate`,
+// Converts every stored amount in one collection (its investment + every
+// card's purchase/sale price and fees) to a new currency by multiplying by `rate`,
 // in one transaction so the currency label and the amounts it labels never
 // go out of sync partway through.
 export async function convertCurrency(
   userId: string,
+  collectionId: string,
   toCurrency: string,
   rate: number
 ): Promise<void> {
@@ -300,16 +480,16 @@ export async function convertCurrency(
   try {
     await client.query("BEGIN");
     await client.query(
-      `UPDATE investment SET currency = $1, amount = ROUND(amount * $2, 2) WHERE user_id = $3`,
-      [toCurrency, rate, userId]
+      `UPDATE investment SET currency = $1, amount = ROUND(amount * $2, 2) WHERE user_id = $3 AND collection_id = $4`,
+      [toCurrency, rate, userId, collectionId]
     );
     await client.query(
       `UPDATE cards SET
         purchase_price = ROUND(purchase_price * $1, 2),
         sale_price = CASE WHEN sale_price IS NOT NULL THEN ROUND(sale_price * $1, 2) ELSE NULL END,
         fees = CASE WHEN fees IS NOT NULL THEN ROUND(fees * $1, 2) ELSE NULL END
-      WHERE user_id = $2`,
-      [rate, userId]
+      WHERE user_id = $2 AND collection_id = $3`,
+      [rate, userId, collectionId]
     );
     await client.query("COMMIT");
   } catch (err) {

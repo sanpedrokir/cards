@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { requirePageUserId } from "@/lib/auth-helpers";
-import { readDb } from "@/lib/store";
+import { getCardById, getInvestment } from "@/lib/store";
 import SellForm from "@/components/SellForm";
 import EbayPriceCheck from "@/components/EbayPriceCheck";
 
@@ -12,13 +12,15 @@ export default async function SellCardPage({
 }) {
   const { id } = await params;
   const userId = await requirePageUserId();
-  const db = await readDb(userId);
-  const card = db.cards.find((c) => c.id === id);
+  const card = await getCardById(userId, id);
 
   if (!card) notFound();
   if (card.status === "sold") redirect(`/cards/${id}`);
 
-  const currency = db.investment?.currency ?? "SGD";
+  const investment = card.collectionId
+    ? await getInvestment(userId, card.collectionId)
+    : null;
+  const currency = investment?.currency ?? "SGD";
 
   return (
     <div className="mx-auto max-w-lg space-y-4">

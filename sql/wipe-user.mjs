@@ -19,8 +19,9 @@ try {
   const cards = await client.query("DELETE FROM cards WHERE user_id = $1", [userId]);
   const investment = await client.query("DELETE FROM investment WHERE user_id = $1", [userId]);
   const subscriptions = await client.query("DELETE FROM subscriptions WHERE user_id = $1", [userId]);
+  const collections = await client.query("DELETE FROM collections WHERE user_id = $1", [userId]);
   console.log(
-    `Deleted for ${userId}: ${cards.rowCount} card(s), ${investment.rowCount} investment row(s), ${subscriptions.rowCount} subscription row(s).`
+    `Deleted for ${userId}: ${cards.rowCount} card(s), ${investment.rowCount} investment row(s), ${subscriptions.rowCount} subscription row(s), ${collections.rowCount} collection(s).`
   );
 } finally {
   await client.end();

@@ -6,20 +6,29 @@ import { revalidatePath } from "next/cache";
 import Anthropic from "@anthropic-ai/sdk";
 import sharp from "sharp";
 import { put, del } from "@vercel/blob";
+import { cookies } from "next/headers";
 import { currentUser } from "@clerk/nextjs/server";
 import { requireAdminUserId, requirePageUserId, requireSignedInUserId } from "./auth-helpers";
+import {
+  ACTIVE_COLLECTION_COOKIE,
+  getCollectionContext,
+  resolveCollectionId,
+} from "./collections";
 import { getStripe, getAppUrl } from "./stripe";
 import { searchEbayActiveListings, type EbayListing } from "./ebay";
 import { getExchangeRate } from "./exchange-rates";
 import {
   convertCurrency,
+  createCollection,
   deleteCard,
+  deleteCollection,
   getCardById,
   getInvestment,
   getSubscription,
   insertCardIfAffordable,
   isSubscriptionGateEnabled,
   markCardSold,
+  renameCollection,
   setInvestmentAmount,
   setSubscriptionGateEnabled,
   updateCardPurchasePrice,
@@ -32,6 +41,8 @@ import type { Card, Sale } from "./types";
 import type { FormState } from "./form-state";
 
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
+
+const MAX_COLLECTION_NAME_LENGTH = 40;
 
 function revalidateInvestmentPaths() {
   revalidatePath("/");
@@ -238,7 +249,8 @@ export async function saveInvestment(
     return { error: "Enter a valid investment amount." };
   }
 
-  await upsertInvestment(userId, { amount, currency, date, notes });
+  const collectionId = await resolveCollectionId(userId, formData.get("collectionId"));
+  await upsertInvestment(userId, collectionId, { amount, currency, date, notes });
 
   revalidateInvestmentPaths();
   redirect("/");
@@ -255,12 +267,13 @@ export async function updateInvestmentAmount(
     return { error: "Enter a valid amount." };
   }
 
-  const investment = await getInvestment(userId);
+  const collectionId = await resolveCollectionId(userId, formData.get("collectionId"));
+  const investment = await getInvestment(userId, collectionId);
   if (!investment) {
     return { error: "Set up your initial investment first." };
   }
 
-  await setInvestmentAmount(userId, amount);
+  await setInvestmentAmount(userId, collectionId, amount);
 
   revalidateInvestmentPaths();
   redirect("/");
@@ -277,7 +290,8 @@ export async function changeCurrencyAction(
     return { error: "Select a currency." };
   }
 
-  const investment = await getInvestment(userId);
+  const collectionId = await resolveCollectionId(userId, formData.get("collectionId"));
+  const investment = await getInvestment(userId, collectionId);
   if (!investment) {
     return { error: "Set up your initial investment first." };
   }
@@ -294,7 +308,7 @@ export async function changeCurrencyAction(
     };
   }
 
-  await convertCurrency(userId, toCurrency, rate);
+  await convertCurrency(userId, collectionId, toCurrency, rate);
 
   revalidateInvestmentPaths();
   revalidateCardPaths();
@@ -351,7 +365,8 @@ export async function purchaseCard(
     status: "available",
     createdAt: new Date().toISOString(),
   };
-  const result = await insertCardIfAffordable(userId, card);
+  const collectionId = await resolveCollectionId(userId, formData.get("collectionId"));
+  const result = await insertCardIfAffordable(userId, collectionId, card);
   if (result === "insufficient-balance") {
     return { error: "Insufficient available investment balance." };
   }
@@ -426,6 +441,109 @@ export async function deleteCardAction(cardId: string): Promise<void> {
 
   revalidateCardPaths();
   redirect("/cards");
+}
+
+async function rememberActiveCollection(collectionId: string): Promise<void> {
+  const store = await cookies();
+  store.set(ACTIVE_COLLECTION_COOKIE, collectionId, {
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 60 * 24 * 365,
+  });
+}
+
+function revalidateCollectionPaths() {
+  revalidateInvestmentPaths();
+  revalidateCardPaths();
+  revalidatePath("/collections");
+}
+
+export async function setActiveCollectionAction(collectionId: string): Promise<void> {
+  const userId = await requirePageUserId();
+  const { collections } = await getCollectionContext(userId);
+  if (!collections.some((c) => c.id === collectionId)) return;
+
+  await rememberActiveCollection(collectionId);
+  revalidateCollectionPaths();
+}
+
+function collectionNameError(
+  name: string | undefined,
+  existingNames: string[]
+): string | null {
+  if (!name) return "Enter a collection name.";
+  if (name.length > MAX_COLLECTION_NAME_LENGTH) {
+    return `Collection names can be up to ${MAX_COLLECTION_NAME_LENGTH} characters.`;
+  }
+  if (existingNames.some((n) => n.toLowerCase() === name.toLowerCase())) {
+    return "You already have a collection with that name.";
+  }
+  return null;
+}
+
+export async function createCollectionAction(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const userId = await requirePageUserId();
+  const name = textField(formData, "name");
+  const { collections } = await getCollectionContext(userId);
+
+  const error = collectionNameError(name, collections.map((c) => c.name));
+  if (error || !name) return { error: error ?? "Enter a collection name." };
+
+  const id = await createCollection(userId, name);
+  await rememberActiveCollection(id);
+
+  revalidateCollectionPaths();
+  redirect("/");
+}
+
+export async function renameCollectionAction(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const userId = await requirePageUserId();
+  const collectionId = textField(formData, "collectionId");
+  const name = textField(formData, "name");
+  const { collections } = await getCollectionContext(userId);
+
+  if (!collectionId || !collections.some((c) => c.id === collectionId)) {
+    return { error: "Collection not found." };
+  }
+
+  const error = collectionNameError(
+    name,
+    collections.filter((c) => c.id !== collectionId).map((c) => c.name)
+  );
+  if (error || !name) return { error: error ?? "Enter a collection name." };
+
+  await renameCollection(userId, collectionId, name);
+
+  revalidateCollectionPaths();
+  return {};
+}
+
+// Deletes the collection along with every card and the budget inside it.
+export async function deleteCollectionAction(collectionId: string): Promise<void> {
+  const userId = await requirePageUserId();
+  const result = await deleteCollection(userId, collectionId);
+  if (!result.ok) return;
+
+  // Best-effort, like deleteCardAction: don't fail the delete over blob cleanup.
+  await Promise.all(
+    result.imageUrls
+      .filter((url) => url.startsWith("https://"))
+      .map((url) => del(url).catch(() => {}))
+  );
+
+  // If the deleted collection was the active one, the cookie now points at a
+  // collection that no longer exists; getCollectionContext falls back to the
+  // user's first collection, so there's nothing to clear here.
+  revalidateCollectionPaths();
+  redirect("/collections");
 }
 
 export async function startCheckout(): Promise<void> {

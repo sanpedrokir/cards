@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requirePageUserId } from "@/lib/auth-helpers";
-import { readDb } from "@/lib/store";
+import { getCardById, getInvestment } from "@/lib/store";
 import { cardProfit } from "@/lib/calculations";
 import { formatDate, formatMoney } from "@/lib/format";
 import StatusBadge from "@/components/StatusBadge";
@@ -22,12 +22,14 @@ export default async function CardDetailPage({
   const { id } = await params;
   const { sold } = await searchParams;
   const userId = await requirePageUserId();
-  const db = await readDb(userId);
-  const card = db.cards.find((c) => c.id === id);
+  const card = await getCardById(userId, id);
 
   if (!card) notFound();
 
-  const currency = db.investment?.currency ?? "SGD";
+  const investment = card.collectionId
+    ? await getInvestment(userId, card.collectionId)
+    : null;
+  const currency = investment?.currency ?? "SGD";
   const profit = card.sale ? cardProfit(card) : null;
 
   const details: Array<[string, string | undefined]> = [

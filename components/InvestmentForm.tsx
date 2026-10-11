@@ -8,14 +8,17 @@ import SubmitButton from "./SubmitButton";
 import type { Investment } from "@/lib/types";
 
 export default function InvestmentForm({
+  collectionId,
   investment,
 }: {
+  collectionId: string;
   investment: Investment | null;
 }) {
   const [state, formAction] = useActionState(saveInvestment, initialFormState);
 
   return (
     <form action={formAction} className="space-y-4">
+      <input type="hidden" name="collectionId" value={collectionId} />
       <div>
         <label htmlFor="amount" className="label-field">
           Investment Amount

@@ -26,6 +26,18 @@ export interface Card {
   status: CardStatus;
   sale?: Sale;
   createdAt: string;
+  collectionId?: string;
+}
+
+export interface Collection {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
+export interface CollectionData {
+  collection: Collection;
+  db: Database;
 }
 
 export interface Investment {

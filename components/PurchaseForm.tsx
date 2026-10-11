@@ -14,9 +14,11 @@ import SubmitButton from "./SubmitButton";
 import CardImage from "./CardImage";
 
 export default function PurchaseForm({
+  collectionId,
   availableBalance,
   currency,
 }: {
+  collectionId: string;
   availableBalance: number | null;
   currency: string;
 }) {
@@ -110,6 +112,7 @@ export default function PurchaseForm({
 
   return (
     <form action={formAction} className="space-y-5">
+      <input type="hidden" name="collectionId" value={collectionId} />
       {availableBalance !== null ? (
         <div className="notice-info">
           Available balance:{" "}

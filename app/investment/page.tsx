@@ -1,13 +1,17 @@
 import { requirePageUserId } from "@/lib/auth-helpers";
 import { readDb } from "@/lib/store";
+import { getCollectionContext } from "@/lib/collections";
+import CollectionSwitcher from "@/components/CollectionSwitcher";
 import InvestmentForm from "@/components/InvestmentForm";
 
 export default async function InvestmentPage() {
   const userId = await requirePageUserId();
-  const { investment } = await readDb(userId);
+  const { collections, active } = await getCollectionContext(userId);
+  const { investment } = await readDb(userId, active.id);
 
   return (
     <div className="mx-auto max-w-md space-y-4">
+      <CollectionSwitcher collections={collections} activeId={active.id} />
       <div>
         <h1 className="page-title">Investment</h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -18,7 +22,7 @@ export default async function InvestmentPage() {
       </div>
 
       <div className="surface p-5">
-        <InvestmentForm investment={investment} />
+        <InvestmentForm collectionId={active.id} investment={investment} />
       </div>
     </div>
   );
