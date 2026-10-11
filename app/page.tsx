@@ -32,7 +32,14 @@ export default async function DashboardPage({
 
   return (
     <div className="space-y-6">
-      <CollectionSwitcher collections={collections} activeId={active.id} />
+      <div className="flex items-center gap-2">
+        <div className="min-w-0 flex-1">
+          <CollectionSwitcher collections={collections} activeId={active.id} />
+        </div>
+        <Link href="/cards/new" className="btn-primary-sm mb-5 shrink-0">
+          <span className="text-base leading-none">+</span> Add Card
+        </Link>
+      </div>
 
       {justSubscribed && (
         <p className="notice-success text-center">
@@ -111,10 +118,14 @@ export default async function DashboardPage({
         </p>
       )}
 
-      <div className="surface flex flex-wrap items-center justify-between gap-4 p-4">
-        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-          {investment ? (
+      <DashboardHero
+        name={active.name}
+        totals={totals}
+        currency={currency}
+        fundPill={
+          investment ? (
             <InvestedAmountEditor
+              compact
               collectionId={active.id}
               amount={totals.investedAmount}
               currency={currency}
@@ -122,38 +133,18 @@ export default async function DashboardPage({
             />
           ) : (
             <div>
-              <span className="text-slate-500 dark:text-slate-400">Overall Fund Invested: </span>
-              <span className="font-semibold text-slate-900 dark:text-white">Not set</span>{" "}
-              <Link href="/investment" className="link-muted">
-                (Setup now, optional)
-              </Link>
+              <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-slate-300/80">
+                Overall Fund Invested
+              </p>
+              <p className="text-sm font-bold text-white">
+                Not set{" "}
+                <Link href="/investment" className="text-xs font-medium text-emerald-300 underline-offset-2 hover:underline">
+                  Set up (optional)
+                </Link>
+              </p>
             </div>
-          )}
-          {investment && (
-            <div>
-              <span className="text-slate-500 dark:text-slate-400">Available Balance: </span>
-              <span className="font-semibold text-amber-700 dark:text-amber-400">
-                {formatMoney(totals.availableBalance, currency)}
-              </span>
-            </div>
-          )}
-          <div>
-            <span className="text-slate-500 dark:text-slate-400">Cards Inventory: </span>
-            <span className="font-semibold text-slate-900 dark:text-white">
-              {formatMoney(totals.inventoryCost, currency)}
-            </span>
-          </div>
-        </div>
-        <Link href="/cards/new" className="btn-primary-sm">
-          <span className="text-base leading-none">+</span> Add Card
-        </Link>
-      </div>
-
-      <DashboardHero
-        name={active.name}
-        totals={totals}
-        currency={currency}
-        hasBudget={Boolean(investment)}
+          )
+        }
       />
 
       <div>

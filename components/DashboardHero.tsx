@@ -1,27 +1,20 @@
 import { formatMoney } from "@/lib/format";
 import type { Totals } from "@/lib/types";
 
-function MiniStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="min-w-[6.5rem] flex-1 rounded-2xl bg-white/[0.07] px-3 py-2">
-      <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-slate-300/80">
-        {label}
-      </p>
-      <p className="break-words text-sm font-bold tabular-nums text-white">{value}</p>
-    </div>
-  );
-}
+const PILL = "min-w-[8.5rem] flex-1 rounded-2xl bg-white/[0.07] px-3 py-2";
 
 export default function DashboardHero({
   name,
   totals,
   currency,
-  hasBudget,
+  fundPill,
 }: {
   name: string;
   totals: Totals;
   currency: string;
-  hasBudget: boolean;
+  // The budget pill is interactive (edit amount / currency), so the page
+  // supplies it; everything else here is plain display.
+  fundPill: React.ReactNode;
 }) {
   const positive = totals.totalProfit >= 0;
 
@@ -51,13 +44,15 @@ export default function DashboardHero({
         </p>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          <MiniStat label="Sales" value={formatMoney(totals.totalSales, currency)} />
-          <MiniStat label="Unsold stock" value={formatMoney(totals.inventoryCost, currency)} />
-          {hasBudget ? (
-            <MiniStat label="Funds" value={formatMoney(totals.totalFunds, currency)} />
-          ) : (
-            <MiniStat label="Total spent" value={formatMoney(totals.purchaseCost, currency)} />
-          )}
+          <div className={PILL}>{fundPill}</div>
+          <div className={PILL}>
+            <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-slate-300/80">
+              Total Sales
+            </p>
+            <p className="break-words text-sm font-bold tabular-nums text-white">
+              {formatMoney(totals.totalSales, currency)}
+            </p>
+          </div>
         </div>
       </div>
     </div>

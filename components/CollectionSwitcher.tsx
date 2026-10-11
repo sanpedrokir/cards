@@ -30,7 +30,7 @@ export default function CollectionSwitcher({
 
   return (
     <div
-      className={`no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 py-2 transition-opacity sm:-mx-2 sm:px-2 ${
+      className={`no-scrollbar -mx-2 flex gap-3 overflow-x-auto px-2 py-2 transition-opacity ${
         isSwitching ? "opacity-60" : ""
       }`}
       role="tablist"

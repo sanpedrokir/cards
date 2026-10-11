@@ -25,11 +25,14 @@ export default function InvestedAmountEditor({
   amount,
   currency,
   since,
+  compact = false,
 }: {
   collectionId: string;
   amount: number;
   currency: string;
   since: string;
+  // Compact: label-over-value layout for a stat pill (e.g. the dashboard hero).
+  compact?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
   const [amountState, amountFormAction] = useActionState(updateInvestmentAmount, initialFormState);
@@ -202,6 +205,30 @@ export default function InvestedAmountEditor({
             </div>
           </div>
         )}
+      </div>
+    );
+  }
+
+  if (compact) {
+    return (
+      <div className="flex items-start justify-between gap-1">
+        <div className="min-w-0">
+          <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-slate-300/80">
+            Overall Fund Invested
+          </p>
+          <p className="break-words text-sm font-bold tabular-nums text-white">
+            {formatMoney(amount, currency)}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          aria-label="Edit total invested or currency"
+          className="btn-ghost-icon -mr-1 shrink-0 !text-slate-300 hover:!text-white"
+          title={`Started ${formatDate(since)}`}
+        >
+          <PencilIcon />
+        </button>
       </div>
     );
   }
