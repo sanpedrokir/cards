@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth, useClerk, useUser } from "@clerk/nextjs";
+import { useState } from "react";
 
 const NAV_ITEMS = [
   {
@@ -97,7 +98,21 @@ export default function Nav() {
   const activeHref = [...NAV_ITEMS]
     .sort((a, b) => b.href.length - a.href.length)
     .find((item) => matches(item.href))?.href;
-  const isActive = (href: string) => href === activeHref;
+
+  // Instant feedback: the tapped tab lights up and a slim bar runs along the
+  // top right away, instead of nothing happening until the server answers.
+  // "pending" remembers which page it was started from, so it clears itself
+  // the moment the pathname changes (no effect needed).
+  const [pending, setPending] = useState<{ href: string; from: string } | null>(null);
+  const pendingHref = pending && pending.from === pathname ? pending.href : null;
+  const isActive = (href: string) => href === (pendingHref ?? activeHref);
+
+  function startNav(href: string) {
+    if (href === pathname) return;
+    setPending({ href, from: pathname });
+    // Safety net so the bar can't spin forever if a navigation never lands.
+    setTimeout(() => setPending(null), 8000);
+  }
 
   function handleSignOut() {
     signOut(() => router.push("/sign-in"));
@@ -121,6 +136,11 @@ export default function Nav() {
 
   return (
     <>
+      {pendingHref && (
+        <div className="pointer-events-none fixed inset-x-0 top-0 z-50 h-0.5 overflow-hidden bg-emerald-300/10">
+          <div className="h-full w-1/3 animate-[nav-progress_0.9s_ease-in-out_infinite] bg-gradient-to-r from-emerald-300 to-sky-400" />
+        </div>
+      )}
       <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur dark:border-white/10 dark:bg-[#060d13]/85 sm:hidden">
         <div className="flex items-center justify-between px-4 py-2">
           <div className="w-12" />
@@ -159,6 +179,7 @@ export default function Nav() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={() => startNav(item.href)}
                   className={active ? "pill-active" : "pill"}
                 >
                   {item.label}
@@ -183,6 +204,7 @@ export default function Nav() {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={() => startNav(item.href)}
                 className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium transition-colors ${
                   active
                     ? "text-amber-700 dark:text-amber-400"
