@@ -122,6 +122,7 @@ export default async function DashboardPage({
         name={active.name}
         totals={totals}
         currency={currency}
+        hasBudget={Boolean(investment)}
         fundPill={
           investment ? (
             <InvestedAmountEditor
