@@ -51,7 +51,7 @@ export default async function CardsPage({
         <p className="surface-dashed p-8">No cards found.</p>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3">
+          <div className="grid grid-cols-3 gap-x-2.5 gap-y-4 sm:grid-cols-4 sm:gap-x-3">
             {cards.map((card) => (
               <CardTile key={card.id} card={card} currency={currency} />
             ))}

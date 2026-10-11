@@ -207,12 +207,14 @@ export default function InvestedAmountEditor({
   }
 
   return (
-    <div className="flex items-center gap-1">
-      <span className="text-slate-500 dark:text-slate-400">Overall Fund Invested: </span>
+    <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
+      <span className="whitespace-nowrap text-slate-500 dark:text-slate-400">
+        Overall Fund Invested:{" "}
+      </span>
       <span className="font-semibold text-amber-700 dark:text-amber-400">
         {formatMoney(amount, currency)}
       </span>
-      <span className="ml-1 text-xs text-slate-400 dark:text-slate-500">
+      <span className="ml-1 whitespace-nowrap text-xs text-slate-400 dark:text-slate-500">
         (started {formatDate(since)})
       </span>
       <button

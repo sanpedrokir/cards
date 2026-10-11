@@ -4,8 +4,7 @@ import { readAllCollections } from "@/lib/store";
 import { getCollectionContext } from "@/lib/collections";
 import { getTotals } from "@/lib/calculations";
 import { formatMoney } from "@/lib/format";
-import SummaryCard from "@/components/SummaryCard";
-import { SalesIcon, ProfitUpIcon, ProfitDownIcon, VaultIcon } from "@/components/icons";
+import DashboardHero from "@/components/DashboardHero";
 import InvestedAmountEditor from "@/components/InvestedAmountEditor";
 import PaginatedSalesTable from "@/components/PaginatedSalesTable";
 import CollectionSwitcher from "@/components/CollectionSwitcher";
@@ -150,27 +149,12 @@ export default async function DashboardPage({
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-2">
-        <SummaryCard
-          label="Total Sales"
-          value={formatMoney(totals.totalSales, currency)}
-          icon={<SalesIcon />}
-        />
-        <SummaryCard
-          label="Total Profit"
-          value={formatMoney(totals.totalProfit, currency)}
-          tone={totals.totalProfit >= 0 ? "positive" : "negative"}
-          icon={totals.totalProfit >= 0 ? <ProfitUpIcon /> : <ProfitDownIcon />}
-        />
-        {investment && (
-          <SummaryCard
-            label="Total Funds (Available funds + Sales)"
-            value={formatMoney(totals.totalFunds, currency)}
-            tone="accent"
-            icon={<VaultIcon />}
-          />
-        )}
-      </div>
+      <DashboardHero
+        name={active.name}
+        totals={totals}
+        currency={currency}
+        hasBudget={Boolean(investment)}
+      />
 
       <div>
         <div className="mb-3 flex items-center justify-between">

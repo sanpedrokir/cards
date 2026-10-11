@@ -189,7 +189,13 @@ export default function Nav() {
                     : "text-slate-500 dark:text-slate-400"
                 }`}
               >
-                {item.icon(active)}
+                <span
+                  className={`rounded-full px-4 py-1 transition-colors ${
+                    active ? "bg-amber-400/15" : ""
+                  }`}
+                >
+                  {item.icon(active)}
+                </span>
                 {item.label}
               </Link>
             );
