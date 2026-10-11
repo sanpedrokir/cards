@@ -42,23 +42,19 @@ export default function DashboardHero({
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0f4a52] via-[#0c2c3b] to-[#0a1722] p-5 shadow-xl shadow-black/30">
-      {/* Artwork (public/dashboard-bg.svg: starry sky, card fan, coins). Toned
-          down on phones, where the figures sit right on top of it. */}
+      {/* Artwork (public/dashboard-bg.svg: starry sky, card fan, coins), kept to
+          a small top-right corner so it never sits behind the figures. */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-50 sm:opacity-100"
+        aria-hidden="true"
+        className="pointer-events-none absolute right-3 top-3 hidden h-24 w-52 opacity-80 sm:block"
         style={{
           backgroundImage: "url(/dashboard-bg.svg)",
-          backgroundSize: "cover",
-          backgroundPosition: "right center",
+          backgroundSize: "contain",
+          backgroundPosition: "right top",
           backgroundRepeat: "no-repeat",
-        }}
-      />
-      {/* Soft dark fade on the left so the text stays easy to read. */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage:
-            "linear-gradient(90deg, rgba(8,18,26,0.65) 0%, rgba(8,18,26,0.2) 55%, rgba(8,18,26,0) 72%)",
+          // Feather the edges so the artwork melts into the card.
+          maskImage: "radial-gradient(ellipse at 60% 50%, #000 45%, transparent 78%)",
+          WebkitMaskImage: "radial-gradient(ellipse at 60% 50%, #000 45%, transparent 78%)",
         }}
       />
 

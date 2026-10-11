@@ -30,6 +30,7 @@ export default function PaginatedSalesTable({
           <div key={card.id} className="flex items-center gap-3 p-3">
             <div className="min-w-0 flex-1">
               <Link
+                prefetch={false}
                 href={`/cards/${card.id}`}
                 className="block truncate text-sm font-medium text-slate-900 hover:text-amber-700 hover:underline dark:text-white dark:hover:text-amber-400"
               >

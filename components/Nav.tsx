@@ -122,7 +122,7 @@ export default function Nav() {
 
   if (!isSignedIn) {
     return (
-      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur dark:border-white/10 dark:bg-[#060d13]/85">
+      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white dark:border-white/10 dark:bg-[#060d13]">
         <div className="mx-auto flex max-w-4xl items-center justify-center px-6 py-3">
           <Link href="/" className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -138,10 +138,10 @@ export default function Nav() {
     <>
       {pendingHref && (
         <div className="pointer-events-none fixed inset-x-0 top-0 z-50 h-0.5 overflow-hidden bg-emerald-300/10">
-          <div className="h-full w-1/3 animate-[nav-progress_0.9s_ease-in-out_infinite] bg-gradient-to-r from-emerald-300 to-sky-400" />
+          <div className="h-full w-1/3 animate-[nav-progress_0.9s_ease-in-out_infinite] will-change-transform bg-gradient-to-r from-emerald-300 to-sky-400" />
         </div>
       )}
-      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur dark:border-white/10 dark:bg-[#060d13]/85 sm:hidden">
+      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white dark:border-white/10 dark:bg-[#060d13] sm:hidden">
         <div className="flex items-center justify-between px-4 py-2">
           <div className="w-12" />
           <Link href="/" className="flex items-center gap-1.5 text-sm font-bold text-slate-900 dark:text-white">
@@ -162,7 +162,7 @@ export default function Nav() {
         )}
       </header>
 
-      <header className="sticky top-0 z-40 hidden border-b border-slate-200/70 bg-white/80 backdrop-blur sm:block dark:border-white/10 dark:bg-[#060d13]/85">
+      <header className="sticky top-0 z-40 hidden border-b border-slate-200/70 bg-white sm:block dark:border-white/10 dark:bg-[#060d13]">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-3">
           <Link href="/" className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -196,7 +196,7 @@ export default function Nav() {
         </div>
       </header>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/70 bg-white/95 backdrop-blur pb-[env(safe-area-inset-bottom)] sm:hidden dark:border-white/10 dark:bg-[#08121a]/95">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/70 bg-white pb-[env(safe-area-inset-bottom)] sm:hidden dark:border-white/10 dark:bg-[#08121a]">
         <div className="mx-auto flex max-w-md items-stretch justify-between px-2">
           {NAV_ITEMS.map((item) => {
             const active = isActive(item.href);

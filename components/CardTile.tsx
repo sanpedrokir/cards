@@ -24,7 +24,7 @@ export default function CardTile({
   const sold = card.status === "sold";
 
   return (
-    <Link href={`/cards/${card.id}`} className="group block min-w-0">
+    <Link href={`/cards/${card.id}`} prefetch={false} className="group block min-w-0">
       <div className="surface-raised p-2 transition-transform group-hover:-translate-y-0.5">
         <CardImage
           src={card.thumbUrl ?? card.imageUrl}

@@ -8,6 +8,21 @@ import CardFilterBar from "@/components/CardFilterBar";
 
 const PAGE_SIZE = 12;
 
+// 1 2 3 … 9 10 style page list: always first, last and the current page's neighbours.
+function pageNumbers(current: number, total: number): Array<number | "…"> {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const keep = new Set([1, total, current - 1, current, current + 1]);
+  if (current <= 3) [2, 3, 4].forEach((n) => keep.add(n));
+  if (current >= total - 2) [total - 3, total - 2, total - 1].forEach((n) => keep.add(n));
+  const nums = [...keep].filter((n) => n >= 1 && n <= total).sort((a, b) => a - b);
+  const out: Array<number | "…"> = [];
+  nums.forEach((n, i) => {
+    if (i > 0 && n - nums[i - 1] > 1) out.push("…");
+    out.push(n);
+  });
+  return out;
+}
+
 export default async function CardsPage({
   searchParams,
 }: {
@@ -25,6 +40,8 @@ export default async function CardsPage({
   ]);
   const currency = investment?.currency ?? "SGD";
   const pageCount = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const firstShown = (page - 1) * PAGE_SIZE + 1;
+  const lastShown = Math.min(totalCount, firstShown + cards.length - 1);
 
   function pageHref(p: number) {
     const params = new URLSearchParams();
@@ -57,37 +74,43 @@ export default async function CardsPage({
             ))}
           </div>
 
-          {pageCount > 1 && (
-            <div className="flex items-center justify-between pt-2">
-              {page > 1 ? (
-                <Link
-                  href={pageHref(page - 1)}
-                  className="rounded-full px-3 py-1 text-sm font-medium text-amber-700 dark:text-amber-400"
-                >
-                  ← Prev
-                </Link>
-              ) : (
-                <span className="rounded-full px-3 py-1 text-sm font-medium text-slate-300 dark:text-slate-700">
-                  ← Prev
-                </span>
-              )}
-              <span className="text-xs text-slate-500 dark:text-slate-400">
-                Page {page} of {pageCount}
-              </span>
-              {page < pageCount ? (
-                <Link
-                  href={pageHref(page + 1)}
-                  className="rounded-full px-3 py-1 text-sm font-medium text-amber-700 dark:text-amber-400"
-                >
-                  Next →
-                </Link>
-              ) : (
-                <span className="rounded-full px-3 py-1 text-sm font-medium text-slate-300 dark:text-slate-700">
-                  Next →
-                </span>
-              )}
-            </div>
-          )}
+          <nav aria-label="Pagination" className="space-y-2 pt-2">
+            <p className="text-center text-xs text-slate-500 dark:text-slate-400">
+              Showing {firstShown}–{lastShown} of {totalCount}{" "}
+              {totalCount === 1 ? "card" : "cards"}
+            </p>
+            {pageCount > 1 && (
+              <div className="flex items-center justify-center gap-1">
+                {page > 1 ? (
+                  <Link href={pageHref(page - 1)} prefetch={false} className="pager-btn" aria-label="Previous page">
+                    ←
+                  </Link>
+                ) : (
+                  <span className="pager-btn pager-btn-off" aria-hidden="true">←</span>
+                )}
+                {pageNumbers(page, pageCount).map((n, i) =>
+                  n === "…" ? (
+                    <span key={`gap-${i}`} className="px-1 text-sm text-slate-500">…</span>
+                  ) : n === page ? (
+                    <span key={n} aria-current="page" className="pager-btn pager-btn-active">
+                      {n}
+                    </span>
+                  ) : (
+                    <Link key={n} href={pageHref(n)} prefetch={false} className="pager-btn">
+                      {n}
+                    </Link>
+                  )
+                )}
+                {page < pageCount ? (
+                  <Link href={pageHref(page + 1)} prefetch={false} className="pager-btn" aria-label="Next page">
+                    →
+                  </Link>
+                ) : (
+                  <span className="pager-btn pager-btn-off" aria-hidden="true">→</span>
+                )}
+              </div>
+            )}
+          </nav>
         </>
       )}
     </div>

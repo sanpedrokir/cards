@@ -149,6 +149,17 @@ body {
     @apply text-2xl font-medium tracking-tight text-slate-900 dark:text-white;
   }
 
+  /* Page-number buttons (card list pagination) */
+  .pager-btn {
+    @apply inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-slate-100 px-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 dark:bg-white/[0.07] dark:text-slate-200 dark:hover:bg-white/[0.14];
+  }
+  .pager-btn-active {
+    @apply bg-gradient-to-r from-amber-300 to-amber-500 font-semibold text-amber-950 hover:brightness-100 dark:bg-none dark:from-amber-300 dark:to-amber-500;
+  }
+  .pager-btn-off {
+    @apply pointer-events-none opacity-30;
+  }
+
   /* Horizontal scroller (filter chips) without the visible scrollbar */
   .no-scrollbar {
     scrollbar-width: none;
