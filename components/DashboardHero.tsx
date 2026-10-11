@@ -70,8 +70,11 @@ export default function DashboardHero({
           <Pill label="Total Sales" value={formatMoney(totals.totalSales, currency)} />
           {hasBudget && (
             <>
-              {/* Available balance + sales, i.e. the budget with profit rolled in */}
-              <Pill label="Total Funds + Profit" value={formatMoney(totals.totalFunds, currency)} />
+              {/* Budget plus realised profit: unchanged by buying a card (the card is still worth what was paid), moves only when a sale makes or loses money. */}
+              <Pill
+                label="Total Funds + Profit"
+                value={formatMoney(totals.investedAmount + totals.totalProfit, currency)}
+              />
               <Pill
                 label="Available to Purchase"
                 value={formatMoney(totals.availableBalance, currency)}
