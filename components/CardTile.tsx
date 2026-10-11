@@ -60,9 +60,17 @@ export default function CardTile({
         )}
         {grade && <span className="tag !text-[10px]">{grade}</span>}
 
-        {card.sale && profit !== null ? (
-          <div className="pt-0.5">
-            <p className="text-[15px] font-bold tabular-nums text-slate-900 dark:text-white">
+        <div className="pt-1">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">Cost</p>
+          <p className="text-[15px] font-bold leading-tight tabular-nums text-slate-900 dark:text-white">
+            {formatMoney(card.purchasePrice, currency)}
+          </p>
+        </div>
+
+        {card.sale && profit !== null && (
+          <div className="pt-1">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">Sold for</p>
+            <p className="text-[15px] font-bold leading-tight tabular-nums text-emerald-600 dark:text-emerald-400">
               {formatMoney(card.sale.salePrice, currency)}
             </p>
             <p
@@ -75,10 +83,6 @@ export default function CardTile({
               {isProfit ? "▲" : "▼"} {formatMoney(Math.abs(profit), currency)}
             </p>
           </div>
-        ) : (
-          <p className="pt-0.5 text-[15px] font-bold tabular-nums text-slate-900 dark:text-white">
-            {formatMoney(card.purchasePrice, currency)}
-          </p>
         )}
       </div>
     </Link>
