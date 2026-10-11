@@ -49,6 +49,7 @@ function mapCard(row: any): Card {
     quantity: row.quantity ?? undefined,
     notes: row.notes ?? undefined,
     imageUrl: row.image_url ?? undefined,
+    thumbUrl: row.thumb_url ?? undefined,
     status: row.status,
     createdAt: toIsoTimestamp(row.created_at),
     collectionId: row.collection_id ?? undefined,
@@ -217,7 +218,7 @@ export async function deleteCollection(
     }
 
     const images = await client.query(
-      "SELECT image_url FROM cards WHERE user_id = $1 AND collection_id = $2 AND image_url IS NOT NULL",
+      "SELECT image_url, thumb_url FROM cards WHERE user_id = $1 AND collection_id = $2 AND (image_url IS NOT NULL OR thumb_url IS NOT NULL)",
       [userId, collectionId]
     );
     await client.query("DELETE FROM cards WHERE user_id = $1 AND collection_id = $2", [
@@ -233,7 +234,12 @@ export async function deleteCollection(
       collectionId,
     ]);
     await client.query("COMMIT");
-    return { ok: true, imageUrls: images.rows.map((r) => String(r.image_url)) };
+    return {
+      ok: true,
+      imageUrls: images.rows
+        .flatMap((r) => [r.image_url, r.thumb_url])
+        .filter((u): u is string => typeof u === "string"),
+    };
   } catch (err) {
     await client.query("ROLLBACK").catch(() => {});
     throw err;
@@ -422,14 +428,14 @@ export async function insertCardIfAffordable(
     await client.query(
       `INSERT INTO cards (
         id, user_id, collection_id, name, purchase_price, purchase_date, category, series, card_number,
-        grade, grading_company, cert_number, quantity, notes, image_url, status, created_at
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
+        grade, grading_company, cert_number, quantity, notes, image_url, status, created_at, thumb_url
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)`,
       [
         card.id, userId, collectionId, card.name, card.purchasePrice, card.purchaseDate,
         card.category ?? null, card.series ?? null, card.cardNumber ?? null,
         card.grade ?? null, card.gradingCompany ?? null, card.certNumber ?? null,
         card.quantity ?? null, card.notes ?? null, card.imageUrl ?? null,
-        card.status, card.createdAt,
+        card.status, card.createdAt, card.thumbUrl ?? null,
       ]
     );
     await client.query("COMMIT");

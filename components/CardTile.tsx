@@ -27,7 +27,7 @@ export default function CardTile({
     <Link href={`/cards/${card.id}`} className="group block min-w-0">
       <div className="surface-raised p-2 transition-transform group-hover:-translate-y-0.5">
         <CardImage
-          src={card.imageUrl}
+          src={card.thumbUrl ?? card.imageUrl}
           alt={card.name}
           fit="contain"
           className="aspect-[3/4] w-full rounded-md"

@@ -64,6 +64,10 @@ CREATE INDEX IF NOT EXISTS collections_user_id_idx ON collections (user_id);
 ALTER TABLE cards ADD COLUMN IF NOT EXISTS collection_id UUID;
 CREATE INDEX IF NOT EXISTS cards_collection_id_idx ON cards (collection_id);
 
+-- Small (~360px) copy of the card photo for grids/lists; image_url keeps the
+-- larger one for the detail page and zoom.
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS thumb_url TEXT;
+
 ALTER TABLE investment ADD COLUMN IF NOT EXISTS collection_id UUID;
 ALTER TABLE investment DROP CONSTRAINT IF EXISTS investment_pkey;
 CREATE UNIQUE INDEX IF NOT EXISTS investment_collection_id_key ON investment (collection_id);

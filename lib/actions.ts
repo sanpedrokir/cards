@@ -77,7 +77,7 @@ function textField(formData: FormData, name: string): string | undefined {
 
 async function encodeImage(
   file: File | null
-): Promise<{ url?: string; error?: string }> {
+): Promise<{ url?: string; thumbUrl?: string; error?: string }> {
   if (!file || file.size === 0) return {};
   if (!file.type.startsWith("image/")) {
     return { error: "Please upload a valid image file." };
@@ -97,18 +97,31 @@ async function encodeImage(
     // Apply the phone's rotation first, then crop to the card (best-effort,
     // see lib/card-crop.ts), then shrink.
     const oriented = await sharp(buffer).rotate().toBuffer();
-    const compressed = await sharp(await cropToCard(oriented))
-      .resize({ width: 800, height: 800, fit: "inside", withoutEnlargement: true })
-      .flatten({ background: { r: 255, g: 255, b: 255 } })
-      .jpeg({ quality: 78 })
-      .toBuffer();
+    const cropped = await cropToCard(oriented);
 
-    const blob = await put(`card-photos/${randomUUID()}.jpg`, compressed, {
-      access: "public",
-      contentType: "image/jpeg",
-    });
+    // Two sizes: a ~640px photo for the detail page / zoom, and a ~360px
+    // thumbnail (roughly 15-25KB) for the card grid, which shows each card
+    // only ~110-170px wide. Lists load the thumbnail, so they stay light.
+    const [compressed, thumbnail] = await Promise.all([
+      sharp(cropped)
+        .resize({ width: 640, height: 640, fit: "inside", withoutEnlargement: true })
+        .flatten({ background: { r: 255, g: 255, b: 255 } })
+        .jpeg({ quality: 72 })
+        .toBuffer(),
+      sharp(cropped)
+        .resize({ width: 360, height: 360, fit: "inside", withoutEnlargement: true })
+        .flatten({ background: { r: 255, g: 255, b: 255 } })
+        .jpeg({ quality: 70 })
+        .toBuffer(),
+    ]);
 
-    return { url: blob.url };
+    const name = randomUUID();
+    const [blob, thumbBlob] = await Promise.all([
+      put(`card-photos/${name}.jpg`, compressed, { access: "public", contentType: "image/jpeg" }),
+      put(`card-photos/${name}-thumb.jpg`, thumbnail, { access: "public", contentType: "image/jpeg" }),
+    ]);
+
+    return { url: blob.url, thumbUrl: thumbBlob.url };
   } catch {
     return { error: "Couldn't process that image. Please try a different photo." };
   }
@@ -344,7 +357,7 @@ export async function purchaseCard(
     return { error: "Enter a valid purchase price greater than zero." };
   }
 
-  const { url: imageUrl, error: imageError } = await encodeImage(
+  const { url: imageUrl, thumbUrl, error: imageError } = await encodeImage(
     imageFile instanceof File ? imageFile : null
   );
   if (imageError) {
@@ -366,6 +379,7 @@ export async function purchaseCard(
     quantity,
     notes,
     imageUrl,
+    thumbUrl,
     status: "available",
     createdAt: new Date().toISOString(),
   };
@@ -439,8 +453,10 @@ export async function deleteCardAction(cardId: string): Promise<void> {
 
   // Best-effort: don't fail the delete if blob cleanup has trouble (and
   // older cards may still have a legacy data: URI, which isn't a blob at all).
-  if (card.imageUrl?.startsWith("https://")) {
-    await del(card.imageUrl).catch(() => {});
+  for (const url of [card.imageUrl, card.thumbUrl]) {
+    if (url?.startsWith("https://")) {
+      await del(url).catch(() => {});
+    }
   }
 
   revalidateCardPaths();

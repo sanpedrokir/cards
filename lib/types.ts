@@ -23,6 +23,7 @@ export interface Card {
   quantity?: number;
   notes?: string;
   imageUrl?: string;
+  thumbUrl?: string;
   status: CardStatus;
   sale?: Sale;
   createdAt: string;
