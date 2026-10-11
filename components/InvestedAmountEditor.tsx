@@ -187,14 +187,14 @@ export default function InvestedAmountEditor({
                 <button
                   type="button"
                   onClick={() => setPendingCurrency(null)}
-                  className="btn-secondary flex-1 px-4 py-2.5"
+                  className="btn-secondary flex-1 px-4 py-2"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleConfirmCurrency}
-                  className="btn-primary flex-1 px-4 py-2.5"
+                  className="btn-primary flex-1 px-4 py-2"
                 >
                   Convert
                 </button>

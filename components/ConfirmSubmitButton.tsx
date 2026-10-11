@@ -65,7 +65,7 @@ export default function ConfirmSubmitButton({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="btn-secondary flex-1 px-4 py-2.5"
+                className="btn-secondary flex-1 px-4 py-2"
               >
                 Cancel
               </button>
