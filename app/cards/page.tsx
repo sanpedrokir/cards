@@ -6,7 +6,7 @@ import CollectionSwitcher from "@/components/CollectionSwitcher";
 import CardTile from "@/components/CardTile";
 import CardFilterBar from "@/components/CardFilterBar";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 12;
 
 export default async function CardsPage({
   searchParams,
@@ -51,7 +51,7 @@ export default async function CardsPage({
         <p className="surface-dashed p-8">No cards found.</p>
       ) : (
         <>
-          <div className="grid grid-cols-3 gap-x-2.5 gap-y-4 sm:grid-cols-4 sm:gap-x-3">
+          <div className="grid grid-cols-3 gap-x-2.5 gap-y-4 sm:grid-cols-4 sm:gap-x-3 md:grid-cols-5 lg:grid-cols-6">
             {cards.map((card) => (
               <CardTile key={card.id} card={card} currency={currency} />
             ))}
