@@ -5,17 +5,123 @@ import { useActionState, useState, useTransition } from "react";
 import {
   createCollectionAction,
   deleteCollectionAction,
+  removeCollectionIconAction,
   renameCollectionAction,
   setActiveCollectionAction,
+  setCollectionIconAction,
 } from "@/lib/actions";
 import { initialFormState } from "@/lib/form-state";
 import SubmitButton from "./SubmitButton";
 import ConfirmSubmitButton from "./ConfirmSubmitButton";
+import CollectionAvatar from "./CollectionAvatar";
 
 export interface CollectionSummary {
   id: string;
   name: string;
   cardCount: number;
+  iconUrl?: string;
+}
+
+function CameraIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
+      <path
+        d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.2-1.8A1 1 0 0 1 9.5 4.7h5a1 1 0 0 1 .8.5L16.5 7h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5Z"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="13" r="3.2" stroke="currentColor" strokeWidth={1.8} />
+    </svg>
+  );
+}
+
+const ICON_SIZE = 192;
+
+// An icon is only ever shown as a small circle, so shrink the chosen picture
+// to a centred square right here on the phone before uploading. That makes a
+// multi-megabyte camera photo upload as a few KB. If the browser can't decode
+// the file (e.g. some HEIC photos), fall back to sending it untouched and let
+// the server try.
+async function shrinkToIcon(file: File): Promise<File> {
+  try {
+    const bitmap = await createImageBitmap(file);
+    const side = Math.min(bitmap.width, bitmap.height);
+    const canvas = document.createElement("canvas");
+    canvas.width = ICON_SIZE;
+    canvas.height = ICON_SIZE;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(
+      bitmap,
+      (bitmap.width - side) / 2,
+      (bitmap.height - side) / 2,
+      side,
+      side,
+      0,
+      0,
+      ICON_SIZE,
+      ICON_SIZE
+    );
+    bitmap.close?.();
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", 0.82)
+    );
+    return blob ? new File([blob], "icon.jpg", { type: "image/jpeg" }) : file;
+  } catch {
+    return file;
+  }
+}
+
+// Tap the avatar to pick a picture; it uploads as soon as one is chosen.
+function IconPicker({ collection, index }: { collection: CollectionSummary; index: number }) {
+  const [state, formAction, isPending] = useActionState(
+    setCollectionIconAction,
+    initialFormState
+  );
+
+  return (
+    <div className="shrink-0">
+      <form action={formAction}>
+        <input type="hidden" name="collectionId" value={collection.id} />
+        <label
+          className={`relative block h-14 w-14 cursor-pointer ${isPending ? "opacity-50" : ""}`}
+          title="Change picture"
+        >
+          <CollectionAvatar
+            name={collection.name}
+            iconUrl={collection.iconUrl}
+            index={index}
+            className="h-14 w-14 text-xl"
+          />
+          <span className="absolute -bottom-0.5 -right-0.5 flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-[#12212b] text-slate-200">
+            <CameraIcon />
+          </span>
+          <input
+            type="file"
+            name="icon"
+            accept="image/*"
+            className="sr-only"
+            aria-label={`Choose a picture for ${collection.name}`}
+            onChange={async (e) => {
+              const input = e.currentTarget;
+              const form = input.form;
+              const picked = input.files?.[0];
+              if (!form || !picked) return;
+              const small = await shrinkToIcon(picked);
+              if (small !== picked) {
+                const transfer = new DataTransfer();
+                transfer.items.add(small);
+                input.files = transfer.files;
+              }
+              form.requestSubmit();
+            }}
+          />
+        </label>
+      </form>
+      {state?.error && <p className="mt-1 max-w-[10rem] text-[11px] text-rose-400">{state.error}</p>}
+    </div>
+  );
 }
 
 function PencilIcon() {
@@ -98,10 +204,12 @@ function NewCollectionForm({ atLimit, limit }: { atLimit: boolean; limit: number
 
 function CollectionRow({
   collection,
+  index,
   isActive,
   canDelete,
 }: {
   collection: CollectionSummary;
+  index: number;
   isActive: boolean;
   canDelete: boolean;
 }) {
@@ -125,7 +233,9 @@ function CollectionRow({
   }
 
   return (
-    <div className="surface space-y-2 p-3">
+    <div className="surface flex items-start gap-3 p-3">
+      <IconPicker collection={collection} index={index} />
+      <div className="min-w-0 flex-1 space-y-2">
       {editing ? (
         <form action={handleRename} className="flex items-center gap-2">
           <input type="hidden" name="collectionId" value={collection.id} />
@@ -192,6 +302,13 @@ function CollectionRow({
               Switch to this
             </button>
           )}
+          {collection.iconUrl && (
+            <form action={removeCollectionIconAction.bind(null, collection.id)}>
+              <button type="submit" className="link-muted">
+                Remove picture
+              </button>
+            </form>
+          )}
           {canDelete && (
             <form action={deleteCollectionAction.bind(null, collection.id)}>
               <ConfirmSubmitButton
@@ -205,6 +322,7 @@ function CollectionRow({
             </form>
           )}
         </div>
+      </div>
       </div>
     </div>
   );
@@ -225,9 +343,10 @@ export default function CollectionManager({
         atLimit={limit !== null && collections.length >= limit}
         limit={limit}
       />
-      {collections.map((c) => (
+      {collections.map((c, i) => (
         <CollectionRow
           key={c.id}
+          index={i}
           collection={c}
           isActive={c.id === activeId}
           canDelete={collections.length > 1}

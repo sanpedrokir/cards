@@ -31,6 +31,7 @@ import {
   isSubscriptionGateEnabled,
   markCardSold,
   renameCollection,
+  setCollectionIcon,
   setInvestmentAmount,
   setSubscriptionGateEnabled,
   updateCardPurchasePrice,
@@ -527,6 +528,71 @@ export async function renameCollectionAction(
 
   revalidateCollectionPaths();
   return {};
+}
+
+const MAX_ICON_BYTES = 3 * 1024 * 1024;
+
+export async function setCollectionIconAction(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const userId = await requirePageUserId();
+  const collectionId = textField(formData, "collectionId");
+  const file = formData.get("icon");
+  const { collections } = await getCollectionContext(userId);
+
+  if (!collectionId || !collections.some((c) => c.id === collectionId)) {
+    return { error: "Collection not found." };
+  }
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Choose a picture first." };
+  }
+  if (!file.type.startsWith("image/")) {
+    return { error: "Please choose an image file." };
+  }
+  if (file.size > MAX_ICON_BYTES) {
+    return { error: "That picture is too large. Please use one under 3MB." };
+  }
+
+  let url: string;
+  try {
+    // Small centred square: it's only ever shown as a ~56px circle.
+    const icon = await sharp(Buffer.from(await file.arrayBuffer()))
+      .rotate()
+      .resize(192, 192, { fit: "cover", position: "centre" })
+      .flatten({ background: { r: 255, g: 255, b: 255 } })
+      .jpeg({ quality: 82 })
+      .toBuffer();
+    const blob = await put(`collection-icons/${randomUUID()}.jpg`, icon, {
+      access: "public",
+      contentType: "image/jpeg",
+    });
+    url = blob.url;
+  } catch {
+    return { error: "Couldn't process that picture. Please try a different one." };
+  }
+
+  const result = await setCollectionIcon(userId, collectionId, url);
+  if (!result.ok) {
+    await del(url).catch(() => {});
+    return { error: "Collection not found." };
+  }
+  if (result.previous?.startsWith("https://")) {
+    await del(result.previous).catch(() => {});
+  }
+
+  revalidateCollectionPaths();
+  return {};
+}
+
+export async function removeCollectionIconAction(collectionId: string): Promise<void> {
+  const userId = await requirePageUserId();
+  const result = await setCollectionIcon(userId, collectionId, null);
+  if (!result.ok) return;
+  if (result.previous?.startsWith("https://")) {
+    await del(result.previous).catch(() => {});
+  }
+  revalidateCollectionPaths();
 }
 
 // Deletes the collection along with every card and the budget inside it.

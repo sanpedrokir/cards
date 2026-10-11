@@ -26,6 +26,7 @@ export default async function CollectionsPage() {
           id: collection.id,
           name: collection.name,
           cardCount: db.cards.length,
+          iconUrl: collection.iconUrl,
         }))}
         activeId={active.id}
         limit={limit}

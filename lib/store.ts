@@ -76,7 +76,26 @@ function mapCollection(row: any): Collection {
     id: row.id,
     name: row.name,
     createdAt: toIsoTimestamp(row.created_at),
+    iconUrl: row.icon_url ?? undefined,
   };
+}
+
+// Sets (or, with null, clears) a collection's picture. Returns the previous
+// picture URL so the caller can delete the old file.
+export async function setCollectionIcon(
+  userId: string,
+  collectionId: string,
+  iconUrl: string | null
+): Promise<{ ok: false } | { ok: true; previous?: string }> {
+  const rows = await sql`
+    SELECT icon_url FROM collections WHERE id = ${collectionId} AND user_id = ${userId}
+  `;
+  if (rows.length === 0) return { ok: false };
+  await sql`
+    UPDATE collections SET icon_url = ${iconUrl}
+    WHERE id = ${collectionId} AND user_id = ${userId}
+  `;
+  return { ok: true, previous: rows[0].icon_url ?? undefined };
 }
 
 // Every user always has at least one collection. A user's first visit after
@@ -217,6 +236,10 @@ export async function deleteCollection(
       return { ok: false, reason: "last-collection" };
     }
 
+    const icon = await client.query(
+      "SELECT icon_url FROM collections WHERE user_id = $1 AND id = $2",
+      [userId, collectionId]
+    );
     const images = await client.query(
       "SELECT image_url, thumb_url FROM cards WHERE user_id = $1 AND collection_id = $2 AND (image_url IS NOT NULL OR thumb_url IS NOT NULL)",
       [userId, collectionId]
@@ -236,9 +259,10 @@ export async function deleteCollection(
     await client.query("COMMIT");
     return {
       ok: true,
-      imageUrls: images.rows
-        .flatMap((r) => [r.image_url, r.thumb_url])
-        .filter((u): u is string => typeof u === "string"),
+      imageUrls: [
+        ...images.rows.flatMap((r) => [r.image_url, r.thumb_url]),
+        icon.rows[0]?.icon_url,
+      ].filter((u): u is string => typeof u === "string"),
     };
   } catch (err) {
     await client.query("ROLLBACK").catch(() => {});

@@ -4,20 +4,7 @@ import Link from "next/link";
 import { useTransition } from "react";
 import { setActiveCollectionAction } from "@/lib/actions";
 import type { Collection } from "@/lib/types";
-
-// Static class strings so Tailwind picks every gradient up at build time.
-const AVATAR_GRADIENTS = [
-  "from-emerald-400 to-teal-600",
-  "from-sky-400 to-blue-600",
-  "from-violet-400 to-indigo-600",
-  "from-pink-400 to-rose-600",
-  "from-amber-300 to-orange-500",
-  "from-cyan-300 to-sky-500",
-];
-
-function initialOf(name: string): string {
-  return (Array.from(name.trim())[0] ?? "?").toUpperCase();
-}
+import CollectionAvatar from "./CollectionAvatar";
 
 export default function CollectionSwitcher({
   collections,
@@ -53,17 +40,16 @@ export default function CollectionSwitcher({
             }}
             className="flex w-[5rem] shrink-0 flex-col items-center gap-1.5"
           >
-            <span
-              className={`flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br text-xl font-bold text-white shadow-lg ring-2 ring-offset-2 ring-offset-[#060d13] transition-all ${
-                AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length]
-              } ${
+            <CollectionAvatar
+              name={c.name}
+              iconUrl={c.iconUrl}
+              index={i}
+              className={`h-14 w-14 text-xl shadow-lg ring-2 ring-offset-2 ring-offset-[#060d13] transition-all ${
                 active
                   ? "scale-105 shadow-emerald-400/20 ring-emerald-300"
                   : "opacity-60 ring-transparent"
               }`}
-            >
-              {initialOf(c.name)}
-            </span>
+            />
             <span
               className={`w-full truncate text-center text-xs ${
                 active ? "font-semibold text-white" : "text-slate-400"

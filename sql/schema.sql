@@ -61,6 +61,9 @@ CREATE TABLE IF NOT EXISTS collections (
 );
 CREATE INDEX IF NOT EXISTS collections_user_id_idx ON collections (user_id);
 
+-- Optional picture shown in place of the collection's letter avatar.
+ALTER TABLE collections ADD COLUMN IF NOT EXISTS icon_url TEXT;
+
 ALTER TABLE cards ADD COLUMN IF NOT EXISTS collection_id UUID;
 CREATE INDEX IF NOT EXISTS cards_collection_id_idx ON cards (collection_id);
 
