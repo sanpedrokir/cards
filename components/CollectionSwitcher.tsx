@@ -30,7 +30,7 @@ export default function CollectionSwitcher({
 
   return (
     <div
-      className={`no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-1 pt-1 transition-opacity sm:mx-0 sm:px-0 ${
+      className={`no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 py-2 transition-opacity sm:-mx-2 sm:px-2 ${
         isSwitching ? "opacity-60" : ""
       }`}
       role="tablist"
@@ -51,7 +51,7 @@ export default function CollectionSwitcher({
                 await setActiveCollectionAction(c.id);
               });
             }}
-            className="flex w-[4.5rem] shrink-0 flex-col items-center gap-1.5"
+            className="flex w-[5rem] shrink-0 flex-col items-center gap-1.5"
           >
             <span
               className={`flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br text-xl font-bold text-white shadow-lg ring-2 ring-offset-2 ring-offset-[#060d13] transition-all ${
@@ -77,7 +77,7 @@ export default function CollectionSwitcher({
 
       <Link
         href="/collections"
-        className="flex w-[4.5rem] shrink-0 flex-col items-center gap-1.5"
+        className="flex w-[5rem] shrink-0 flex-col items-center gap-1.5"
       >
         <span className="flex h-14 w-14 items-center justify-center rounded-full border border-dashed border-white/25 text-2xl text-slate-300 ring-2 ring-transparent ring-offset-2 ring-offset-[#060d13]">
           +
