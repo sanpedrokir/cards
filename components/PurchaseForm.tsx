@@ -29,6 +29,7 @@ export default function PurchaseForm({
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
+  const categoryRef = useRef<HTMLInputElement>(null);
   const seriesRef = useRef<HTMLInputElement>(null);
   const cardNumberRef = useRef<HTMLInputElement>(null);
   const gradeRef = useRef<HTMLInputElement>(null);
@@ -59,6 +60,7 @@ export default function PurchaseForm({
 
   const fieldRefs = {
     name: nameRef,
+    category: categoryRef,
     series: seriesRef,
     cardNumber: cardNumberRef,
     grade: gradeRef,
@@ -296,10 +298,11 @@ export default function PurchaseForm({
                 Category
               </label>
               <input
+                ref={categoryRef}
                 id="category"
                 name="category"
                 type="text"
-                placeholder="Pokémon"
+                placeholder="e.g. One Piece"
                 className="input-field"
               />
             </div>
@@ -312,7 +315,7 @@ export default function PurchaseForm({
                 id="series"
                 name="series"
                 type="text"
-                placeholder="Base Set"
+                placeholder="e.g. Romance Dawn"
                 className="input-field"
               />
             </div>
@@ -355,7 +358,7 @@ export default function PurchaseForm({
                 id="gradingCompany"
                 name="gradingCompany"
                 type="text"
-                placeholder="PSA"
+                placeholder="e.g. PSA, BGS"
                 className="input-field"
               />
             </div>
@@ -370,7 +373,7 @@ export default function PurchaseForm({
               id="certNumber"
               name="certNumber"
               type="text"
-              placeholder="115823198"
+              placeholder="Only for graded slabs"
               className="input-field"
             />
           </div>

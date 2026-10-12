@@ -136,6 +136,7 @@ const SUPPORTED_SCAN_TYPES = new Set([
 
 export interface CardScanResult {
   name?: string;
+  category?: string;
   series?: string;
   cardNumber?: string;
   grade?: string;
@@ -211,12 +212,15 @@ export async function analyzeCardPhoto(
 Extract these fields and reply with ONLY a JSON object, no markdown fences, no extra text:
 {
   "name": short listing-style card name, e.g. "2016 Pokemon XY Evolutions FA/M Charizard EX" (combine year, set, and character/player as shown; omit words you can't read),
+  "category": the trading card game or sport, e.g. "Pokémon", "One Piece", "Magic: The Gathering", "Yu-Gi-Oh!", "Dragon Ball", "Baseball", or null if unsure. Judge it from the card's own artwork, logo and layout,
   "series": the set/series name if shown separately, e.g. "Evolutions", or null,
   "cardNumber": the card's print number within its set, e.g. "101" or "4/102", or null if not visible,
   "grade": the numeric grade if the card is professionally graded (e.g. "10"), or "0" if the card is ungraded/raw,
   "gradingCompany": the grading company name if graded, e.g. "PSA", "BGS", "CGC", or null if ungraded,
-  "certNumber": the certification number printed on a graded slab (a long number, distinct from the card's print number), or null if ungraded or not visible
+  "certNumber": the certification number printed on the label of a graded slab (a long number, distinct from the card's print number), or null if the card is not in a grading slab or the number is not clearly legible. Never guess or invent digits
 }
+
+Only report grade, gradingCompany and certNumber when you can actually see a grading slab label. A raw card has grade "0" and null for gradingCompany and certNumber.
 
 If you cannot identify the card at all, reply with {"error": "Could not identify the card in this photo."}`,
             },
@@ -234,13 +238,18 @@ If you cannot identify the card at all, reply with {"error": "Could not identify
       return { error: String(parsed.error) };
     }
 
+    const grade =
+      parsed.grade !== undefined && parsed.grade !== null ? String(parsed.grade) : undefined;
+    // A raw card has no slab, so never carry a company or cert number for one.
+    const graded = !!parsed.gradingCompany && !!grade && Number(grade) > 0;
     return {
       name: parsed.name ?? undefined,
+      category: parsed.category ?? undefined,
       series: parsed.series ?? undefined,
       cardNumber: parsed.cardNumber ?? undefined,
-      grade: parsed.grade !== undefined && parsed.grade !== null ? String(parsed.grade) : undefined,
-      gradingCompany: parsed.gradingCompany ?? undefined,
-      certNumber: parsed.certNumber ?? undefined,
+      grade,
+      gradingCompany: graded ? parsed.gradingCompany : undefined,
+      certNumber: graded ? parsed.certNumber ?? undefined : undefined,
     };
   } catch (err) {
     if (err instanceof Anthropic.APIError && err.status === 429) {
