@@ -322,6 +322,25 @@ export async function readAllCollections(userId: string): Promise<CollectionData
   });
 }
 
+// Collections page: names, pictures and card counts only, without pulling
+// every card row (and its columns) just to count them.
+export async function readCollectionSummaries(
+  userId: string
+): Promise<{ collection: Collection; cardCount: number }[]> {
+  const [collectionRows, countRows] = await Promise.all([
+    sql`SELECT * FROM collections WHERE user_id = ${userId} ORDER BY created_at, id`,
+    sql`SELECT collection_id, COUNT(*)::int AS n FROM cards WHERE user_id = ${userId} GROUP BY collection_id`,
+  ]);
+  if (collectionRows.length === 0) {
+    await ensureCollections(userId);
+    return readCollectionSummaries(userId);
+  }
+  return collectionRows.map((row) => ({
+    collection: mapCollection(row),
+    cardCount: countRows.find((r) => r.collection_id === row.id)?.n ?? 0,
+  }));
+}
+
 export interface CardsPageOptions {
   status: string;
   query: string;
