@@ -192,7 +192,7 @@ export default function PurchaseForm({
             name="name"
             type="text"
             required
-            placeholder="2023 Pokémon Charizard PSA 10"
+            placeholder="Scan a photo or type the card name"
             className="input-field"
           />
         </div>
