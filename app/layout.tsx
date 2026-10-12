@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Roboto, Roboto_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import Nav from "@/components/Nav";
+import PerfMeter from "@/components/PerfMeter";
 import AdminFooterLink from "@/components/AdminFooterLink";
 import LightboxProvider from "@/components/LightboxProvider";
 import "./globals.css";
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ClerkProvider>
           <LightboxProvider>
             <Nav />
+            <PerfMeter />
             <main className="mx-auto w-full max-w-4xl flex-1 px-4 pb-24 pt-4 sm:px-6 sm:pb-12 sm:pt-6">
               {children}
             </main>
