@@ -1,13 +1,16 @@
 import { requirePageUserId } from "@/lib/auth-helpers";
 import { readDb } from "@/lib/store";
-import { getCollectionContext } from "@/lib/collections";
+import { withActiveCollection } from "@/lib/collections";
 import CollectionSwitcher from "@/components/CollectionSwitcher";
 import InvestmentForm from "@/components/InvestmentForm";
 
 export default async function InvestmentPage() {
   const userId = await requirePageUserId();
-  const { collections, active } = await getCollectionContext(userId);
-  const { investment } = await readDb(userId, active.id);
+  const {
+    collections,
+    active,
+    data: { investment },
+  } = await withActiveCollection(userId, (id) => readDb(userId, id));
 
   return (
     <div className="mx-auto max-w-md space-y-4">

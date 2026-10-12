@@ -1,13 +1,14 @@
 import { requirePageUserId } from "@/lib/auth-helpers";
 import { readDb } from "@/lib/store";
-import { getCollectionContext } from "@/lib/collections";
+import { withActiveCollection } from "@/lib/collections";
 import CollectionSwitcher from "@/components/CollectionSwitcher";
 import SellPickerForm from "@/components/SellPickerForm";
 
 export default async function SalesPage() {
   const userId = await requirePageUserId();
-  const { collections, active } = await getCollectionContext(userId);
-  const db = await readDb(userId, active.id);
+  const { collections, active, data: db } = await withActiveCollection(userId, (id) =>
+    readDb(userId, id)
+  );
   const currency = db.investment?.currency ?? "SGD";
   const availableCards = db.cards.filter((c) => c.status === "available");
 

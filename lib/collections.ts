@@ -22,6 +22,26 @@ export async function getCollectionContext(userId: string): Promise<CollectionCo
   return { collections, active };
 }
 
+// Same as getCollectionContext, but also runs `fetcher` for the collection
+// named in the cookie *at the same time* as the collection lookup, so a page
+// pays one database round trip instead of two in a row. The cookie id is
+// only a guess: if it turns out not to be the active collection (stale
+// cookie, first visit) the fetch simply runs again with the right id. The
+// speculative query is always scoped to the user, so a bad id returns nothing.
+export async function withActiveCollection<T>(
+  userId: string,
+  fetcher: (collectionId: string) => Promise<T>
+): Promise<CollectionContext & { data: T }> {
+  const guess = (await cookies()).get(ACTIVE_COLLECTION_COOKIE)?.value;
+  const [ctx, guessed] = await Promise.all([
+    getCollectionContext(userId),
+    guess ? fetcher(guess) : Promise.resolve(undefined),
+  ]);
+  const data =
+    guess && ctx.active.id === guess ? (guessed as T) : await fetcher(ctx.active.id);
+  return { ...ctx, data };
+}
+
 // Free accounts can have FREE_COLLECTION_LIMIT collections; subscribers (and
 // the admin) have no cap. Returns null for "unlimited".
 export async function getCollectionLimit(userId: string): Promise<number | null> {

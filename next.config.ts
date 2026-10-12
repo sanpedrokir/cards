@@ -14,6 +14,9 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   experimental: {
+    // Keep pages the user just visited for 30s so tabbing back and forth is
+    // instant. Server actions clear this cache, so edits still show at once.
+    staleTimes: { dynamic: 30 },
     serverActions: {
       bodySizeLimit: "5mb",
     },
