@@ -179,6 +179,7 @@ export default function Nav() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch={true}
                   onClick={() => startNav(item.href)}
                   className={active ? "pill-active" : "pill"}
                 >
@@ -204,6 +205,7 @@ export default function Nav() {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={true}
                 onClick={() => startNav(item.href)}
                 className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium transition-colors ${
                   active
