@@ -65,6 +65,7 @@ export default function CollectionSwitcher({
           Collections page is where adding, renaming and deleting all live. */}
       <Link
         href="/collections"
+        prefetch={true}
         className="mt-3.5 inline-flex h-8 shrink-0 items-center gap-1.5 self-start whitespace-nowrap rounded-full border border-white/15 px-3 text-xs font-medium text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
       >
         <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
