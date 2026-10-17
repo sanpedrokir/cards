@@ -6,12 +6,15 @@ import {
   purchaseCard,
   analyzeCardPhoto,
   checkEbayPriceForQuery,
+  checkPokemonPriceForQuery,
+  type PokemonPriceResult,
   type EbayPriceEstimate,
 } from "@/lib/actions";
 import { initialFormState } from "@/lib/form-state";
 import { formatMoney, formatDate, todayIso } from "@/lib/format";
 import SubmitButton from "./SubmitButton";
 import CardImage from "./CardImage";
+import { PokemonResults } from "./PokemonPriceCheck";
 
 export default function PurchaseForm({
   collectionId,
@@ -45,6 +48,22 @@ export default function PurchaseForm({
 
   const [ebayResult, setEbayResult] = useState<EbayPriceEstimate | null>(null);
   const [isCheckingEbay, startEbayCheck] = useTransition();
+
+  const [pokemonResult, setPokemonResult] = useState<PokemonPriceResult | null>(null);
+  const [isCheckingPokemon, startPokemonCheck] = useTransition();
+
+  function handleCheckPokemon() {
+    const name = nameRef.current?.value ?? "";
+    startPokemonCheck(async () => {
+      setPokemonResult(
+        await checkPokemonPriceForQuery(
+          name,
+          categoryRef.current?.value,
+          cardNumberRef.current?.value
+        )
+      );
+    });
+  }
 
   function handleCheckEbay() {
     const name = nameRef.current?.value ?? "";
@@ -284,6 +303,30 @@ export default function PurchaseForm({
               </ul>
             </div>
           )}
+        </div>
+
+        <div className="rounded-xl border border-slate-200 p-4 dark:border-white/10">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                Pokémon Market Check
+              </p>
+              <p className="text-xs text-slate-400 dark:text-slate-500">
+                Pokémon cards only. TCGplayer (US$) and Cardmarket (€) prices, for ungraded
+                cards. Guideline only.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleCheckPokemon}
+              disabled={isCheckingPokemon}
+              className="btn-chip shrink-0"
+            >
+              {isCheckingPokemon ? "Checking…" : "Check Pokémon Price"}
+            </button>
+          </div>
+
+          <PokemonResults result={pokemonResult} />
         </div>
       </fieldset>
 

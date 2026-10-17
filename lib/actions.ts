@@ -821,14 +821,12 @@ export async function sellCard(
 
 export type PokemonPriceResult = PokemonLookup;
 
-export async function checkPokemonPrice(cardId: string): Promise<PokemonPriceResult> {
-  const userId = await requirePageUserId();
-  const card = await getCardById(userId, cardId);
-  if (!card) {
-    return { matches: [], error: "Card not found." };
-  }
-
-  if (isPokemonCategory(card.category) === false) {
+async function pokemonPriceFor(
+  name: string,
+  category?: string,
+  cardNumber?: string
+): Promise<PokemonPriceResult> {
+  if (isPokemonCategory(category) === false) {
     return {
       matches: [],
       info: "This price check is only for Pokémon cards for now. Try the eBay check instead!",
@@ -836,7 +834,7 @@ export async function checkPokemonPrice(cardId: string): Promise<PokemonPriceRes
   }
 
   try {
-    const matches = await lookupPokemonCard(card.name, card.cardNumber);
+    const matches = await lookupPokemonCard(name, cardNumber);
     if (matches.length === 0) {
       return {
         matches: [],
@@ -851,4 +849,26 @@ export async function checkPokemonPrice(cardId: string): Promise<PokemonPriceRes
       error: "The Pokémon price service is busy right now. Please try again in a moment.",
     };
   }
+}
+
+export async function checkPokemonPrice(cardId: string): Promise<PokemonPriceResult> {
+  const userId = await requirePageUserId();
+  const card = await getCardById(userId, cardId);
+  if (!card) {
+    return { matches: [], error: "Card not found." };
+  }
+  return pokemonPriceFor(card.name, card.category, card.cardNumber);
+}
+
+export async function checkPokemonPriceForQuery(
+  name: string,
+  category?: string,
+  cardNumber?: string
+): Promise<PokemonPriceResult> {
+  await requirePageUserId();
+
+  if (!name.trim()) {
+    return { matches: [], info: "Enter a card name first." };
+  }
+  return pokemonPriceFor(name, category, cardNumber);
 }
