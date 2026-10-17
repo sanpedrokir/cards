@@ -12,19 +12,40 @@ function variantLabel(variant?: string): string {
     .trim();
 }
 
-export function PokemonResults({ result }: { result: PokemonPriceResult | null }) {
-  if (!result) return null;
+export default function PokemonPriceCheck({ cardId }: { cardId: string }) {
+  const [isPending, startTransition] = useTransition();
+  const [result, setResult] = useState<PokemonPriceResult | null>(null);
+
+  function handleCheck() {
+    startTransition(async () => {
+      setResult(await checkPokemonPrice(cardId));
+    });
+  }
+
   return (
-    <>
-      {result.error && (
+    <div className="surface p-5">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
+          Pokémon Market Price
+        </h2>
+        <button type="button" onClick={handleCheck} disabled={isPending} className="btn-chip">
+          {isPending ? "Checking…" : "Check Pokémon Price"}
+        </button>
+      </div>
+      <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+        Pokémon cards only. Market prices from TCGplayer (US$) and Cardmarket (€). Guideline
+        only, for ungraded cards.
+      </p>
+
+      {result?.error && (
         <p className="mt-3 text-sm text-rose-600 dark:text-rose-400">{result.error}</p>
       )}
 
-      {result.info && (
+      {result?.info && (
         <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">{result.info}</p>
       )}
 
-      {result.matches.length > 0 && (
+      {result && result.matches.length > 0 && (
         <ul className="mt-3 space-y-1.5 text-sm">
           {result.matches.map((m) => {
             const row = (
@@ -72,36 +93,6 @@ export function PokemonResults({ result }: { result: PokemonPriceResult | null }
           })}
         </ul>
       )}
-    </>
-  );
-}
-
-export default function PokemonPriceCheck({ cardId }: { cardId: string }) {
-  const [isPending, startTransition] = useTransition();
-  const [result, setResult] = useState<PokemonPriceResult | null>(null);
-
-  function handleCheck() {
-    startTransition(async () => {
-      setResult(await checkPokemonPrice(cardId));
-    });
-  }
-
-  return (
-    <div className="surface p-5">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
-          Pokémon Market Price
-        </h2>
-        <button type="button" onClick={handleCheck} disabled={isPending} className="btn-chip">
-          {isPending ? "Checking…" : "Check Pokémon Price"}
-        </button>
-      </div>
-      <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-        Pokémon cards only. Market prices from TCGplayer (US$) and Cardmarket (€). Guideline
-        only, for ungraded cards.
-      </p>
-
-      <PokemonResults result={result} />
     </div>
   );
 }
