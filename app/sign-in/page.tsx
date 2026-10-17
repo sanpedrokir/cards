@@ -4,19 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSignIn, useSignUp, useAuth } from "@clerk/nextjs";
 import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
+import { normalizePhone } from "@/lib/phone";
 
 const inputClass = "input-field";
 
 type Step = "email" | "code";
 type Method = "email" | "phone";
-
-// Accepts what people actually type (spaces, dashes, brackets, 00 prefix) and
-// returns E.164, or null if it clearly isn't a full international number.
-function normalizePhone(raw: string): string | null {
-  let v = raw.trim().replace(/[\s\-().]/g, "");
-  if (v.startsWith("00")) v = "+" + v.slice(2);
-  return /^\+[1-9]\d{7,14}$/.test(v) ? v : null;
-}
 
 export default function SignInPage() {
   const { signIn, fetchStatus } = useSignIn();

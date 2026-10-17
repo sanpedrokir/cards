@@ -1,22 +1,34 @@
-import { UserProfile } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 import { requireSignedInUserId } from "@/lib/auth-helpers";
+import LinkAccountForm from "@/components/LinkAccountForm";
 
-// Clerk's profile screen is where people add a second sign-in method. Adding
-// the other one (email <-> phone) to the same account is what stops someone
-// ending up with two separate accounts -- and paying for two subscriptions.
 export default async function AccountPage() {
   await requireSignedInUserId();
+  const user = await currentUser();
+  const email = user?.primaryEmailAddress?.emailAddress;
+  const phone = user?.primaryPhoneNumber?.phoneNumber;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4">
+    <div className="mx-auto max-w-md space-y-4">
       <div>
-        <h1 className="page-title">Account</h1>
+        <h1 className="page-title">Your account</h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Add both an email and a mobile number to this account so you can sign in either way
-          and keep a single set of collections and one subscription.
+          One vault. Two ways in.
         </p>
       </div>
-      <UserProfile routing="hash" />
+
+      <div className="surface divide-y divide-slate-200/70 dark:divide-white/10">
+        <div className="flex items-center justify-between p-4 text-sm">
+          <span className="text-slate-500 dark:text-slate-400">Email</span>
+          <span className="text-slate-900 dark:text-white">{email ?? "Not added"}</span>
+        </div>
+        <div className="flex items-center justify-between p-4 text-sm">
+          <span className="text-slate-500 dark:text-slate-400">Phone</span>
+          <span className="text-slate-900 dark:text-white">{phone ?? "Not added"}</span>
+        </div>
+      </div>
+
+      <LinkAccountForm />
     </div>
   );
 }
