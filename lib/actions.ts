@@ -41,7 +41,6 @@ import {
   upsertSubscriptionCustomer,
 } from "./store";
 import { todayIso } from "./format";
-import { isPokemonCategory, lookupPokemonCard, type PokemonLookup } from "./pokemon";
 import type { Card, Sale } from "./types";
 import type { FormState } from "./form-state";
 
@@ -817,38 +816,4 @@ export async function sellCard(
 
   revalidateCardPaths(cardId);
   redirect(`/cards/${cardId}?sold=1`);
-}
-
-export type PokemonPriceResult = PokemonLookup;
-
-export async function checkPokemonPrice(cardId: string): Promise<PokemonPriceResult> {
-  const userId = await requirePageUserId();
-  const card = await getCardById(userId, cardId);
-  if (!card) {
-    return { matches: [], error: "Card not found." };
-  }
-
-  if (isPokemonCategory(card.category) === false) {
-    return {
-      matches: [],
-      info: "This price check is only for Pokémon cards for now. Try the eBay check instead!",
-    };
-  }
-
-  try {
-    const matches = await lookupPokemonCard(card.name, card.cardNumber);
-    if (matches.length === 0) {
-      return {
-        matches: [],
-        info: "No Pokémon match found. Check the card name and number, or try the eBay check.",
-      };
-    }
-    return { matches };
-  } catch (err) {
-    console.error("Pokemon price lookup failed:", err);
-    return {
-      matches: [],
-      error: "The Pokémon price service is busy right now. Please try again in a moment.",
-    };
-  }
 }

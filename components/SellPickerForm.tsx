@@ -7,7 +7,6 @@ import { formatMoney, formatDate, todayIso, SALE_CHANNELS } from "@/lib/format";
 import type { Card } from "@/lib/types";
 import SubmitButton from "./SubmitButton";
 import EbayPriceCheck from "./EbayPriceCheck";
-import PokemonPriceCheck from "./PokemonPriceCheck";
 import CardImage from "./CardImage";
 
 export default function SellPickerForm({
@@ -57,10 +56,7 @@ export default function SellPickerForm({
       </div>
 
       {selectedCardId && (
-        <>
-          <EbayPriceCheck key={selectedCardId} cardId={selectedCardId} />
-          <PokemonPriceCheck key={`pk-${selectedCardId}`} cardId={selectedCardId} />
-        </>
+        <EbayPriceCheck key={selectedCardId} cardId={selectedCardId} />
       )}
 
       <div className="grid grid-cols-2 gap-4">

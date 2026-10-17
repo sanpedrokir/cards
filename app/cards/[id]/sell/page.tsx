@@ -4,7 +4,6 @@ import { requirePageUserId } from "@/lib/auth-helpers";
 import { getCardById, getInvestment } from "@/lib/store";
 import SellForm from "@/components/SellForm";
 import EbayPriceCheck from "@/components/EbayPriceCheck";
-import PokemonPriceCheck from "@/components/PokemonPriceCheck";
 
 export default async function SellCardPage({
   params,
@@ -31,7 +30,6 @@ export default async function SellCardPage({
       <h1 className="page-title">Sell {card.name}</h1>
 
       <EbayPriceCheck cardId={card.id} />
-      <PokemonPriceCheck cardId={card.id} />
 
       <div className="surface p-5">
         <SellForm

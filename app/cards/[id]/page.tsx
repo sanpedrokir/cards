@@ -7,7 +7,6 @@ import { formatDate, formatMoney } from "@/lib/format";
 import StatusBadge from "@/components/StatusBadge";
 import DeleteCardButton from "@/components/DeleteCardButton";
 import EbayPriceCheck from "@/components/EbayPriceCheck";
-import PokemonPriceCheck from "@/components/PokemonPriceCheck";
 import SaleCelebration from "@/components/SaleCelebration";
 import EditableAmount from "@/components/EditableAmount";
 import CardImage from "@/components/CardImage";
@@ -193,7 +192,6 @@ export default async function CardDetailPage({
       </div>
 
       <EbayPriceCheck cardId={card.id} />
-      <PokemonPriceCheck cardId={card.id} />
     </div>
   );
 }
