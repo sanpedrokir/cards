@@ -8,6 +8,7 @@ import DashboardHero from "@/components/DashboardHero";
 import InvestedAmountEditor from "@/components/InvestedAmountEditor";
 import PaginatedSalesTable from "@/components/PaginatedSalesTable";
 import CollectionSwitcher from "@/components/CollectionSwitcher";
+import LinkAccountNotice from "@/components/LinkAccountNotice";
 
 export default async function DashboardPage({
   searchParams,
@@ -32,6 +33,7 @@ export default async function DashboardPage({
 
   return (
     <div className="space-y-6">
+      <LinkAccountNotice />
       <div className="flex items-center gap-2">
         <div className="min-w-0 flex-1">
           <CollectionSwitcher collections={collections} activeId={active.id} />
