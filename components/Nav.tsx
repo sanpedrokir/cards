@@ -80,21 +80,6 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
-  {
-    href: "/account",
-    label: "Account",
-    icon: (active: boolean) => (
-      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7">
-        <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth={active ? 2.2 : 1.8} />
-        <path
-          d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"
-          stroke="currentColor"
-          strokeWidth={active ? 2.2 : 1.8}
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
 ];
 
 export default function Nav() {
