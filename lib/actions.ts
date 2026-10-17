@@ -12,6 +12,7 @@ import { requireAdminUserId, requirePageUserId, requireSignedInUserId } from "./
 import {
   ACTIVE_COLLECTION_COOKIE,
   getCollectionContext,
+  getCardLimit,
   getCollectionLimit,
   resolveCollectionId,
 } from "./collections";
@@ -24,6 +25,7 @@ import {
   createCollection,
   deleteCard,
   deleteCollection,
+  FREE_CARDS_PER_COLLECTION,
   getCardById,
   getInvestment,
   getSubscription,
@@ -393,7 +395,17 @@ export async function purchaseCard(
     createdAt: new Date().toISOString(),
   };
   const collectionId = await resolveCollectionId(userId, formData.get("collectionId"));
-  const result = await insertCardIfAffordable(userId, collectionId, card);
+  const result = await insertCardIfAffordable(
+    userId,
+    collectionId,
+    card,
+    await getCardLimit(userId)
+  );
+  if (result === "card-limit-reached") {
+    return {
+      error: `Free accounts can add up to ${FREE_CARDS_PER_COLLECTION} cards per collection. Subscribe to add more.`,
+    };
+  }
   if (result === "insufficient-balance") {
     return { error: "Insufficient available investment balance." };
   }

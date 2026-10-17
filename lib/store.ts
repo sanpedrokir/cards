@@ -151,6 +151,7 @@ export const ensureCollections = cache(async function ensureCollections(
 });
 
 export const FREE_COLLECTION_LIMIT = 2;
+export const FREE_CARDS_PER_COLLECTION = 20;
 
 export type CreateCollectionResult =
   | { ok: true; id: string }
@@ -429,7 +430,7 @@ export async function setInvestmentAmount(
   `;
 }
 
-export type PurchaseResult = "ok" | "insufficient-balance";
+export type PurchaseResult = "ok" | "insufficient-balance" | "card-limit-reached";
 
 // Locks the user's investment row for the duration of the transaction so a
 // double-submit (double-click, two tabs) can't have both requests read the
@@ -437,12 +438,30 @@ export type PurchaseResult = "ok" | "insufficient-balance";
 export async function insertCardIfAffordable(
   userId: string,
   collectionId: string,
-  card: Card
+  card: Card,
+  maxCards: number | null = null
 ): Promise<PurchaseResult> {
   const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
+
+    // `maxCards` is null for unlimited. Sold cards still count, so selling
+    // and re-adding can't be used to get around the cap. The count runs under
+    // a per-collection lock so two simultaneous adds can't both slip past it.
+    if (maxCards !== null) {
+      await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [
+        `cards:${userId}:${collectionId}`,
+      ]);
+      const count = await client.query(
+        "SELECT COUNT(*)::int AS n FROM cards WHERE user_id = $1 AND collection_id = $2",
+        [userId, collectionId]
+      );
+      if (count.rows[0].n >= maxCards) {
+        await client.query("ROLLBACK");
+        return "card-limit-reached";
+      }
+    }
 
     const invResult = await client.query(
       "SELECT amount FROM investment WHERE user_id = $1 AND collection_id = $2 FOR UPDATE",
@@ -489,6 +508,17 @@ export async function insertCardIfAffordable(
   } finally {
     client.release();
   }
+}
+
+export async function countCardsInCollection(
+  userId: string,
+  collectionId: string
+): Promise<number> {
+  const rows = await sql`
+    SELECT COUNT(*)::int AS n FROM cards
+    WHERE user_id = ${userId} AND collection_id = ${collectionId}
+  `;
+  return rows[0].n;
 }
 
 export type UpdatePriceResult = "ok" | "not-found" | "locked" | "insufficient-balance";

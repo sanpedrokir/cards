@@ -1,6 +1,11 @@
 import "server-only";
 import { cookies } from "next/headers";
-import { ensureCollections, FREE_COLLECTION_LIMIT, hasActiveSubscription } from "./store";
+import {
+  ensureCollections,
+  FREE_CARDS_PER_COLLECTION,
+  FREE_COLLECTION_LIMIT,
+  hasActiveSubscription,
+} from "./store";
 import type { Collection } from "./types";
 
 export const ACTIVE_COLLECTION_COOKIE = "vaulted_collection";
@@ -47,6 +52,13 @@ export async function withActiveCollection<T>(
 export async function getCollectionLimit(userId: string): Promise<number | null> {
   if (userId === process.env.ADMIN_USER_ID) return null;
   return (await hasActiveSubscription(userId)) ? null : FREE_COLLECTION_LIMIT;
+}
+
+// Free accounts can hold FREE_CARDS_PER_COLLECTION cards in each collection;
+// subscribers (and the admin) have no cap. Returns null for "unlimited".
+export async function getCardLimit(userId: string): Promise<number | null> {
+  if (userId === process.env.ADMIN_USER_ID) return null;
+  return (await hasActiveSubscription(userId)) ? null : FREE_CARDS_PER_COLLECTION;
 }
 
 // For server actions: honour the collection the form was rendered for (so a

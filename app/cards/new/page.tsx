@@ -1,16 +1,21 @@
 import Link from "next/link";
 import { requirePageUserId } from "@/lib/auth-helpers";
-import { readDb } from "@/lib/store";
-import { withActiveCollection } from "@/lib/collections";
+import { countCardsInCollection, readDb } from "@/lib/store";
+import { getCardLimit, withActiveCollection } from "@/lib/collections";
 import CollectionSwitcher from "@/components/CollectionSwitcher";
 import { getTotals } from "@/lib/calculations";
 import PurchaseForm from "@/components/PurchaseForm";
 
 export default async function NewCardPage() {
   const userId = await requirePageUserId();
-  const { collections, active, data: db } = await withActiveCollection(userId, (id) =>
-    readDb(userId, id)
-  );
+  const [{ collections, active, data: db }, cardLimit] = await Promise.all([
+    withActiveCollection(userId, (id) => readDb(userId, id)),
+    getCardLimit(userId),
+  ]);
+
+  // Sold cards still count towards the free cap (see insertCardIfAffordable).
+  const atCardLimit =
+    cardLimit !== null && (await countCardsInCollection(userId, active.id)) >= cardLimit;
 
   const availableBalance = db.investment ? getTotals(db).availableBalance : null;
 
@@ -25,11 +30,24 @@ export default async function NewCardPage() {
       <h1 className="page-title">Add Card</h1>
 
       <div className="surface p-5">
-        <PurchaseForm
-          collectionId={active.id}
-          availableBalance={availableBalance}
-          currency={db.investment?.currency ?? "SGD"}
-        />
+        {atCardLimit ? (
+          <div className="space-y-3 text-center">
+            <p className="font-semibold text-slate-900 dark:text-white">Card limit reached</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Free accounts can add up to {cardLimit} cards per collection. Subscribe to add
+              more cards to {active.name}.
+            </p>
+            <Link href="/pricing" className="btn-primary w-full">
+              Subscribe
+            </Link>
+          </div>
+        ) : (
+          <PurchaseForm
+            collectionId={active.id}
+            availableBalance={availableBalance}
+            currency={db.investment?.currency ?? "SGD"}
+          />
+        )}
       </div>
     </div>
   );
