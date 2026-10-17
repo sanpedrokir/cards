@@ -151,7 +151,7 @@ export const ensureCollections = cache(async function ensureCollections(
 });
 
 export const FREE_COLLECTION_LIMIT = 2;
-export const FREE_CARDS_PER_COLLECTION = 20;
+export const FREE_CARDS_PER_COLLECTION = 30;
 
 export type CreateCollectionResult =
   | { ok: true; id: string }
