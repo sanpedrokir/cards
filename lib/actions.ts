@@ -404,6 +404,7 @@ export async function purchaseCard(
   if (result === "card-limit-reached") {
     return {
       error: `Free accounts can add up to ${FREE_CARDS_PER_COLLECTION} cards per collection. Subscribe to add more.`,
+      upgrade: true,
     };
   }
   if (result === "insufficient-balance") {

@@ -392,7 +392,19 @@ export default function PurchaseForm({
         </fieldset>
       </details>
 
-      {state?.error && <p className="notice-error">{state.error}</p>}
+      {state?.error && (
+        <p className="notice-error">
+          {state.error}
+          {state.upgrade && (
+            <>
+              {" "}
+              <Link href="/pricing" className="font-semibold underline">
+                Subscribe
+              </Link>
+            </>
+          )}
+        </p>
+      )}
 
       <SubmitButton className="w-full">Add Card</SubmitButton>
     </form>
