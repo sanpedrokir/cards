@@ -88,8 +88,7 @@ export default function Nav() {
   const { isSignedIn, isLoaded } = useAuth();
   const { signOut } = useClerk();
   const { user } = useUser();
-  // Phone-only accounts have no email, so fall back to the phone number.
-  const email = user?.primaryEmailAddress?.emailAddress ?? user?.primaryPhoneNumber?.phoneNumber;
+  const email = user?.primaryEmailAddress?.emailAddress;
 
   // "/cards" is a prefix of "/cards/new", so a plain startsWith() check would
   // light up both "Vaulted Cards" and "Add Card" at once. Instead, pick the
@@ -157,12 +156,9 @@ export default function Nav() {
           </button>
         </div>
         {email && (
-          <Link
-            href="/account"
-            className="block border-t border-slate-100 px-4 py-1 text-center text-[11px] text-slate-400 dark:border-white/5 dark:text-slate-500"
-          >
+          <div className="border-t border-slate-100 px-4 py-1 text-center text-[11px] text-slate-400 dark:border-white/5 dark:text-slate-500">
             {email}
-          </Link>
+          </div>
         )}
       </header>
 
@@ -174,9 +170,7 @@ export default function Nav() {
             <span className="font-bold text-slate-900 dark:text-white">Vaulted</span>
           </Link>
           {email && (
-            <Link href="/account" className="text-xs text-slate-400 hover:underline dark:text-slate-500">
-              {email}
-            </Link>
+            <span className="text-xs text-slate-400 dark:text-slate-500">{email}</span>
           )}
           <nav className="flex items-center gap-1">
             {NAV_ITEMS.map((item) => {
