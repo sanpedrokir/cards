@@ -10,6 +10,7 @@ import {
 } from "@/lib/actions";
 import { initialFormState } from "@/lib/form-state";
 import { formatMoney, formatDate, todayIso } from "@/lib/format";
+import { MAX_PICKED_BYTES, shrinkPhoto } from "@/lib/shrink-image";
 import SubmitButton from "./SubmitButton";
 import CardImage from "./CardImage";
 
@@ -68,17 +69,42 @@ export default function PurchaseForm({
     certNumber: certNumberRef,
   } as const;
 
-  function handleFileChange() {
-    const file = imageInputRef.current?.files?.[0];
+  async function handleFileChange() {
+    const input = imageInputRef.current;
+    const picked = input?.files?.[0];
+    setScanError(null);
+    setScanNotice(null);
+
+    if (picked && picked.size > MAX_PICKED_BYTES) {
+      if (input) input.value = "";
+      setFileName(null);
+      setPreviewUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return null;
+      });
+      setScanError("That file is too large to be a card photo. Please pick a smaller one.");
+      return;
+    }
+
+    // Shrink big camera photos on the phone, then swap the shrunk copy into
+    // the input so the form submit uploads it too, not just the scan.
+    const file = picked ? await shrinkPhoto(picked) : undefined;
+    if (input && picked && file && file !== picked) {
+      try {
+        const transfer = new DataTransfer();
+        transfer.items.add(file);
+        input.files = transfer.files;
+      } catch {
+        // Browser won't let us replace the file; the original is submitted.
+      }
+    }
+
     setFileName(file?.name ?? null);
     setPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return file ? URL.createObjectURL(file) : null;
     });
     if (!file) return;
-
-    setScanError(null);
-    setScanNotice(null);
 
     // Clear only fields that came from a previous scan -- never clobber
     // something the user typed in by hand.
