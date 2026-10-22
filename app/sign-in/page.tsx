@@ -7,7 +7,7 @@ import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 
 const inputClass = "input-field";
 
-type Step = "email" | "code";
+type Step = "email" | "code" | "password";
 
 export default function SignInPage() {
   const { signIn, fetchStatus } = useSignIn();
@@ -70,6 +70,30 @@ export default function SignInPage() {
     }
 
     setStep("code");
+  }
+
+  // For accounts that have a password (e.g. the App Store reviewer's demo
+  // account). Everyone else signs in with the emailed code.
+  async function handlePasswordSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setStuckStatus(null);
+    setFormError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const emailAddress = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
+
+    const { error } = await signIn.password({ identifier: emailAddress, password });
+    if (error) {
+      setFormError(error.message || "Couldn't sign in. Please check your details.");
+      return;
+    }
+
+    if (signIn.status === "complete") {
+      await finalizeSignIn();
+    } else {
+      setStuckStatus(signIn.status ?? "unknown");
+    }
   }
 
   async function handleTransfer() {
@@ -159,6 +183,70 @@ export default function SignInPage() {
               </a>
               .
             </p>
+            <button
+              type="button"
+              onClick={() => {
+                setFormError(null);
+                setStep("password");
+              }}
+              className="w-full text-center text-sm font-medium text-slate-400 dark:text-slate-500"
+            >
+              Sign in with a password instead
+            </button>
+          </form>
+        )}
+
+        {step === "password" && (
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="pw-email" className="label-field">
+                Email
+              </label>
+              <input id="pw-email" name="email" type="email" required className={inputClass} />
+            </div>
+            <div>
+              <label htmlFor="password" className="label-field">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                autoComplete="current-password"
+                className={inputClass}
+              />
+            </div>
+
+            {stuckStatus && (
+              <p className="text-sm text-rose-600 dark:text-rose-400">
+                Clerk needs an extra step ({stuckStatus}) that this form
+                doesn&apos;t support yet. Please contact the app owner.
+              </p>
+            )}
+
+            {formError && (
+              <p className="text-sm text-rose-600 dark:text-rose-400">{formError}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={fetchStatus === "fetching"}
+              className="btn-primary w-full"
+            >
+              {fetchStatus === "fetching" ? "Signing in…" : "Sign in"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setStuckStatus(null);
+                setFormError(null);
+                setStep("email");
+              }}
+              className="w-full text-center text-sm font-medium text-slate-400 dark:text-slate-500"
+            >
+              Use an emailed code instead
+            </button>
           </form>
         )}
 
