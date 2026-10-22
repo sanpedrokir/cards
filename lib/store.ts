@@ -273,6 +273,42 @@ export async function deleteCollection(
   }
 }
 
+// Permanently removes everything stored for a user (cards, budgets,
+// collections, subscription record) in one transaction, and returns the image
+// URLs so the caller can clean up the blobs. Safe to run again if a later
+// step of account deletion failed.
+export async function deleteAllUserData(userId: string): Promise<string[]> {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [userId]);
+
+    const images = await client.query(
+      "SELECT image_url, thumb_url FROM cards WHERE user_id = $1 AND (image_url IS NOT NULL OR thumb_url IS NOT NULL)",
+      [userId]
+    );
+    const icons = await client.query(
+      "SELECT icon_url FROM collections WHERE user_id = $1 AND icon_url IS NOT NULL",
+      [userId]
+    );
+    await client.query("DELETE FROM cards WHERE user_id = $1", [userId]);
+    await client.query("DELETE FROM investment WHERE user_id = $1", [userId]);
+    await client.query("DELETE FROM collections WHERE user_id = $1", [userId]);
+    await client.query("DELETE FROM subscriptions WHERE user_id = $1", [userId]);
+    await client.query("COMMIT");
+
+    return [
+      ...images.rows.flatMap((r) => [r.image_url, r.thumb_url]),
+      ...icons.rows.map((r) => r.icon_url),
+    ].filter((u): u is string => typeof u === "string");
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 export async function getInvestment(
   userId: string,
   collectionId: string

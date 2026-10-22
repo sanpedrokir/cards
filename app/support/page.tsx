@@ -50,9 +50,11 @@ export default function SupportPage() {
             always enter the details by hand.
           </li>
           <li>
-            <strong>How do I delete my account and data?</strong> Email us
-            from the address you signed up with and we will delete your
-            account and all of your data.
+            <strong>How do I delete my account and data?</strong> In the
+            app, open Account and tap Delete my account. This permanently
+            deletes your account and all of your data and cancels any
+            subscription. If you can&apos;t sign in, email us from the
+            address you signed up with and we will do it for you.
           </li>
         </ul>
       </section>

@@ -58,7 +58,13 @@ async function syncSubscription(
   eventCreatedAt: number,
   knownUserId?: string
 ) {
-  const userId = knownUserId ?? (await getUserIdByStripeCustomerId(customerId));
+  const rowUserId = await getUserIdByStripeCustomerId(customerId);
+  // Deleting an account removes its subscription row and then its Stripe
+  // customer, which sends a "canceled" event. Don't let that event recreate
+  // the row for a user who no longer exists.
+  if (!rowUserId && subscription.status === "canceled") return;
+
+  const userId = knownUserId ?? rowUserId;
   if (!userId) {
     console.error("Stripe webhook: no user found for customer", customerId);
     return;

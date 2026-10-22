@@ -7,7 +7,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import sharp from "sharp";
 import { put, del } from "@vercel/blob";
 import { cookies } from "next/headers";
-import { currentUser } from "@clerk/nextjs/server";
+import { clerkClient, currentUser } from "@clerk/nextjs/server";
 import { requireAdminUserId, requirePageUserId, requireSignedInUserId } from "./auth-helpers";
 import {
   ACTIVE_COLLECTION_COOKIE,
@@ -23,6 +23,7 @@ import { cropToCard } from "./card-crop";
 import {
   convertCurrency,
   createCollection,
+  deleteAllUserData,
   deleteCard,
   deleteCollection,
   FREE_CARDS_PER_COLLECTION,
@@ -695,6 +696,55 @@ export async function openBillingPortal(): Promise<void> {
   });
 
   redirect(portalSession.url);
+}
+
+// Permanently deletes the signed-in user's account and everything in it
+// (App Store rule 5.1.1(v) requires this to be possible from inside the app).
+// Order matters: end billing first so a failure can never leave someone being
+// charged for an account that's gone, then data, then the sign-in account.
+// Every step is safe to repeat, so if one fails the user can just try again.
+export async function deleteAccountAction(
+  _prevState: FormState,
+  _formData: FormData
+): Promise<FormState> {
+  // Not requirePageUserId: someone without a subscription must still be able
+  // to delete their account, and that helper redirects them to /pricing.
+  const userId = await requireSignedInUserId();
+
+  try {
+    const subscription = await getSubscription(userId);
+    if (subscription?.stripeCustomerId) {
+      // Deleting the Stripe customer also cancels any active subscription
+      // immediately. Past charges and invoices stay in Stripe's records.
+      await getStripe()
+        .customers.del(subscription.stripeCustomerId)
+        .catch((err: { code?: string }) => {
+          if (err?.code !== "resource_missing") throw err;
+        });
+    }
+
+    const imageUrls = await deleteAllUserData(userId);
+
+    // Best-effort, like deleteCardAction: don't fail over blob cleanup.
+    await Promise.all(
+      imageUrls
+        .filter((url) => url.startsWith("https://"))
+        .map((url) => del(url).catch(() => {}))
+    );
+
+    const clerk = await clerkClient();
+    await clerk.users.deleteUser(userId).catch((err: { status?: number }) => {
+      if (err?.status !== 404) throw err;
+    });
+  } catch (err) {
+    console.error("Account deletion failed:", err);
+    return {
+      error:
+        "We couldn't finish deleting your account. Please try again, or email vaultedsup@gmail.com and we'll do it for you.",
+    };
+  }
+
+  redirect("/sign-in");
 }
 
 export async function toggleSubscriptionGate(): Promise<void> {

@@ -143,7 +143,12 @@ export default function Nav() {
       )}
       <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white dark:border-white/10 dark:bg-[#060d13] sm:hidden">
         <div className="flex items-center justify-between px-4 py-2">
-          <div className="w-12" />
+          <Link
+            href="/account"
+            className="w-12 text-left text-[11px] font-medium text-slate-500 dark:text-slate-400"
+          >
+            Account
+          </Link>
           <Link href="/" className="flex items-center gap-1.5 text-sm font-bold text-slate-900 dark:text-white">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/vaulted-logo.png" alt="Vaulted" className="h-8 w-8 rounded-lg shadow-sm" />
@@ -187,9 +192,15 @@ export default function Nav() {
                 </Link>
               );
             })}
+            <Link
+              href="/account"
+              className="ml-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10"
+            >
+              Account
+            </Link>
             <button
               onClick={handleSignOut}
-              className="ml-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10"
+              className="rounded-full px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10"
             >
               Sign out
             </button>

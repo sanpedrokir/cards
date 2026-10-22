@@ -90,8 +90,10 @@ export default function PrivacyPage() {
           Data retention and deletion
         </h2>
         <p>
-          To request deletion of your account and all of your data, email us
-          using the address below and we will delete it. See also our{" "}
+          You can permanently delete your account and all of your data at any
+          time from inside the app: open Account and tap Delete my account.
+          You can also email us using the address below and we will delete it
+          for you. See also our{" "}
           <a href="/support" className="font-medium text-amber-700 dark:text-amber-400">
             Support page
           </a>
