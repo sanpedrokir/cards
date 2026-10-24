@@ -72,7 +72,7 @@ export default function EbayPriceCheck({ cardId }: { cardId: string }) {
                   rel="noreferrer"
                   className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-white/5"
                 >
-                  <span className="truncate text-slate-600 dark:text-slate-300">
+                  <span className="min-w-0 truncate text-slate-600 dark:text-slate-300">
                     {listing.title}
                   </span>
                   <span className="shrink-0 font-medium text-slate-900 dark:text-white">

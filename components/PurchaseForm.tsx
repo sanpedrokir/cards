@@ -157,7 +157,7 @@ export default function PurchaseForm({
         </div>
       )}
 
-      <fieldset className="space-y-4">
+      <fieldset className="min-w-0 space-y-4">
         <div>
           <span className="label-field">
             Photo
@@ -178,7 +178,7 @@ export default function PurchaseForm({
               onChange={handleFileChange}
               className="sr-only"
             />
-            <span className="truncate text-sm text-slate-500 dark:text-slate-400">
+            <span className="min-w-0 truncate text-sm text-slate-500 dark:text-slate-400">
               {fileName ?? "No file chosen"}
             </span>
           </div>
@@ -298,7 +298,7 @@ export default function PurchaseForm({
                       rel="noreferrer"
                       className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-white/5"
                     >
-                      <span className="truncate text-slate-600 dark:text-slate-300">
+                      <span className="min-w-0 truncate text-slate-600 dark:text-slate-300">
                         {listing.title}
                       </span>
                       <span className="shrink-0 font-medium text-slate-900 dark:text-white">
@@ -317,7 +317,7 @@ export default function PurchaseForm({
         <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
           More details (optional)
         </summary>
-        <fieldset className="space-y-4 px-4 pb-4">
+        <fieldset className="min-w-0 space-y-4 px-4 pb-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="category" className="label-field">
