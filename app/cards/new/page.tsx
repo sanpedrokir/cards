@@ -7,7 +7,7 @@ import PurchaseForm from "@/components/PurchaseForm";
 
 export default async function NewCardPage() {
   const userId = await requirePageUserId();
-  const [{ collections, active, data: db }, cardLimit] = await Promise.all([
+  const [{ collections, active }, cardLimit] = await Promise.all([
     withActiveCollection(userId, (id) => readDb(userId, id)),
     getCardLimit(userId),
   ]);
