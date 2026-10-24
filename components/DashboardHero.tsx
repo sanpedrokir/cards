@@ -74,6 +74,7 @@ export default function DashboardHero({
         <div className="mt-4 flex flex-wrap gap-2">
           <div className={PILL}>{fundPill}</div>
           <Pill label="Total Sales" value={formatMoney(totals.totalSales, currency)} />
+          <Pill label="Inventory" value={formatMoney(totals.inventoryCost, currency)} />
           {hasBudget && (
             <>
               {/* Budget plus realised profit: unchanged by buying a card (the card is still worth what was paid), moves only when a sale makes or loses money. */}
