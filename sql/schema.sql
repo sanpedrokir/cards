@@ -97,3 +97,6 @@ CREATE TABLE IF NOT EXISTS app_settings (
 INSERT INTO app_settings (id, subscription_required)
 VALUES (1, false)
 ON CONFLICT (id) DO NOTHING;
+
+-- Optional user-entered estimated market worth of a card (per card).
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS estimated_value NUMERIC(14, 2);

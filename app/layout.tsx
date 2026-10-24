@@ -20,7 +20,7 @@ const robotoMono = Roboto_Mono({
 
 export const metadata: Metadata = {
   title: "Vaulted",
-  description: "Track investment, purchases, sales and profit for your card business.",
+  description: "Track purchases, sales and profit for your card business.",
 };
 
 export const viewport: Viewport = {

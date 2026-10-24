@@ -3,7 +3,6 @@ import { requirePageUserId } from "@/lib/auth-helpers";
 import { countCardsInCollection, readDb } from "@/lib/store";
 import { getCardLimit, withActiveCollection } from "@/lib/collections";
 import CollectionSwitcher from "@/components/CollectionSwitcher";
-import { getTotals } from "@/lib/calculations";
 import PurchaseForm from "@/components/PurchaseForm";
 
 export default async function NewCardPage() {
@@ -13,11 +12,9 @@ export default async function NewCardPage() {
     getCardLimit(userId),
   ]);
 
-  // Sold cards still count towards the free cap (see insertCardIfAffordable).
+  // Sold cards still count towards the free cap (see insertCard).
   const atCardLimit =
     cardLimit !== null && (await countCardsInCollection(userId, active.id)) >= cardLimit;
-
-  const availableBalance = db.investment ? getTotals(db).availableBalance : null;
 
   return (
     <div className="mx-auto max-w-lg space-y-4">
@@ -44,8 +41,6 @@ export default async function NewCardPage() {
         ) : (
           <PurchaseForm
             collectionId={active.id}
-            availableBalance={availableBalance}
-            currency={db.investment?.currency ?? "SGD"}
           />
         )}
       </div>

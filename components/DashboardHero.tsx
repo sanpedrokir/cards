@@ -26,17 +26,13 @@ export default function DashboardHero({
   name,
   totals,
   currency,
-  hasBudget,
-  fundPill,
+  currencyPill,
 }: {
   name: string;
   totals: Totals;
   currency: string;
-  // Funds / available balance only mean something once a budget is set.
-  hasBudget: boolean;
-  // The budget pill is interactive (edit amount / currency), so the page
-  // supplies it; everything else here is plain display.
-  fundPill: React.ReactNode;
+  // Interactive (switches the collection's currency), so the page supplies it.
+  currencyPill: React.ReactNode;
 }) {
   const positive = totals.totalProfit >= 0;
 
@@ -72,25 +68,13 @@ export default function DashboardHero({
         </p>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          <div className={PILL}>{fundPill}</div>
           <Pill label="Total Sales" value={formatMoney(totals.totalSales, currency)} />
           <Pill label="Inventory" value={formatMoney(totals.inventoryCost, currency)} />
-          {hasBudget && (
-            <>
-              {/* Budget plus realised profit: unchanged by buying a card (the card is still worth what was paid), moves only when a sale makes or loses money. */}
-              <Pill
-                label="Total Funds + Profit"
-                value={formatMoney(totals.investedAmount + totals.totalProfit, currency)}
-              />
-              <Pill
-                label="Available to Purchase"
-                value={formatMoney(totals.availableBalance, currency)}
-                valueClassName={
-                  totals.availableBalance >= 0 ? "text-emerald-300" : "text-rose-300"
-                }
-              />
-            </>
-          )}
+          <Pill
+            label="Est. Inventory Worth"
+            value={formatMoney(totals.inventoryEstimate, currency)}
+          />
+          <div className={PILL}>{currencyPill}</div>
         </div>
       </div>
     </div>

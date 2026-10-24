@@ -13,6 +13,7 @@ export interface Card {
   id: string;
   name: string;
   purchasePrice: number;
+  estimatedValue?: number;
   purchaseDate: string;
   category?: string;
   series?: string;
@@ -55,11 +56,9 @@ export interface Database {
 }
 
 export interface Totals {
-  investedAmount: number;
-  purchaseCost: number;
-  availableBalance: number;
   inventoryCost: number;
+  // Sum of the estimated worth entered on unsold cards (cards without one count as 0).
+  inventoryEstimate: number;
   totalSales: number;
   totalProfit: number;
-  totalFunds: number;
 }

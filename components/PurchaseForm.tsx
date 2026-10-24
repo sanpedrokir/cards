@@ -16,12 +16,8 @@ import CardImage from "./CardImage";
 
 export default function PurchaseForm({
   collectionId,
-  availableBalance,
-  currency,
 }: {
   collectionId: string;
-  availableBalance: number | null;
-  currency: string;
 }) {
   const [state, formAction] = useActionState(purchaseCard, initialFormState);
   const [isScanning, startScan] = useTransition();
@@ -141,22 +137,6 @@ export default function PurchaseForm({
   return (
     <form action={formAction} className="space-y-5">
       <input type="hidden" name="collectionId" value={collectionId} />
-      {availableBalance !== null ? (
-        <div className="notice-info">
-          Available balance:{" "}
-          <span className="font-semibold">
-            {formatMoney(availableBalance, currency)}
-          </span>
-        </div>
-      ) : (
-        <div className="notice-neutral">
-          {"No spending budget set — this purchase won't be limited. "}
-          <Link href="/investment" className="font-medium underline">
-            Set one up (optional)
-          </Link>
-        </div>
-      )}
-
       <fieldset className="min-w-0 space-y-4">
         <div>
           <span className="label-field">
@@ -226,15 +206,15 @@ export default function PurchaseForm({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="purchasePrice" className="label-field">
-              Purchase Price *
+              Purchase Price
             </label>
             <input
               id="purchasePrice"
               name="purchasePrice"
               type="number"
               step="0.01"
-              min="0.01"
-              required
+              min="0"
+              placeholder="0.00"
               className="input-field"
             />
           </div>

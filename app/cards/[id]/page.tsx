@@ -9,6 +9,7 @@ import DeleteCardButton from "@/components/DeleteCardButton";
 import EbayPriceCheck from "@/components/EbayPriceCheck";
 import SaleCelebration from "@/components/SaleCelebration";
 import EditableAmount from "@/components/EditableAmount";
+import EstimatedWorth from "@/components/EstimatedWorth";
 import CardImage from "@/components/CardImage";
 import { updateCardPurchasePriceAction } from "@/lib/actions";
 
@@ -102,11 +103,17 @@ export default async function CardDetailPage({
                   amount={card.purchasePrice}
                   currency={currency}
                   ariaLabel="Edit purchase price"
-                  min="0.01"
                 />
               )}
             </span>
           </div>
+          {card.status === "available" && (
+            <EstimatedWorth
+              cardId={card.id}
+              worth={card.estimatedValue}
+              currency={currency}
+            />
+          )}
           <div className="flex justify-between">
             <span className="text-slate-500 dark:text-slate-400">
               Purchase Date

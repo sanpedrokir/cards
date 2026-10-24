@@ -39,6 +39,7 @@ function mapCard(row: any): Card {
     id: row.id,
     name: row.name,
     purchasePrice: toNumber(row.purchase_price),
+    estimatedValue: toOptionalNumber(row.estimated_value),
     purchaseDate: toIsoDate(row.purchase_date),
     category: row.category ?? undefined,
     series: row.series ?? undefined,
@@ -456,23 +457,9 @@ export async function upsertInvestment(
   `;
 }
 
-export async function setInvestmentAmount(
-  userId: string,
-  collectionId: string,
-  amount: number
-): Promise<void> {
-  await sql`
-    UPDATE investment SET amount = ${amount}
-    WHERE user_id = ${userId} AND collection_id = ${collectionId}
-  `;
-}
+export type PurchaseResult = "ok" | "card-limit-reached";
 
-export type PurchaseResult = "ok" | "insufficient-balance" | "card-limit-reached";
-
-// Locks the user's investment row for the duration of the transaction so a
-// double-submit (double-click, two tabs) can't have both requests read the
-// same pre-purchase balance and both succeed.
-export async function insertCardIfAffordable(
+export async function insertCard(
   userId: string,
   collectionId: string,
   card: Card,
@@ -500,41 +487,18 @@ export async function insertCardIfAffordable(
       }
     }
 
-    const invResult = await client.query(
-      "SELECT amount FROM investment WHERE user_id = $1 AND collection_id = $2 FOR UPDATE",
-      [userId, collectionId]
-    );
-
-    // No budget set yet -- purchases aren't capped until the user opts into
-    // one. Once they do, this check applies to every purchase from then on,
-    // computed against the full historical purchase cost (including
-    // anything bought before the budget existed).
-    if (invResult.rows.length > 0) {
-      const sumResult = await client.query(
-        "SELECT COALESCE(SUM(purchase_price), 0) AS total FROM cards WHERE user_id = $1 AND collection_id = $2",
-        [userId, collectionId]
-      );
-      const investedAmount = toNumber(invResult.rows[0].amount);
-      const purchaseCost = toNumber(sumResult.rows[0].total);
-      const availableBalance = investedAmount - purchaseCost;
-
-      if (card.purchasePrice > availableBalance) {
-        await client.query("ROLLBACK");
-        return "insufficient-balance";
-      }
-    }
-
     await client.query(
       `INSERT INTO cards (
         id, user_id, collection_id, name, purchase_price, purchase_date, category, series, card_number,
-        grade, grading_company, cert_number, quantity, notes, image_url, status, created_at, thumb_url
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)`,
+        grade, grading_company, cert_number, quantity, notes, image_url, status, created_at, thumb_url,
+        estimated_value
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
       [
         card.id, userId, collectionId, card.name, card.purchasePrice, card.purchaseDate,
         card.category ?? null, card.series ?? null, card.cardNumber ?? null,
         card.grade ?? null, card.gradingCompany ?? null, card.certNumber ?? null,
         card.quantity ?? null, card.notes ?? null, card.imageUrl ?? null,
-        card.status, card.createdAt, card.thumbUrl ?? null,
+        card.status, card.createdAt, card.thumbUrl ?? null, card.estimatedValue ?? null,
       ]
     );
     await client.query("COMMIT");
@@ -558,70 +522,36 @@ export async function countCardsInCollection(
   return rows[0].n;
 }
 
-export type UpdatePriceResult = "ok" | "not-found" | "locked" | "insufficient-balance";
+export type UpdatePriceResult = "ok" | "not-found" | "locked";
 
-// Locks the investment row (and the card row) so a concurrent purchase can't
-// read a stale available balance while this edit is in flight.
+// Sold cards are locked: their recorded profit shouldn't change later.
 export async function updateCardPurchasePrice(
   userId: string,
   cardId: string,
   newPrice: number
 ): Promise<UpdatePriceResult> {
-  const client = await pool.connect();
+  const rows = await sql`
+    UPDATE cards SET purchase_price = ${newPrice}
+    WHERE id = ${cardId} AND user_id = ${userId} AND status <> 'sold'
+    RETURNING id
+  `;
+  if (rows.length > 0) return "ok";
+  const exists = await sql`SELECT 1 FROM cards WHERE id = ${cardId} AND user_id = ${userId}`;
+  return exists.length === 0 ? "not-found" : "locked";
+}
 
-  try {
-    await client.query("BEGIN");
-
-    const cardResult = await client.query(
-      "SELECT id, collection_id, status FROM cards WHERE id = $1 AND user_id = $2 FOR UPDATE",
-      [cardId, userId]
-    );
-    if (cardResult.rows.length === 0) {
-      await client.query("ROLLBACK");
-      return "not-found";
-    }
-    // Sold cards are locked: their recorded profit shouldn't change later.
-    if (cardResult.rows[0].status === "sold") {
-      await client.query("ROLLBACK");
-      return "locked";
-    }
-    // The budget that applies is the one belonging to the card's own
-    // collection, not whichever collection happens to be selected right now.
-    const collectionId: string | null = cardResult.rows[0].collection_id;
-
-    const invResult = await client.query(
-      "SELECT amount FROM investment WHERE user_id = $1 AND collection_id IS NOT DISTINCT FROM $2::uuid FOR UPDATE",
-      [userId, collectionId]
-    );
-
-    // No budget set -- edits aren't capped until the user opts into one.
-    if (invResult.rows.length > 0) {
-      const sumResult = await client.query(
-        "SELECT COALESCE(SUM(purchase_price), 0) AS total FROM cards WHERE user_id = $1 AND collection_id IS NOT DISTINCT FROM $3::uuid AND id != $2",
-        [userId, cardId, collectionId]
-      );
-      const investedAmount = toNumber(invResult.rows[0].amount);
-      const otherCardsCost = toNumber(sumResult.rows[0].total);
-      const availableBalance = investedAmount - otherCardsCost;
-
-      if (newPrice > availableBalance) {
-        await client.query("ROLLBACK");
-        return "insufficient-balance";
-      }
-    }
-
-    await client.query(
-      "UPDATE cards SET purchase_price = $1 WHERE id = $2 AND user_id = $3",
-      [newPrice, cardId, userId]
-    );
-    await client.query("COMMIT");
-    return "ok";
-  } catch (err) {
-    await client.query("ROLLBACK").catch(() => {});
-    throw err;
-  } finally {
-    client.release();
-  }
+// Estimated worth can be set (or cleared with null) on any card.
+export async function updateCardEstimatedValue(
+  userId: string,
+  cardId: string,
+  value: number | null
+): Promise<boolean> {
+  const rows = await sql`
+    UPDATE cards SET estimated_value = ${value}
+    WHERE id = ${cardId} AND user_id = ${userId}
+    RETURNING id
+  `;
+  return rows.length > 0;
 }
 
 // Converts every stored amount in one collection (its investment + every
@@ -654,6 +584,7 @@ export async function convertCurrency(
     await client.query(
       `UPDATE cards SET
         purchase_price = ROUND(purchase_price * $1, 2),
+        estimated_value = CASE WHEN estimated_value IS NOT NULL THEN ROUND(estimated_value * $1, 2) ELSE NULL END,
         sale_price = CASE WHEN sale_price IS NOT NULL THEN ROUND(sale_price * $1, 2) ELSE NULL END,
         fees = CASE WHEN fees IS NOT NULL THEN ROUND(fees * $1, 2) ELSE NULL END
       WHERE user_id = $2 AND collection_id = $3`,

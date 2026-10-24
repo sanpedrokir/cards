@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Vaulted",
     short_name: "Vaulted",
-    description: "Track investment, purchases, sales and profit for your card business.",
+    description: "Track purchases, sales and profit for your card business.",
     start_url: "/",
     display: "standalone",
     background_color: "#060d13",

@@ -1,33 +1,15 @@
 import type { Card, Database, Totals } from "./types";
 
 export function getTotals(db: Database): Totals {
-  const investedAmount = db.investment?.amount ?? 0;
-  const purchaseCost = db.cards.reduce((sum, c) => sum + c.purchasePrice, 0);
-  const availableBalance = investedAmount - purchaseCost;
-
   const soldCards = db.cards.filter((c) => c.status === "sold");
   const availableCards = db.cards.filter((c) => c.status === "available");
 
-  const inventoryCost = availableCards.reduce(
-    (sum, c) => sum + c.purchasePrice,
-    0
-  );
-  const totalSales = soldCards.reduce(
-    (sum, c) => sum + (c.sale?.salePrice ?? 0),
-    0
-  );
+  const inventoryCost = availableCards.reduce((sum, c) => sum + c.purchasePrice, 0);
+  const inventoryEstimate = availableCards.reduce((sum, c) => sum + (c.estimatedValue ?? 0), 0);
+  const totalSales = soldCards.reduce((sum, c) => sum + (c.sale?.salePrice ?? 0), 0);
   const totalProfit = soldCards.reduce((sum, c) => sum + cardProfit(c), 0);
-  const totalFunds = availableBalance + totalSales;
 
-  return {
-    investedAmount,
-    purchaseCost,
-    availableBalance,
-    inventoryCost,
-    totalSales,
-    totalProfit,
-    totalFunds,
-  };
+  return { inventoryCost, inventoryEstimate, totalSales, totalProfit };
 }
 
 export function cardProfit(card: Card): number {

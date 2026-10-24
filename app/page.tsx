@@ -5,7 +5,7 @@ import { getCollectionContext } from "@/lib/collections";
 import { getTotals } from "@/lib/calculations";
 import { formatMoney } from "@/lib/format";
 import DashboardHero from "@/components/DashboardHero";
-import InvestedAmountEditor from "@/components/InvestedAmountEditor";
+import CurrencyEditor from "@/components/CurrencyEditor";
 import PaginatedSalesTable from "@/components/PaginatedSalesTable";
 import CollectionSwitcher from "@/components/CollectionSwitcher";
 
@@ -96,11 +96,9 @@ export default async function DashboardPage({
                       </dd>
                     </div>
                     <div className="flex justify-between gap-2">
-                      <dt>{collectionDb.investment ? "Balance" : "Cards"}</dt>
+                      <dt>Cards</dt>
                       <dd className="font-semibold tabular-nums text-slate-900 dark:text-white">
-                        {collectionDb.investment
-                          ? formatMoney(t.availableBalance, cur)
-                          : collectionDb.cards.length}
+                        {collectionDb.cards.length}
                       </dd>
                     </div>
                   </dl>
@@ -113,8 +111,7 @@ export default async function DashboardPage({
 
       {cards.length === 0 && (
         <p className="text-center text-sm text-slate-900 dark:text-white">
-          Welcome to Vaulted! Record your first purchase to get started — a
-          spending budget is optional, set one up any time.
+          Welcome to Vaulted! Record your first purchase to get started.
         </p>
       )}
 
@@ -122,30 +119,7 @@ export default async function DashboardPage({
         name={active.name}
         totals={totals}
         currency={currency}
-        hasBudget={Boolean(investment)}
-        fundPill={
-          investment ? (
-            <InvestedAmountEditor
-              compact
-              collectionId={active.id}
-              amount={totals.investedAmount}
-              currency={currency}
-              since={investment.date}
-            />
-          ) : (
-            <div>
-              <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-slate-300/80">
-                Overall Fund Invested
-              </p>
-              <p className="text-sm font-bold text-white">
-                Not set{" "}
-                <Link href="/investment" className="text-xs font-medium text-emerald-300 underline-offset-2 hover:underline">
-                  Set up (optional)
-                </Link>
-              </p>
-            </div>
-          )
-        }
+        currencyPill={<CurrencyEditor collectionId={active.id} currency={currency} />}
       />
 
       <div>

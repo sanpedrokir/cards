@@ -30,13 +30,13 @@ import {
   getCardById,
   getInvestment,
   getSubscription,
-  insertCardIfAffordable,
+  insertCard,
   isSubscriptionGateEnabled,
   markCardSold,
   renameCollection,
   setCollectionIcon,
-  setInvestmentAmount,
   setSubscriptionGateEnabled,
+  updateCardEstimatedValue,
   updateCardPurchasePrice,
   upsertInvestment,
   upsertSubscriptionCustomer,
@@ -51,7 +51,6 @@ const MAX_COLLECTION_NAME_LENGTH = 40;
 
 function revalidateInvestmentPaths() {
   revalidatePath("/");
-  revalidatePath("/investment");
   revalidatePath("/cards/new");
   revalidatePath("/sales");
 }
@@ -280,53 +279,6 @@ If you cannot identify the card at all, reply with {"error": "Could not identify
   }
 }
 
-export async function saveInvestment(
-  _prevState: FormState,
-  formData: FormData
-): Promise<FormState> {
-  const userId = await requirePageUserId();
-  const amount = numberField(formData, "amount");
-  const currency = textField(formData, "currency") ?? "SGD";
-  const date = dateField(formData, "date") ?? todayIso();
-  const notes = textField(formData, "notes")?.slice(0, MAX_TEXT_LENGTH);
-
-  if (amount === undefined || amount < 0 || amount > MAX_AMOUNT) {
-    return { error: "Enter a valid investment amount." };
-  }
-  if (!isCurrency(currency)) {
-    return { error: "Select a currency." };
-  }
-
-  const collectionId = await resolveCollectionId(userId, formData.get("collectionId"));
-  await upsertInvestment(userId, collectionId, { amount, currency, date, notes });
-
-  revalidateInvestmentPaths();
-  redirect("/");
-}
-
-export async function updateInvestmentAmount(
-  _prevState: FormState,
-  formData: FormData
-): Promise<FormState> {
-  const userId = await requirePageUserId();
-  const amount = numberField(formData, "amount");
-
-  if (amount === undefined || amount < 0 || amount > MAX_AMOUNT) {
-    return { error: "Enter a valid amount." };
-  }
-
-  const collectionId = await resolveCollectionId(userId, formData.get("collectionId"));
-  const investment = await getInvestment(userId, collectionId);
-  if (!investment) {
-    return { error: "Set up your initial investment first." };
-  }
-
-  await setInvestmentAmount(userId, collectionId, amount);
-
-  revalidateInvestmentPaths();
-  redirect("/");
-}
-
 export async function changeCurrencyAction(
   _prevState: FormState,
   formData: FormData
@@ -339,9 +291,12 @@ export async function changeCurrencyAction(
   }
 
   const collectionId = await resolveCollectionId(userId, formData.get("collectionId"));
-  const investment = await getInvestment(userId, collectionId);
+  // The collection's currency lives on its investment row; collections that
+  // never had one are in SGD, so create an empty row to hold the new currency.
+  let investment = await getInvestment(userId, collectionId);
   if (!investment) {
-    return { error: "Set up your initial investment first." };
+    investment = { amount: 0, currency: "SGD", date: todayIso() };
+    await upsertInvestment(userId, collectionId, investment);
   }
   if (investment.currency === toCurrency) {
     return { error: `You're already using ${toCurrency}.` };
@@ -379,7 +334,8 @@ export async function purchaseCard(
   const userId = await requirePageUserId();
   const short = (field: string) => textField(formData, field)?.slice(0, MAX_TEXT_LENGTH);
   const name = short("name");
-  const purchasePrice = numberField(formData, "purchasePrice");
+  // Optional: a card with no price entered is treated as costing nothing.
+  const purchasePrice = numberField(formData, "purchasePrice") ?? 0;
   const purchaseDate = dateField(formData, "purchaseDate") ?? todayIso();
   const category = short("category");
   const series = short("series");
@@ -398,8 +354,8 @@ export async function purchaseCard(
   if (!name) {
     return { error: "Card name is required." };
   }
-  if (purchasePrice === undefined || purchasePrice <= 0 || purchasePrice > MAX_AMOUNT) {
-    return { error: "Enter a valid purchase price greater than zero." };
+  if (purchasePrice < 0 || purchasePrice > MAX_AMOUNT) {
+    return { error: "Enter a valid purchase price." };
   }
 
   const { url: imageUrl, thumbUrl, error: imageError } = await encodeImage(
@@ -429,7 +385,14 @@ export async function purchaseCard(
     createdAt: new Date().toISOString(),
   };
   const collectionId = await resolveCollectionId(userId, formData.get("collectionId"));
-  const result = await insertCardIfAffordable(
+  const investment = await getInvestment(userId, collectionId);
+  // Best effort: a card with no comparable eBay listing just has no worth.
+  const worth = await ebayWorth(
+    buildEbayQuery(name, gradingCompany, grade),
+    investment?.currency ?? "SGD"
+  );
+  if (typeof worth === "number") card.estimatedValue = worth;
+  const result = await insertCard(
     userId,
     collectionId,
     card,
@@ -447,9 +410,6 @@ export async function purchaseCard(
       upgrade: true,
     };
   }
-  if (result === "insufficient-balance") {
-    return { error: "Insufficient available investment balance." };
-  }
 
   revalidateCardPaths();
   redirect(`/cards/${id}`);
@@ -466,8 +426,8 @@ export async function updateCardPurchasePriceAction(
   if (!cardId) {
     return { error: "Missing card reference." };
   }
-  if (amount === undefined || amount <= 0 || amount > MAX_AMOUNT) {
-    return { error: "Enter a valid purchase price greater than zero." };
+  if (amount === undefined || amount < 0 || amount > MAX_AMOUNT) {
+    return { error: "Enter a valid purchase price." };
   }
 
   const result = await updateCardPurchasePrice(userId, cardId, amount);
@@ -477,11 +437,32 @@ export async function updateCardPurchasePriceAction(
   if (result === "locked") {
     return { error: "This card has been sold, so its prices are locked." };
   }
-  if (result === "insufficient-balance") {
-    return { error: "That price exceeds your available investment balance." };
-  }
 
   revalidateCardPaths(cardId);
+  return {};
+}
+
+// Refreshes a card's estimated worth from eBay. With no comparable listing the
+// card has no worth, so any earlier estimate is cleared.
+export async function refreshEstimatedWorth(cardId: string): Promise<FormState> {
+  const userId = await requirePageUserId();
+  const card = await getCardById(userId, cardId);
+  if (!card) return { error: "Card not found." };
+
+  const investment = card.collectionId
+    ? await getInvestment(userId, card.collectionId)
+    : null;
+  const worth = await ebayWorth(
+    buildEbayQuery(card.name, card.gradingCompany, card.grade),
+    investment?.currency ?? "SGD"
+  );
+  if (worth === "error") {
+    return { error: "Couldn't reach eBay. Please try again later." };
+  }
+
+  await updateCardEstimatedValue(userId, cardId, worth);
+  revalidateCardPaths(cardId);
+  if (worth === null) return { error: NO_EBAY_PRICING };
   return {};
 }
 
@@ -793,8 +774,12 @@ export async function toggleSubscriptionGate(): Promise<void> {
   revalidatePath("/admin");
 }
 
+const EBAY_UNREACHABLE = "Couldn't reach eBay. Please try again later.";
+
 export interface EbayPriceEstimate {
   recommendedPrice?: number;
+  // Median asking price of the listings, before the selling discount.
+  medianPrice?: number;
   currency?: string;
   listings: EbayListing[];
   error?: string;
@@ -822,7 +807,7 @@ async function estimateEbayPrice(query: string): Promise<EbayPriceEstimate> {
   try {
     const listings = await searchEbayActiveListings(query);
     if (listings.length === 0) {
-      return { listings: [], error: "No comparable listings found on eBay." };
+      return { listings: [], error: NO_EBAY_PRICING };
     }
 
     const prices = listings.map((l) => l.price).filter((p) => p > 0);
@@ -838,12 +823,34 @@ async function estimateEbayPrice(query: string): Promise<EbayPriceEstimate> {
     return {
       listings,
       recommendedPrice,
+      medianPrice: Math.round(med * 100) / 100,
       currency: listings[0].currency,
     };
   } catch (err) {
     console.error("eBay price estimate failed:", err);
-    return { listings: [], error: "Couldn't reach eBay. Please try again later." };
+    return { listings: [], error: EBAY_UNREACHABLE };
   }
+}
+
+const NO_EBAY_PRICING = "No comparable pricing from eBay.";
+
+// Median asking price of similar active eBay listings, converted from eBay's
+// currency into `currency`. null: nothing comparable. "error": eBay or the
+// exchange rate couldn't be reached.
+async function ebayWorth(query: string, currency: string): Promise<number | null | "error"> {
+  const estimate = await estimateEbayPrice(query);
+  if (estimate.medianPrice === undefined || !estimate.currency) {
+    return estimate.error === EBAY_UNREACHABLE ? "error" : null;
+  }
+  let value = estimate.medianPrice;
+  if (estimate.currency !== currency) {
+    try {
+      value *= await getExchangeRate(estimate.currency, currency);
+    } catch {
+      return "error";
+    }
+  }
+  return Math.round(value * 100) / 100;
 }
 
 export async function checkEbayPrice(cardId: string): Promise<EbayPriceEstimate> {
