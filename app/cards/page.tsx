@@ -6,8 +6,12 @@ import { withActiveCollection } from "@/lib/collections";
 import CollectionSwitcher from "@/components/CollectionSwitcher";
 import CardTile from "@/components/CardTile";
 import CardFilterBar from "@/components/CardFilterBar";
+import RefreshWorthButton from "@/components/RefreshWorthButton";
 
 const PAGE_SIZE = 12;
+
+// Refreshing every card's eBay worth can take a while.
+export const maxDuration = 60;
 
 // 1 2 3 … 9 10 style page list: always first, last and the current page's neighbours.
 function pageNumbers(current: number, total: number): Array<number | "…"> {
@@ -77,6 +81,8 @@ export default async function CardsPage({
           <span className="text-base leading-none">+</span> Add Card
         </Link>
       </div>
+
+      <RefreshWorthButton collectionId={active.id} />
 
       <CardFilterBar defaultQuery={q} defaultStatus={status} />
 

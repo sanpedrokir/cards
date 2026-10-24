@@ -67,11 +67,11 @@ export default function CardTile({
           </p>
         </div>
 
-        {!sold && card.estimatedValue !== undefined && (
+        {!sold && (
           <div className="pt-1">
             <p className="text-[11px] text-slate-500 dark:text-slate-400">Est. worth</p>
             <p className="text-[15px] font-bold leading-tight tabular-nums text-amber-600 dark:text-amber-400">
-              {formatMoney(card.estimatedValue, currency)}
+              {card.estimatedValue !== undefined ? formatMoney(card.estimatedValue, currency) : "—"}
             </p>
           </div>
         )}

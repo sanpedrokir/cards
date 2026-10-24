@@ -26,11 +26,14 @@ export default function DashboardHero({
   name,
   totals,
   currency,
+  worthPill,
   currencyPill,
 }: {
   name: string;
   totals: Totals;
   currency: string;
+  // Interactive (runs the eBay refresh), so the page supplies it.
+  worthPill: React.ReactNode;
   // Interactive (switches the collection's currency), so the page supplies it.
   currencyPill: React.ReactNode;
 }) {
@@ -70,10 +73,7 @@ export default function DashboardHero({
         <div className="mt-4 flex flex-wrap gap-2">
           <Pill label="Total Sales" value={formatMoney(totals.totalSales, currency)} />
           <Pill label="Inventory" value={formatMoney(totals.inventoryCost, currency)} />
-          <Pill
-            label="Est. Inventory Worth"
-            value={formatMoney(totals.inventoryEstimate, currency)}
-          />
+          <div className={PILL}>{worthPill}</div>
           <div className={PILL}>{currencyPill}</div>
         </div>
       </div>

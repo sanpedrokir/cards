@@ -29,6 +29,7 @@ import {
   deleteCollection,
   FREE_CARDS_PER_COLLECTION,
   getCardById,
+  getCards,
   getInvestment,
   getSubscription,
   insertCard,
@@ -49,6 +50,8 @@ import type { FormState } from "./form-state";
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
 
 const MAX_COLLECTION_NAME_LENGTH = 40;
+const MAX_WORTH_REFRESH = 40;
+const WORTH_CONCURRENCY = 4;
 
 function revalidateInvestmentPaths() {
   revalidatePath("/");
@@ -474,6 +477,44 @@ export async function refreshEstimatedWorth(cardId: string): Promise<FormState> 
   revalidateCardPaths(cardId);
   if (worth === null) return { error: NO_EBAY_PRICING };
   return {};
+}
+
+// Refreshes the eBay estimated worth of every in-stock card in a collection
+// (a few at a time, capped so one click can't run past the function timeout).
+export async function refreshInventoryWorth(collectionId: string): Promise<FormState> {
+  const userId = await requirePageUserId();
+  const id = await resolveCollectionId(userId, collectionId);
+  const [cards, investment] = await Promise.all([getCards(userId, id), getInvestment(userId, id)]);
+  const currency = investment?.currency ?? "SGD";
+  const stock = cards.filter((c) => c.status === "available").slice(0, MAX_WORTH_REFRESH);
+  if (stock.length === 0) return { message: "No cards in stock to check." };
+
+  let priced = 0;
+  let noPricing = 0;
+  let failed = 0;
+  const queue = [...stock];
+  const worker = async () => {
+    for (let card = queue.shift(); card; card = queue.shift()) {
+      const worth = await ebayWorth(buildEbayQuery(card.name, card.gradingCompany, card.grade), currency);
+      if (worth === "error") {
+        failed++;
+        continue;
+      }
+      await updateCardEstimatedValue(userId, card.id, worth);
+      if (worth === null) noPricing++;
+      else priced++;
+    }
+  };
+  await Promise.all(Array.from({ length: WORTH_CONCURRENCY }, worker));
+
+  revalidateCardPaths();
+  if (priced === 0 && failed > 0) {
+    return { error: "Couldn't reach eBay. Please try again later." };
+  }
+  const parts = [`Updated ${priced} of ${stock.length} cards from eBay`];
+  if (noPricing) parts.push(`${noPricing} had no comparable pricing`);
+  if (failed) parts.push(`${failed} couldn't be checked`);
+  return { message: parts.join(" · ") };
 }
 
 export async function deleteCardAction(cardId: string): Promise<void> {

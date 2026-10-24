@@ -1,0 +1,54 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { refreshInventoryWorth } from "@/lib/actions";
+
+// Stat pill for the dashboard hero: the estimated worth of the collection's
+// in-stock cards (from eBay), with a button to refresh it for every card.
+export default function InventoryWorthPill({
+  collectionId,
+  value,
+}: {
+  collectionId: string;
+  value: string;
+}) {
+  const [isPending, startTransition] = useTransition();
+  const [result, setResult] = useState<{ text: string; isError: boolean } | null>(null);
+  const router = useRouter();
+
+  function handleRefresh() {
+    setResult(null);
+    startTransition(async () => {
+      const res = await refreshInventoryWorth(collectionId);
+      setResult(
+        res.error
+          ? { text: res.error, isError: true }
+          : { text: res.message ?? "", isError: false }
+      );
+      router.refresh();
+    });
+  }
+
+  return (
+    <div>
+      <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-slate-300/80">
+        Est. Inventory Worth
+      </p>
+      <p className="break-words text-sm font-bold tabular-nums text-white">{value}</p>
+      <button
+        type="button"
+        onClick={handleRefresh}
+        disabled={isPending}
+        className="mt-1 text-[11px] font-medium text-emerald-300 underline-offset-2 hover:underline disabled:opacity-60"
+      >
+        {isPending ? "Checking eBay…" : "Update from eBay"}
+      </button>
+      {result && (
+        <p className={`mt-1 text-[11px] ${result.isError ? "text-rose-300" : "text-slate-300/80"}`}>
+          {result.text}
+        </p>
+      )}
+    </div>
+  );
+}

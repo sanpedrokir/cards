@@ -6,8 +6,12 @@ import { getTotals } from "@/lib/calculations";
 import { formatMoney } from "@/lib/format";
 import DashboardHero from "@/components/DashboardHero";
 import CurrencyEditor from "@/components/CurrencyEditor";
+import InventoryWorthPill from "@/components/InventoryWorthPill";
 import PaginatedSalesTable from "@/components/PaginatedSalesTable";
 import CollectionSwitcher from "@/components/CollectionSwitcher";
+
+// Refreshing every card's eBay worth from the dashboard can take a while.
+export const maxDuration = 60;
 
 export default async function DashboardPage({
   searchParams,
@@ -119,6 +123,12 @@ export default async function DashboardPage({
         name={active.name}
         totals={totals}
         currency={currency}
+        worthPill={
+          <InventoryWorthPill
+            collectionId={active.id}
+            value={formatMoney(totals.inventoryEstimate, currency)}
+          />
+        }
         currencyPill={<CurrencyEditor collectionId={active.id} currency={currency} />}
       />
 
