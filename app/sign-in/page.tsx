@@ -150,6 +150,37 @@ function SignInForm() {
     }
   }
 
+  // If a request hangs (e.g. a blocked bot check on some phones) the button just
+  // sits on "Sending…". Say something after 5s (soft) and 20s (firmer); both
+  // vanish as soon as the request finishes.
+  const [slowLevel, setSlowLevel] = useState<0 | 1 | 2>(0);
+  const busy = fetchStatus === "fetching";
+  useEffect(() => {
+    if (!busy) return;
+    const soft = setTimeout(() => setSlowLevel(1), 5_000);
+    const firm = setTimeout(() => setSlowLevel(2), 20_000);
+    return () => {
+      clearTimeout(soft);
+      clearTimeout(firm);
+      setSlowLevel(0);
+    };
+  }, [busy]);
+  const slowNotice =
+    busy && slowLevel > 0 ? (
+      <p
+        role="status"
+        className={`text-sm ${
+          slowLevel === 2
+            ? "text-rose-600 dark:text-rose-400"
+            : "text-slate-500 dark:text-slate-400"
+        }`}
+      >
+        {slowLevel === 2
+          ? "This is taking too long. Please check your connection, then refresh the page and try again."
+          : "Still working… this is taking a little longer than usual."}
+      </p>
+    ) : null;
+
   const alreadySignedIn = signIn.status === "complete" || signUp.status === "complete" || isSignedIn;
 
   useEffect(() => {
@@ -190,6 +221,7 @@ function SignInForm() {
             >
               {fetchStatus === "fetching" ? "Sending code…" : "Continue"}
             </button>
+            {slowNotice}
             <p className="text-center text-xs text-slate-400 dark:text-slate-500">
               By continuing, you agree to our{" "}
               <a href="/privacy" className="underline">
@@ -252,6 +284,7 @@ function SignInForm() {
             >
               {fetchStatus === "fetching" ? "Signing in…" : "Sign in"}
             </button>
+            {slowNotice}
             <button
               type="button"
               onClick={() => {
@@ -297,6 +330,7 @@ function SignInForm() {
             >
               {fetchStatus === "fetching" ? "Verifying…" : "Verify"}
             </button>
+            {slowNotice}
             <button
               type="button"
               onClick={() => signIn.emailCode.sendCode()}
