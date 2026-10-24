@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import sharp from "sharp";
 import { put, del } from "@vercel/blob";
@@ -385,13 +386,6 @@ export async function purchaseCard(
     createdAt: new Date().toISOString(),
   };
   const collectionId = await resolveCollectionId(userId, formData.get("collectionId"));
-  const investment = await getInvestment(userId, collectionId);
-  // Best effort: a card with no comparable eBay listing just has no worth.
-  const worth = await ebayWorth(
-    buildEbayQuery(name, gradingCompany, grade),
-    investment?.currency ?? "SGD"
-  );
-  if (typeof worth === "number") card.estimatedValue = worth;
   const result = await insertCard(
     userId,
     collectionId,
@@ -410,6 +404,22 @@ export async function purchaseCard(
       upgrade: true,
     };
   }
+
+  // The eBay lookup is slow (OAuth + search + exchange rate), so it runs after
+  // the response instead of holding up the redirect. Best effort: a card with
+  // no comparable listing just has no worth.
+  after(async () => {
+    try {
+      const investment = await getInvestment(userId, collectionId);
+      const worth = await ebayWorth(
+        buildEbayQuery(name, gradingCompany, grade),
+        investment?.currency ?? "SGD"
+      );
+      if (typeof worth === "number") await updateCardEstimatedValue(userId, id, worth);
+    } catch (err) {
+      console.error("Estimated worth lookup failed:", err);
+    }
+  });
 
   revalidateCardPaths();
   redirect(`/cards/${id}`);
