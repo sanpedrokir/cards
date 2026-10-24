@@ -399,7 +399,8 @@ export async function getCardsPage(
   { status, query, page, pageSize }: CardsPageOptions
 ): Promise<CardsPageResult> {
   const offset = (Math.max(1, page) - 1) * pageSize;
-  const likeQuery = `%${query}%`;
+  // Escape LIKE wildcards so searching "100%" or "a_b" matches literally.
+  const likeQuery = `%${query.replace(/[\\%_]/g, "\\$&")}%`;
 
   const [rows, countRows] = await Promise.all([
     sql`
@@ -627,20 +628,29 @@ export async function updateCardPurchasePrice(
 // card's purchase/sale price and fees) to a new currency by multiplying by `rate`,
 // in one transaction so the currency label and the amounts it labels never
 // go out of sync partway through.
+//
+// Returns false (changing nothing) if the collection is no longer in
+// `fromCurrency`, e.g. a double-click or second tab already converted it --
+// otherwise the same conversion would be applied twice.
 export async function convertCurrency(
   userId: string,
   collectionId: string,
+  fromCurrency: string,
   toCurrency: string,
   rate: number
-): Promise<void> {
+): Promise<boolean> {
   const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
-    await client.query(
-      `UPDATE investment SET currency = $1, amount = ROUND(amount * $2, 2) WHERE user_id = $3 AND collection_id = $4`,
-      [toCurrency, rate, userId, collectionId]
+    const converted = await client.query(
+      `UPDATE investment SET currency = $1, amount = ROUND(amount * $2, 2) WHERE user_id = $3 AND collection_id = $4 AND currency = $5`,
+      [toCurrency, rate, userId, collectionId, fromCurrency]
     );
+    if (converted.rowCount === 0) {
+      await client.query("ROLLBACK");
+      return false;
+    }
     await client.query(
       `UPDATE cards SET
         purchase_price = ROUND(purchase_price * $1, 2),
@@ -650,6 +660,7 @@ export async function convertCurrency(
       [rate, userId, collectionId]
     );
     await client.query("COMMIT");
+    return true;
   } catch (err) {
     await client.query("ROLLBACK").catch(() => {});
     throw err;
@@ -662,8 +673,10 @@ export async function deleteCard(userId: string, id: string): Promise<void> {
   await sql`DELETE FROM cards WHERE id = ${id} AND user_id = ${userId}`;
 }
 
-export async function markCardSold(userId: string, id: string, sale: Sale): Promise<void> {
-  await sql`
+// Returns false if the card was already sold (or isn't this user's), so a
+// double-submit can't overwrite the first sale's price and date.
+export async function markCardSold(userId: string, id: string, sale: Sale): Promise<boolean> {
+  const rows = await sql`
     UPDATE cards SET
       status = 'sold',
       sale_price = ${sale.salePrice},
@@ -672,8 +685,10 @@ export async function markCardSold(userId: string, id: string, sale: Sale): Prom
       channel = ${sale.channel ?? null},
       fees = ${sale.fees ?? null},
       sale_notes = ${sale.notes ?? null}
-    WHERE id = ${id} AND user_id = ${userId}
+    WHERE id = ${id} AND user_id = ${userId} AND status <> 'sold'
+    RETURNING id
   `;
+  return rows.length > 0;
 }
 
 const ACTIVE_SUBSCRIPTION_STATUSES = new Set(["active", "trialing", "past_due"]);

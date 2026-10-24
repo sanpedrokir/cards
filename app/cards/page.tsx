@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { requirePageUserId } from "@/lib/auth-helpers";
 import { getInvestment, getCardsPage } from "@/lib/store";
 import { withActiveCollection } from "@/lib/collections";
@@ -45,6 +46,16 @@ export default async function CardsPage({
   );
   const currency = investment?.currency ?? "SGD";
   const pageCount = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  // A stale link to a page that no longer exists (e.g. after deleting cards)
+  // would otherwise show an empty list with "Showing 25–24".
+  if (page > pageCount && totalCount > 0) {
+    const params = new URLSearchParams();
+    if (status !== "all") params.set("status", status);
+    if (q) params.set("q", q);
+    if (pageCount > 1) params.set("page", String(pageCount));
+    const qs = params.toString();
+    redirect(qs ? `/cards?${qs}` : "/cards");
+  }
   const firstShown = (page - 1) * PAGE_SIZE + 1;
   const lastShown = Math.min(totalCount, firstShown + cards.length - 1);
 

@@ -41,7 +41,7 @@ import {
   upsertInvestment,
   upsertSubscriptionCustomer,
 } from "./store";
-import { todayIso } from "./format";
+import { CURRENCIES, todayIso } from "./format";
 import type { Card, Sale } from "./types";
 import type { FormState } from "./form-state";
 
@@ -70,6 +70,22 @@ function numberField(formData: FormData, name: string): number | undefined {
   const value = Number(raw);
   return Number.isFinite(value) ? value : undefined;
 }
+
+// Dates come from <input type="date"> but a hand-built request could send
+// anything, which Postgres would reject with a 500. Fall back to undefined.
+function dateField(formData: FormData, name: string): string | undefined {
+  const raw = textField(formData, name);
+  if (!raw || !/^d{4}-d{2}-d{2}$/.test(raw)) return undefined;
+  return Number.isNaN(Date.parse(raw)) ? undefined : raw;
+}
+
+function isCurrency(value: string): boolean {
+  return (CURRENCIES as readonly string[]).includes(value);
+}
+
+// Keeps free-text fields to a sane size.
+const MAX_TEXT_LENGTH = 500;
+const MAX_AMOUNT = 100_000_000;
 
 function textField(formData: FormData, name: string): string | undefined {
   const raw = formData.get(name);
@@ -271,11 +287,14 @@ export async function saveInvestment(
   const userId = await requirePageUserId();
   const amount = numberField(formData, "amount");
   const currency = textField(formData, "currency") ?? "SGD";
-  const date = textField(formData, "date") ?? todayIso();
-  const notes = textField(formData, "notes");
+  const date = dateField(formData, "date") ?? todayIso();
+  const notes = textField(formData, "notes")?.slice(0, MAX_TEXT_LENGTH);
 
-  if (amount === undefined || amount < 0) {
+  if (amount === undefined || amount < 0 || amount > MAX_AMOUNT) {
     return { error: "Enter a valid investment amount." };
+  }
+  if (!isCurrency(currency)) {
+    return { error: "Select a currency." };
   }
 
   const collectionId = await resolveCollectionId(userId, formData.get("collectionId"));
@@ -292,7 +311,7 @@ export async function updateInvestmentAmount(
   const userId = await requirePageUserId();
   const amount = numberField(formData, "amount");
 
-  if (amount === undefined || amount < 0) {
+  if (amount === undefined || amount < 0 || amount > MAX_AMOUNT) {
     return { error: "Enter a valid amount." };
   }
 
@@ -315,7 +334,7 @@ export async function changeCurrencyAction(
   const userId = await requirePageUserId();
   const toCurrency = textField(formData, "currency");
 
-  if (!toCurrency) {
+  if (!toCurrency || !isCurrency(toCurrency)) {
     return { error: "Select a currency." };
   }
 
@@ -337,7 +356,16 @@ export async function changeCurrencyAction(
     };
   }
 
-  await convertCurrency(userId, collectionId, toCurrency, rate);
+  const converted = await convertCurrency(
+    userId,
+    collectionId,
+    investment.currency,
+    toCurrency,
+    rate
+  );
+  if (!converted) {
+    return { error: "This collection was just converted. Refresh to see the new currency." };
+  }
 
   revalidateInvestmentPaths();
   revalidateCardPaths();
@@ -349,23 +377,28 @@ export async function purchaseCard(
   formData: FormData
 ): Promise<FormState> {
   const userId = await requirePageUserId();
-  const name = textField(formData, "name");
+  const short = (field: string) => textField(formData, field)?.slice(0, MAX_TEXT_LENGTH);
+  const name = short("name");
   const purchasePrice = numberField(formData, "purchasePrice");
-  const purchaseDate = textField(formData, "purchaseDate") ?? todayIso();
-  const category = textField(formData, "category");
-  const series = textField(formData, "series");
-  const cardNumber = textField(formData, "cardNumber");
-  const grade = textField(formData, "grade");
-  const gradingCompany = textField(formData, "gradingCompany");
-  const certNumber = textField(formData, "certNumber");
-  const quantity = numberField(formData, "quantity");
-  const notes = textField(formData, "notes");
+  const purchaseDate = dateField(formData, "purchaseDate") ?? todayIso();
+  const category = short("category");
+  const series = short("series");
+  const cardNumber = short("cardNumber");
+  const grade = short("grade");
+  const gradingCompany = short("gradingCompany");
+  const certNumber = short("certNumber");
+  const rawQuantity = numberField(formData, "quantity");
+  const quantity =
+    rawQuantity !== undefined && Number.isInteger(rawQuantity) && rawQuantity >= 1 && rawQuantity <= 100_000
+      ? rawQuantity
+      : undefined;
+  const notes = short("notes");
   const imageFile = formData.get("image");
 
   if (!name) {
     return { error: "Card name is required." };
   }
-  if (purchasePrice === undefined || purchasePrice <= 0) {
+  if (purchasePrice === undefined || purchasePrice <= 0 || purchasePrice > MAX_AMOUNT) {
     return { error: "Enter a valid purchase price greater than zero." };
   }
 
@@ -402,6 +435,12 @@ export async function purchaseCard(
     card,
     await getCardLimit(userId)
   );
+  if (result !== "ok") {
+    // The photo was already uploaded; don't leave it orphaned in storage.
+    await Promise.all(
+      [imageUrl, thumbUrl].map((url) => (url ? del(url).catch(() => {}) : undefined))
+    );
+  }
   if (result === "card-limit-reached") {
     return {
       error: `Free accounts can add up to ${FREE_CARDS_PER_COLLECTION} cards per collection. Subscribe to add more.`,
@@ -427,7 +466,7 @@ export async function updateCardPurchasePriceAction(
   if (!cardId) {
     return { error: "Missing card reference." };
   }
-  if (amount === undefined || amount <= 0) {
+  if (amount === undefined || amount <= 0 || amount > MAX_AMOUNT) {
     return { error: "Enter a valid purchase price greater than zero." };
   }
 
@@ -840,17 +879,20 @@ export async function sellCard(
   const userId = await requirePageUserId();
   const cardId = textField(formData, "cardId");
   const salePrice = numberField(formData, "salePrice");
-  const saleDate = textField(formData, "saleDate") ?? todayIso();
-  const buyer = textField(formData, "buyer");
-  const channel = textField(formData, "channel");
+  const saleDate = dateField(formData, "saleDate") ?? todayIso();
+  const buyer = textField(formData, "buyer")?.slice(0, MAX_TEXT_LENGTH);
+  const channel = textField(formData, "channel")?.slice(0, MAX_TEXT_LENGTH);
   const fees = numberField(formData, "fees");
-  const notes = textField(formData, "notes");
+  const notes = textField(formData, "notes")?.slice(0, MAX_TEXT_LENGTH);
 
   if (!cardId) {
     return { error: "Missing card reference." };
   }
-  if (salePrice === undefined || salePrice < 0) {
+  if (salePrice === undefined || salePrice < 0 || salePrice > MAX_AMOUNT) {
     return { error: "Enter a valid sales amount." };
+  }
+  if (fees !== undefined && (fees < 0 || fees > MAX_AMOUNT)) {
+    return { error: "Enter valid fees (zero or more)." };
   }
 
   const card = await getCardById(userId, cardId);
@@ -862,7 +904,9 @@ export async function sellCard(
   }
 
   const sale: Sale = { salePrice, saleDate, buyer, channel, fees, notes };
-  await markCardSold(userId, cardId, sale);
+  if (!(await markCardSold(userId, cardId, sale))) {
+    return { error: "This card has already been sold." };
+  }
 
   revalidateCardPaths(cardId);
   redirect(`/cards/${cardId}?sold=1`);

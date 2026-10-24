@@ -24,6 +24,7 @@ async function getEbayAccessToken(): Promise<string> {
   const credentials = Buffer.from(`${appId}:${certId}`).toString("base64");
   const res = await fetch("https://api.ebay.com/identity/v1/oauth2/token", {
     method: "POST",
+    signal: AbortSignal.timeout(8_000),
     headers: {
       Authorization: `Basic ${credentials}`,
       "Content-Type": "application/x-www-form-urlencoded",
@@ -57,6 +58,7 @@ export async function searchEbayActiveListings(
   url.searchParams.set("limit", "8");
 
   const res = await fetch(url, {
+    signal: AbortSignal.timeout(8_000),
     headers: {
       Authorization: `Bearer ${token}`,
       "X-EBAY-C-MARKETPLACE-ID": "EBAY_US",

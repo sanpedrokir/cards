@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSignIn, useSignUp, useAuth } from "@clerk/nextjs";
 import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 
@@ -9,12 +9,26 @@ const inputClass = "input-field";
 
 type Step = "email" | "code" | "password";
 
+// The password form is hidden from the public page for now. It is still
+// reachable at /sign-in?password=1 (used for the App Store reviewer's demo
+// account). Set this to true to show the link again.
+const SHOW_PASSWORD_LINK = false;
+
 export default function SignInPage() {
+  return (
+    <Suspense>
+      <SignInForm />
+    </Suspense>
+  );
+}
+
+function SignInForm() {
   const { signIn, fetchStatus } = useSignIn();
   const { signUp } = useSignUp();
   const { isSignedIn } = useAuth();
   const router = useRouter();
-  const [step, setStep] = useState<Step>("email");
+  const searchParams = useSearchParams();
+  const [step, setStep] = useState<Step>(searchParams.get("password") === "1" ? "password" : "email");
   const [email, setEmail] = useState("");
   const [stuckStatus, setStuckStatus] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
@@ -183,16 +197,18 @@ export default function SignInPage() {
               </a>
               .
             </p>
-            <button
-              type="button"
-              onClick={() => {
-                setFormError(null);
-                setStep("password");
-              }}
-              className="w-full text-center text-sm font-medium text-slate-400 dark:text-slate-500"
-            >
-              Sign in with a password instead
-            </button>
+            {SHOW_PASSWORD_LINK && (
+              <button
+                type="button"
+                onClick={() => {
+                  setFormError(null);
+                  setStep("password");
+                }}
+                className="w-full text-center text-sm font-medium text-slate-400 dark:text-slate-500"
+              >
+                Sign in with a password instead
+              </button>
+            )}
           </form>
         )}
 

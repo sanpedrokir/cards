@@ -9,6 +9,7 @@ export async function getExchangeRate(from: string, to: string): Promise<number>
 
   const res = await fetch(`${EXCHANGE_RATE_API_BASE}/${encodeURIComponent(from)}`, {
     cache: "no-store",
+    signal: AbortSignal.timeout(8_000),
   });
   if (!res.ok) {
     throw new Error("Could not reach the exchange rate service.");
