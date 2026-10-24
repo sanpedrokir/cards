@@ -12,7 +12,7 @@ type Step = "email" | "code" | "password";
 // The password form is hidden from the public page for now. It is still
 // reachable at /sign-in?password=1 (used for the App Store reviewer's demo
 // account). Set this to true to show the link again.
-const SHOW_PASSWORD_LINK = false;
+const SHOW_PASSWORD_LINK = true;
 
 export default function SignInPage() {
   return (
