@@ -542,6 +542,18 @@ export async function updateCardPurchasePrice(
   return exists.length === 0 ? "not-found" : "locked";
 }
 
+// The oldest eBay check among a collection's unsold cards (undefined if none was checked).
+export async function getInventoryEstimatedAt(
+  userId: string,
+  collectionId: string
+): Promise<string | undefined> {
+  const rows = await sql`
+    SELECT MIN(estimated_at) AS at FROM cards
+    WHERE user_id = ${userId} AND collection_id = ${collectionId} AND status = 'available'
+  `;
+  return rows[0].at ? toIsoTimestamp(rows[0].at) : undefined;
+}
+
 // Estimated worth can be set (or cleared with null) on any card.
 export async function updateCardEstimatedValue(
   userId: string,

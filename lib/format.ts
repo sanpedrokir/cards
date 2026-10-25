@@ -44,3 +44,14 @@ export function formatDate(iso: string): string {
 export function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
+
+// Relative age of a timestamp, e.g. "3 hr ago".
+export function timeAgo(iso: string): string {
+  const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins} min ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} hr ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} ${days === 1 ? "day" : "days"} ago`;
+}

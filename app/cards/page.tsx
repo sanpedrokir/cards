@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requirePageUserId } from "@/lib/auth-helpers";
-import { getInvestment, getCardsPage } from "@/lib/store";
+import { getInvestment, getCardsPage, getInventoryEstimatedAt } from "@/lib/store";
 import { withActiveCollection } from "@/lib/collections";
 import CollectionSwitcher from "@/components/CollectionSwitcher";
 import CardTile from "@/components/CardTile";
@@ -41,11 +41,12 @@ export default async function CardsPage({
   const {
     collections,
     active,
-    data: [investment, { cards, totalCount }],
+    data: [investment, { cards, totalCount }, estimatedAt],
   } = await withActiveCollection(userId, (id) =>
     Promise.all([
       getInvestment(userId, id),
       getCardsPage(userId, id, { status, query, page, pageSize: PAGE_SIZE }),
+      getInventoryEstimatedAt(userId, id),
     ])
   );
   const currency = investment?.currency ?? "SGD";
@@ -82,7 +83,7 @@ export default async function CardsPage({
         </Link>
       </div>
 
-      <RefreshWorthButton collectionId={active.id} />
+      <RefreshWorthButton collectionId={active.id} updatedAt={estimatedAt} />
 
       <CardFilterBar defaultQuery={q} defaultStatus={status} />
 

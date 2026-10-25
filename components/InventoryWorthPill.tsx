@@ -3,16 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { refreshInventoryWorth } from "@/lib/actions";
-
-function timeAgo(iso: string): string {
-  const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins} min ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} hr ago`;
-  const days = Math.floor(hours / 24);
-  return `${days} ${days === 1 ? "day" : "days"} ago`;
-}
+import { timeAgo } from "@/lib/format";
 
 // Stat pill for the dashboard hero: the estimated worth of the collection's
 // in-stock cards (from eBay), with a button to refresh it for every card.
