@@ -78,7 +78,7 @@ export default async function CardsPage({
       <CollectionSwitcher collections={collections} activeId={active.id} />
       <div className="flex items-center justify-between">
         <h1 className="page-title">Vaulted Cards</h1>
-        <Link href="/cards/new" className="btn-primary-sm">
+        <Link href="/cards/new" prefetch={true} className="btn-primary-sm">
           <span className="text-base leading-none">+</span> Add Card
         </Link>
       </div>

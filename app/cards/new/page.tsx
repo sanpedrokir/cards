@@ -1,20 +1,18 @@
 import Link from "next/link";
 import { requirePageUserId } from "@/lib/auth-helpers";
-import { countCardsInCollection, readDb } from "@/lib/store";
+import { countCardsInCollection } from "@/lib/store";
 import { getCardLimit, withActiveCollection } from "@/lib/collections";
 import CollectionSwitcher from "@/components/CollectionSwitcher";
 import PurchaseForm from "@/components/PurchaseForm";
 
 export default async function NewCardPage() {
   const userId = await requirePageUserId();
-  const [{ collections, active }, cardLimit] = await Promise.all([
-    withActiveCollection(userId, (id) => readDb(userId, id)),
+  // Sold cards still count towards the free cap (see insertCard).
+  const [{ collections, active, data: cardCount }, cardLimit] = await Promise.all([
+    withActiveCollection(userId, (id) => countCardsInCollection(userId, id)),
     getCardLimit(userId),
   ]);
-
-  // Sold cards still count towards the free cap (see insertCard).
-  const atCardLimit =
-    cardLimit !== null && (await countCardsInCollection(userId, active.id)) >= cardLimit;
+  const atCardLimit = cardLimit !== null && cardCount >= cardLimit;
 
   return (
     <div className="mx-auto max-w-lg space-y-4">

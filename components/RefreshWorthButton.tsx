@@ -29,7 +29,7 @@ export default function RefreshWorthButton({
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
       <button type="button" onClick={handleRefresh} disabled={isPending} className="btn-chip">
-        {isPending ? "Checking eBay…" : "Update est. worth from eBay"}
+        {isPending ? "Checking eBay…" : "Refresh prices from eBay"}
       </button>
       {!error && !isPending && (
         <p className="text-xs text-slate-500 dark:text-slate-400">

@@ -40,7 +40,7 @@ export default async function DashboardPage({
         <div className="min-w-0 flex-1">
           <CollectionSwitcher collections={collections} activeId={active.id} />
         </div>
-        <Link href="/cards/new" className="btn-primary-sm mb-5 shrink-0">
+        <Link href="/cards/new" prefetch={true} className="btn-primary-sm mb-5 shrink-0">
           <span className="text-base leading-none">+</span> Add Card
         </Link>
       </div>

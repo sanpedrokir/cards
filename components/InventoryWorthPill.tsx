@@ -41,7 +41,7 @@ export default function InventoryWorthPill({
         disabled={isPending}
         className="mt-1 text-[11px] font-medium text-emerald-300 underline-offset-2 hover:underline disabled:opacity-60"
       >
-        {isPending ? "Checking eBay…" : "Update from eBay"}
+        {isPending ? "Checking eBay…" : "Refresh prices from eBay"}
       </button>
       {!error && !isPending && (
         <p className="mt-1 text-[11px] text-slate-300/80">
