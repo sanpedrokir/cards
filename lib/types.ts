@@ -14,6 +14,8 @@ export interface Card {
   name: string;
   purchasePrice: number;
   estimatedValue?: number;
+  // When estimatedValue was last checked against eBay (ISO timestamp).
+  estimatedAt?: string;
   purchaseDate: string;
   category?: string;
   series?: string;
@@ -59,6 +61,8 @@ export interface Totals {
   inventoryCost: number;
   // Sum of the estimated worth entered on unsold cards (cards without one count as 0).
   inventoryEstimate: number;
+  // Oldest eBay check among unsold cards, or undefined if none has been checked.
+  inventoryEstimatedAt?: string;
   totalSales: number;
   totalProfit: number;
 }

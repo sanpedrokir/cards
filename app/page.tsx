@@ -94,7 +94,7 @@ export default async function DashboardPage({
                       </dd>
                     </div>
                     <div className="flex justify-between gap-2">
-                      <dt>Inventory</dt>
+                      <dt>Cost paid</dt>
                       <dd className="font-semibold tabular-nums text-slate-900 dark:text-white">
                         {formatMoney(t.inventoryCost, cur)}
                       </dd>
@@ -127,6 +127,7 @@ export default async function DashboardPage({
           <InventoryWorthPill
             collectionId={active.id}
             value={formatMoney(totals.inventoryEstimate, currency)}
+            updatedAt={totals.inventoryEstimatedAt}
           />
         }
         currencyPill={<CurrencyEditor collectionId={active.id} currency={currency} />}

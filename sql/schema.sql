@@ -100,3 +100,6 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Optional user-entered estimated market worth of a card (per card).
 ALTER TABLE cards ADD COLUMN IF NOT EXISTS estimated_value NUMERIC(14, 2);
+
+-- When the card's estimated worth was last checked against eBay.
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS estimated_at TIMESTAMPTZ;

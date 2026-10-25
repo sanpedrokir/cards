@@ -40,6 +40,7 @@ function mapCard(row: any): Card {
     name: row.name,
     purchasePrice: toNumber(row.purchase_price),
     estimatedValue: toOptionalNumber(row.estimated_value),
+    estimatedAt: row.estimated_at ? toIsoTimestamp(row.estimated_at) : undefined,
     purchaseDate: toIsoDate(row.purchase_date),
     category: row.category ?? undefined,
     series: row.series ?? undefined,
@@ -491,14 +492,15 @@ export async function insertCard(
       `INSERT INTO cards (
         id, user_id, collection_id, name, purchase_price, purchase_date, category, series, card_number,
         grade, grading_company, cert_number, quantity, notes, image_url, status, created_at, thumb_url,
-        estimated_value
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
+        estimated_value, estimated_at
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)`,
       [
         card.id, userId, collectionId, card.name, card.purchasePrice, card.purchaseDate,
         card.category ?? null, card.series ?? null, card.cardNumber ?? null,
         card.grade ?? null, card.gradingCompany ?? null, card.certNumber ?? null,
         card.quantity ?? null, card.notes ?? null, card.imageUrl ?? null,
         card.status, card.createdAt, card.thumbUrl ?? null, card.estimatedValue ?? null,
+        card.estimatedAt ?? null,
       ]
     );
     await client.query("COMMIT");
@@ -547,7 +549,7 @@ export async function updateCardEstimatedValue(
   value: number | null
 ): Promise<boolean> {
   const rows = await sql`
-    UPDATE cards SET estimated_value = ${value}
+    UPDATE cards SET estimated_value = ${value}, estimated_at = now()
     WHERE id = ${cardId} AND user_id = ${userId}
     RETURNING id
   `;

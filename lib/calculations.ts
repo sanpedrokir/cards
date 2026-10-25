@@ -9,7 +9,11 @@ export function getTotals(db: Database): Totals {
   const totalSales = soldCards.reduce((sum, c) => sum + (c.sale?.salePrice ?? 0), 0);
   const totalProfit = soldCards.reduce((sum, c) => sum + cardProfit(c), 0);
 
-  return { inventoryCost, inventoryEstimate, totalSales, totalProfit };
+  // The oldest check, so "updated X ago" never overstates how fresh the total is.
+  const checked = availableCards.flatMap((c) => (c.estimatedAt ? [c.estimatedAt] : []));
+  const inventoryEstimatedAt = checked.length ? checked.reduce((a, b) => (a < b ? a : b)) : undefined;
+
+  return { inventoryCost, inventoryEstimate, inventoryEstimatedAt, totalSales, totalProfit };
 }
 
 export function cardProfit(card: Card): number {

@@ -511,7 +511,7 @@ export async function refreshInventoryWorth(collectionId: string): Promise<FormS
   if (priced === 0 && failed > 0) {
     return { error: "Couldn't reach eBay. Please try again later." };
   }
-  const parts = [`Updated ${priced} of ${stock.length} cards from eBay`];
+  const parts = [`${priced} ${priced === 1 ? "card" : "cards"} re-priced from eBay`];
   if (noPricing) parts.push(`${noPricing} had no comparable pricing`);
   if (failed) parts.push(`${failed} couldn't be checked`);
   return { message: parts.join(" · ") };
