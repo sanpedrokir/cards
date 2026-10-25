@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { requirePageUserId } from "@/lib/auth-helpers";
 import { readAllCollections } from "@/lib/store";
 import { getCollectionContext } from "@/lib/collections";
