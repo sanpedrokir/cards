@@ -36,14 +36,7 @@ export default async function DashboardPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <div className="min-w-0 flex-1">
-          <CollectionSwitcher collections={collections} activeId={active.id} />
-        </div>
-        <Link href="/cards/new" prefetch={true} className="btn-primary-sm mb-5 shrink-0">
-          <span className="text-base leading-none">+</span> Add Card
-        </Link>
-      </div>
+      <CollectionSwitcher collections={collections} activeId={active.id} />
 
       {justSubscribed && (
         <p className="notice-success text-center">
