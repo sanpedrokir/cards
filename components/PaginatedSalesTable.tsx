@@ -17,9 +17,9 @@ export default function PaginatedSalesTable({
   currency: string;
   totalProfit: number;
 }) {
-  const [page, setPage] = useState(0);
-  const pageCount = Math.max(1, Math.ceil(soldCards.length / PAGE_SIZE));
-  const pageItems = soldCards.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+  const [shown, setShown] = useState(PAGE_SIZE);
+  const pageItems = soldCards.slice(0, shown);
+  const remaining = soldCards.length - pageItems.length;
 
   return (
     <div className="surface overflow-hidden divide-y divide-slate-100 dark:divide-white/5">
@@ -56,26 +56,17 @@ export default function PaginatedSalesTable({
         );
       })}
 
-      {pageCount > 1 && (
+      {remaining > 0 && (
         <div className="flex items-center justify-between p-3">
-          <button
-            type="button"
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            disabled={page === 0}
-            className="rounded-full px-3 py-1 text-sm font-medium text-amber-700 disabled:cursor-not-allowed disabled:opacity-40 dark:text-amber-400"
-          >
-            ← Prev
-          </button>
           <span className="text-xs text-slate-500 dark:text-slate-400">
-            Page {page + 1} of {pageCount}
+            Showing {pageItems.length} of {soldCards.length}
           </span>
           <button
             type="button"
-            onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
-            disabled={page >= pageCount - 1}
-            className="rounded-full px-3 py-1 text-sm font-medium text-amber-700 disabled:cursor-not-allowed disabled:opacity-40 dark:text-amber-400"
+            onClick={() => setShown((n) => n + PAGE_SIZE)}
+            className="rounded-full px-3 py-1 text-sm font-medium text-amber-700 dark:text-amber-400"
           >
-            Next →
+            Load more
           </button>
         </div>
       )}
