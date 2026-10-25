@@ -17,6 +17,7 @@ export default function DeleteAccountForm() {
         message="This permanently deletes your account, all of your collections, cards, photos and sales, and cancels any subscription. It cannot be undone."
         confirmLabel="Delete forever"
         danger
+        requireText="DELETE"
       />
       {state.error && (
         <p className="text-sm text-rose-600 dark:text-rose-400">{state.error}</p>

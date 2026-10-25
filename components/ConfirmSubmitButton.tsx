@@ -6,16 +6,18 @@ import { useFormStatus } from "react-dom";
 function ModalSubmitButton({
   label,
   danger,
+  blocked,
 }: {
   label: string;
   danger?: boolean;
+  blocked?: boolean;
 }) {
   const { pending } = useFormStatus();
 
   return (
     <button
       type="submit"
-      disabled={pending}
+      disabled={pending || blocked}
       className={`flex-1 ${danger ? "btn-danger" : "btn-primary"}`}
     >
       {pending ? "Please wait…" : label}
@@ -30,6 +32,7 @@ export default function ConfirmSubmitButton({
   message,
   confirmLabel = "Confirm",
   danger = false,
+  requireText,
 }: {
   triggerLabel: React.ReactNode;
   triggerClassName?: string;
@@ -37,12 +40,15 @@ export default function ConfirmSubmitButton({
   message: string;
   confirmLabel?: string;
   danger?: boolean;
+  // When set, the user must type this exact text before the action is enabled.
+  requireText?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [typed, setTyped] = useState("");
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={triggerClassName}>
+      <button type="button" onClick={() => { setTyped(""); setOpen(true); }} className={triggerClassName}>
         {triggerLabel}
       </button>
 
@@ -61,6 +67,19 @@ export default function ConfirmSubmitButton({
               {title}
             </h3>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{message}</p>
+            {requireText && (
+              <label className="mt-4 block text-sm text-slate-600 dark:text-slate-400">
+                Type <span className="font-semibold">{requireText}</span> to confirm
+                <input
+                  name="confirmation"
+                  value={typed}
+                  onChange={(e) => setTyped(e.target.value)}
+                  autoComplete="off"
+                  autoCapitalize="characters"
+                  className="mt-1 w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 text-slate-900 dark:border-white/20 dark:text-white"
+                />
+              </label>
+            )}
             <div className="mt-5 flex gap-3">
               <button
                 type="button"
@@ -69,7 +88,11 @@ export default function ConfirmSubmitButton({
               >
                 Cancel
               </button>
-              <ModalSubmitButton label={confirmLabel} danger={danger} />
+              <ModalSubmitButton
+                label={confirmLabel}
+                danger={danger}
+                blocked={requireText !== undefined && typed !== requireText}
+              />
             </div>
           </div>
         </div>

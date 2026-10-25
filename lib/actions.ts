@@ -776,11 +776,16 @@ export async function openBillingPortal(): Promise<void> {
 // Every step is safe to repeat, so if one fails the user can just try again.
 export async function deleteAccountAction(
   _prevState: FormState,
-  _formData: FormData
+  formData: FormData
 ): Promise<FormState> {
   // Not requirePageUserId: someone without a subscription must still be able
   // to delete their account, and that helper redirects them to /pricing.
   const userId = await requireSignedInUserId();
+
+  // The dialog makes the user type this; checked here too so it can't be skipped.
+  if (formData.get("confirmation") !== "DELETE") {
+    return { error: "Type DELETE to confirm." };
+  }
 
   try {
     const subscription = await getSubscription(userId);
