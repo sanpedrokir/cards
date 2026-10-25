@@ -40,6 +40,13 @@ export default async function AdminPage() {
       >
         View subscriptions →
       </Link>
+
+      <Link
+        href="/admin/deletions"
+        className="surface block p-5 text-sm font-medium text-amber-700 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-white/5"
+      >
+        View deleted accounts →
+      </Link>
     </div>
   );
 }

@@ -32,6 +32,8 @@ import {
   getCards,
   getInvestment,
   getSubscription,
+  countUserCards,
+  recordAccountDeletion,
   insertCard,
   isSubscriptionGateEnabled,
   markCardSold,
@@ -789,6 +791,11 @@ export async function deleteAccountAction(
 
   try {
     const subscription = await getSubscription(userId);
+    // Gathered up front: this is all that's left once the data is wiped.
+    const user = await currentUser();
+    const email =
+      user?.primaryEmailAddress?.emailAddress ?? user?.emailAddresses[0]?.emailAddress;
+    const cardCount = await countUserCards(userId);
     if (subscription?.stripeCustomerId) {
       // Deleting the Stripe customer also cancels any active subscription
       // immediately. Past charges and invoices stay in Stripe's records.
@@ -812,6 +819,11 @@ export async function deleteAccountAction(
     await clerk.users.deleteUser(userId).catch((err: { status?: number }) => {
       if (err?.status !== 404) throw err;
     });
+
+    // Best-effort: a logging hiccup must not report a finished deletion as failed.
+    await recordAccountDeletion(userId, email, cardCount, Boolean(subscription)).catch((err) =>
+      console.error("Couldn't log account deletion:", err)
+    );
   } catch (err) {
     console.error("Account deletion failed:", err);
     return {

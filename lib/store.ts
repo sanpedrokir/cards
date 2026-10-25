@@ -664,6 +664,43 @@ export async function getSubscription(userId: string): Promise<SubscriptionRecor
   return rows.length ? mapSubscription(rows[0]) : null;
 }
 
+export interface AccountDeletion {
+  userId: string;
+  email?: string;
+  cardCount: number;
+  hadSubscription: boolean;
+  deletedAt: string;
+}
+
+export async function countUserCards(userId: string): Promise<number> {
+  const rows = await sql`SELECT COUNT(*)::int AS n FROM cards WHERE user_id = ${userId}`;
+  return rows[0].n;
+}
+
+export async function recordAccountDeletion(
+  userId: string,
+  email: string | undefined,
+  cardCount: number,
+  hadSubscription: boolean
+): Promise<void> {
+  await sql`
+    INSERT INTO account_deletions (user_id, email, card_count, had_subscription)
+    VALUES (${userId}, ${email ?? null}, ${cardCount}, ${hadSubscription})
+    ON CONFLICT (user_id) DO NOTHING
+  `;
+}
+
+export async function getAccountDeletions(): Promise<AccountDeletion[]> {
+  const rows = await sql`SELECT * FROM account_deletions ORDER BY deleted_at DESC`;
+  return rows.map((r) => ({
+    userId: r.user_id,
+    email: r.email ?? undefined,
+    cardCount: r.card_count,
+    hadSubscription: r.had_subscription,
+    deletedAt: toIsoTimestamp(r.deleted_at),
+  }));
+}
+
 export async function getAllSubscriptions(): Promise<SubscriptionRecord[]> {
   const rows = await sql`SELECT * FROM subscriptions ORDER BY created_at DESC`;
   return rows.map(mapSubscription);

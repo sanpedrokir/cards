@@ -103,3 +103,13 @@ ALTER TABLE cards ADD COLUMN IF NOT EXISTS estimated_value NUMERIC(14, 2);
 
 -- When the card's estimated worth was last checked against eBay.
 ALTER TABLE cards ADD COLUMN IF NOT EXISTS estimated_at TIMESTAMPTZ;
+
+-- Admin log of accounts that deleted themselves (their data is wiped; only
+-- this summary row is kept).
+CREATE TABLE IF NOT EXISTS account_deletions (
+  user_id TEXT PRIMARY KEY,
+  email TEXT,
+  card_count INTEGER NOT NULL DEFAULT 0,
+  had_subscription BOOLEAN NOT NULL DEFAULT false,
+  deleted_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
