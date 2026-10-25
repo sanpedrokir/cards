@@ -131,9 +131,6 @@ export default async function DashboardPage({
           <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
             Sales{allCollections.length > 1 ? ` — ${active.name}` : ""}
           </h2>
-          <Link href="/cards?status=sold" className="link-muted">
-            View all
-          </Link>
         </div>
 
         {soldCards.length === 0 ? (
