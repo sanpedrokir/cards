@@ -26,18 +26,14 @@ export default function InventoryWorthPill({
   updatedAt?: string;
 }) {
   const [isPending, startTransition] = useTransition();
-  const [result, setResult] = useState<{ text: string; isError: boolean } | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   function handleRefresh() {
-    setResult(null);
+    setError(null);
     startTransition(async () => {
       const res = await refreshInventoryWorth(collectionId);
-      setResult(
-        res.error
-          ? { text: res.error, isError: true }
-          : { text: res.message ?? "", isError: false }
-      );
+      setError(res.error ?? null);
       router.refresh();
     });
   }
@@ -56,16 +52,12 @@ export default function InventoryWorthPill({
       >
         {isPending ? "Checking eBay…" : "Update from eBay"}
       </button>
-      {!result && !isPending && (
+      {!error && !isPending && (
         <p className="mt-1 text-[11px] text-slate-300/80">
           {updatedAt ? `Updated ${timeAgo(updatedAt)}` : "Not checked yet"}
         </p>
       )}
-      {result && (
-        <p className={`mt-1 text-[11px] ${result.isError ? "text-rose-300" : "text-slate-300/80"}`}>
-          {result.text}
-        </p>
-      )}
+      {error && <p className="mt-1 text-[11px] text-rose-300">{error}</p>}
     </div>
   );
 }
