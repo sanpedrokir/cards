@@ -832,7 +832,9 @@ export async function deleteAccountAction(
     };
   }
 
-  redirect("/sign-in");
+  // The form signs this device out and goes to /sign-in: the browser still
+  // holds the deleted user's session, so a server redirect would bounce back.
+  return { done: true };
 }
 
 export async function toggleSubscriptionGate(): Promise<void> {
