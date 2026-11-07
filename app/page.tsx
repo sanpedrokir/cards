@@ -60,17 +60,23 @@ export default async function DashboardPage({
                       {collection.name}
                     </span>
                   </div>
-                  <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
-                    <div className="flex justify-between gap-2">
+                  <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs text-slate-500 dark:text-slate-400 sm:grid-cols-4">
+                    <div>
                       <dt>Sales</dt>
-                      <dd className="font-semibold tabular-nums text-slate-900 dark:text-white">
+                      <dd className="mt-0.5 text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
                         {formatMoney(t.totalSales, cur)}
                       </dd>
                     </div>
-                    <div className="flex justify-between gap-2">
+                    <div>
+                      <dt>Cost paid</dt>
+                      <dd className="mt-0.5 text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
+                        {formatMoney(t.inventoryCost, cur)}
+                      </dd>
+                    </div>
+                    <div>
                       <dt>Profit</dt>
                       <dd
-                        className={`font-semibold tabular-nums ${
+                        className={`mt-0.5 text-sm font-semibold tabular-nums ${
                           t.totalProfit >= 0
                             ? "text-emerald-600 dark:text-emerald-400"
                             : "text-rose-600 dark:text-rose-400"
@@ -79,15 +85,9 @@ export default async function DashboardPage({
                         {formatMoney(t.totalProfit, cur)}
                       </dd>
                     </div>
-                    <div className="flex justify-between gap-2">
-                      <dt>Cost paid</dt>
-                      <dd className="font-semibold tabular-nums text-slate-900 dark:text-white">
-                        {formatMoney(t.inventoryCost, cur)}
-                      </dd>
-                    </div>
-                    <div className="flex justify-between gap-2">
+                    <div>
                       <dt>Cards</dt>
-                      <dd className="font-semibold tabular-nums text-slate-900 dark:text-white">
+                      <dd className="mt-0.5 text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
                         {collectionDb.cards.length}
                       </dd>
                     </div>
