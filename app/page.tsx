@@ -86,7 +86,7 @@ export default async function DashboardPage({
                       </dd>
                     </div>
                     <div className="flex justify-between gap-2">
-                      <dt>Cost paid</dt>
+                      <dt>Value(Cost)</dt>
                       <dd className="font-semibold tabular-nums text-slate-900 dark:text-white">
                         {formatMoney(t.inventoryCost, cur)}
                       </dd>
