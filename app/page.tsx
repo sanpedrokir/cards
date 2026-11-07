@@ -62,7 +62,7 @@ export default async function DashboardPage({
                   </div>
                   <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs text-slate-500 dark:text-slate-400 sm:grid-cols-4">
                     <div>
-                      <dt>Price</dt>
+                      <dt>Price (Value)</dt>
                       <dd className="mt-0.5 text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
                         {formatMoney(t.inventoryCost, cur)}
                       </dd>

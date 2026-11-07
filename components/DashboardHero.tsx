@@ -72,7 +72,7 @@ export default function DashboardHero({
 
         <div className="mt-4 flex flex-wrap gap-2">
           <Pill label="Total Sales" value={formatMoney(totals.totalSales, currency)} />
-          <Pill label="Cost paid" value={formatMoney(totals.inventoryCost, currency)} />
+          <Pill label="Price paid" value={formatMoney(totals.inventoryCost, currency)} />
           <div className={PILL}>{worthPill}</div>
           <div className={PILL}>{currencyPill}</div>
         </div>

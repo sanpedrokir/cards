@@ -61,7 +61,7 @@ export default function CardTile({
         {grade && <span className="tag !text-[10px]">{grade}</span>}
 
         <div className="pt-1">
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">Cost</p>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">Price paid</p>
           <p className="text-[15px] font-bold leading-tight tabular-nums text-slate-900 dark:text-white">
             {formatMoney(card.purchasePrice, currency)}
           </p>
