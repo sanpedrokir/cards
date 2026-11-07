@@ -33,6 +33,42 @@ export default async function DashboardPage({
     .filter((c) => c.status === "sold" && c.sale)
     .sort((a, b) => (a.sale!.saleDate < b.sale!.saleDate ? 1 : -1));
 
+  // One grand-total row per currency, since collections can differ in currency.
+  const grand = new Map<string, { cost: number; sales: number; profit: number; cards: number }>();
+  for (const { db: d } of allCollections) {
+    const cur = d.investment?.currency ?? "SGD";
+    const t = getTotals(d);
+    const g = grand.get(cur) ?? { cost: 0, sales: 0, profit: 0, cards: 0 };
+    g.cost += t.totalCost;
+    g.sales += t.totalSales;
+    g.profit += t.totalProfit;
+    g.cards += d.cards.length;
+    grand.set(cur, g);
+  }
+  const rows = [
+    ...[...grand].map(([cur, g]) => ({
+      key: `total-${cur}`,
+      name: grand.size > 1 ? `All collections total (${cur})` : "All collections total",
+      cur,
+      cost: g.cost,
+      sales: g.sales,
+      profit: g.profit,
+      cards: g.cards,
+    })),
+    ...allCollections.map(({ collection, db: d }) => {
+      const t = getTotals(d);
+      return {
+        key: collection.id,
+        name: collection.name,
+        cur: d.investment?.currency ?? "SGD",
+        cost: t.totalCost,
+        sales: t.totalSales,
+        profit: t.totalProfit,
+        cards: d.cards.length,
+      };
+    }),
+  ];
+
   return (
     <div className="space-y-6">
       <CollectionSwitcher collections={collections} activeId={active.id} />
@@ -50,45 +86,43 @@ export default async function DashboardPage({
             All collections
           </h2>
           <div className="surface overflow-hidden border-0">
-            {allCollections.map(({ collection, db: collectionDb }) => {
-              const t = getTotals(collectionDb);
-              const cur = collectionDb.investment?.currency ?? "SGD";
+            {rows.map((r) => {
               return (
-                <div key={collection.id} className="space-y-2 p-3">
+                <div key={r.key} className="space-y-2 p-3">
                   <div className="flex items-center justify-between gap-2">
                     <span className="truncate text-sm font-semibold text-slate-900 dark:text-white">
-                      {collection.name}
+                      {r.name}
                     </span>
                   </div>
                   <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs text-slate-500 dark:text-slate-400 sm:grid-cols-4">
                     <div>
                       <dt>Price paid</dt>
                       <dd className="mt-0.5 text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
-                        {formatMoney(t.totalCost, cur)}
+                        {formatMoney(r.cost, r.cur)}
                       </dd>
                     </div>
                     <div>
                       <dt>Sales</dt>
                       <dd className="mt-0.5 text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
-                        {formatMoney(t.totalSales, cur)}
+                        {formatMoney(r.sales, r.cur)}
                       </dd>
                     </div>
                     <div>
                       <dt>Profit</dt>
                       <dd
                         className={`mt-0.5 text-sm font-semibold tabular-nums ${
-                          t.totalProfit >= 0
+                          r.profit >= 0
                             ? "text-emerald-600 dark:text-emerald-400"
                             : "text-rose-600 dark:text-rose-400"
                         }`}
                       >
-                        {formatMoney(t.totalProfit, cur)}
+                        {formatMoney(r.profit, r.cur)}
                       </dd>
                     </div>
                     <div>
                       <dt>Cards</dt>
                       <dd className="mt-0.5 text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
-                        {collectionDb.cards.length}
+                        {r.cards}
                       </dd>
                     </div>
                   </dl>
