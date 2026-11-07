@@ -244,7 +244,7 @@ export default function PurchaseForm({
               disabled={isCheckingEbay}
               className="btn-chip"
             >
-              {isCheckingEbay ? "Checking…" : "Check eBay Price"}
+              {isCheckingEbay ? "Checking…" : "Check eBay Value"}
             </button>
           </div>
 
