@@ -53,12 +53,18 @@ export default async function DashboardPage({
             {allCollections.map(({ collection, db: collectionDb }) => {
               const t = getTotals(collectionDb);
               const cur = collectionDb.investment?.currency ?? "SGD";
+              const isActive = collection.id === active.id;
               return (
                 <div key={collection.id} className="space-y-2 p-3">
                   <div className="flex items-center justify-between gap-2">
                     <span className="truncate text-sm font-semibold text-slate-900 dark:text-white">
                       {collection.name}
                     </span>
+                    {isActive && (
+                      <span className="text-[11px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">
+                        Viewing
+                      </span>
+                    )}
                   </div>
                   <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
                     <div className="flex justify-between gap-2">
