@@ -206,7 +206,7 @@ export default function PurchaseForm({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="purchasePrice" className="label-field">
-              Value(Cost)
+              Purchase Price
             </label>
             <input
               id="purchasePrice"

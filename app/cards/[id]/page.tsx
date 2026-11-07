@@ -89,7 +89,7 @@ export default async function CardDetailPage({
         <div className="mt-3 space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-slate-500 dark:text-slate-400">
-              Value(Cost)
+              Purchase Price
             </span>
             <span className="font-medium text-slate-900 dark:text-white">
               {/* Sold cards are locked so recorded profit can't be changed
