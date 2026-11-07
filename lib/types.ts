@@ -58,7 +58,7 @@ export interface Database {
 }
 
 export interface Totals {
-  inventoryCost: number;
+  totalCost: number;
   // Sum of the estimated worth entered on unsold cards (cards without one count as 0).
   inventoryEstimate: number;
   // Oldest eBay check among unsold cards, or undefined if none has been checked.

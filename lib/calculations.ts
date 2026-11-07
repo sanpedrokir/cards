@@ -4,7 +4,7 @@ export function getTotals(db: Database): Totals {
   const soldCards = db.cards.filter((c) => c.status === "sold");
   const availableCards = db.cards.filter((c) => c.status === "available");
 
-  const inventoryCost = availableCards.reduce((sum, c) => sum + c.purchasePrice, 0);
+  const totalCost = db.cards.reduce((sum, c) => sum + c.purchasePrice, 0);
   const inventoryEstimate = availableCards.reduce((sum, c) => sum + (c.estimatedValue ?? 0), 0);
   const totalSales = soldCards.reduce((sum, c) => sum + (c.sale?.salePrice ?? 0), 0);
   const totalProfit = soldCards.reduce((sum, c) => sum + cardProfit(c), 0);
@@ -13,7 +13,7 @@ export function getTotals(db: Database): Totals {
   const checked = availableCards.flatMap((c) => (c.estimatedAt ? [c.estimatedAt] : []));
   const inventoryEstimatedAt = checked.length ? checked.reduce((a, b) => (a < b ? a : b)) : undefined;
 
-  return { inventoryCost, inventoryEstimate, inventoryEstimatedAt, totalSales, totalProfit };
+  return { totalCost, inventoryEstimate, inventoryEstimatedAt, totalSales, totalProfit };
 }
 
 export function cardProfit(card: Card): number {
