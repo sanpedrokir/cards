@@ -32,7 +32,7 @@ export default function EbayPriceCheck({ cardId }: { cardId: string }) {
           disabled={isPending}
           className="btn-chip"
         >
-          {isPending ? "Checking…" : "Check eBay Value"}
+          {isPending ? "Checking…" : "Check eBay Price"}
         </button>
       </div>
       <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
