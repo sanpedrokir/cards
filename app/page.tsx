@@ -49,7 +49,7 @@ export default async function DashboardPage({
           <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
             All collections
           </h2>
-          <div className="surface divide-y divide-slate-100 overflow-hidden dark:divide-white/5">
+          <div className="surface overflow-hidden border-0">
             {allCollections.map(({ collection, db: collectionDb }) => {
               const t = getTotals(collectionDb);
               const cur = collectionDb.investment?.currency ?? "SGD";
